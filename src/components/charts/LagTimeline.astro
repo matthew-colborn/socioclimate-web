@@ -1,0 +1,90 @@
+---
+/**
+ * The lag, and its asymmetry. Transaction-based and appraisal-based indices
+ * turned at different times, and the distance was not the same at the top as at
+ * the bottom. Quarters are the unit because that is the reporting frequency of
+ * the slower index.
+ */
+const L = 20, RIGHT = 540;
+const N = 12;                                     // 2022Q1 .. 2025Q1
+const x = (q: number) => +(L + (q * (RIGHT - L)) / N).toFixed(1);
+
+const A_Y = 70;    // Green Street CPPI
+const B_Y = 190;   // NCREIF NPI
+const AXIS_Y = 262;
+
+const peakA = x(0), peakB = x(1), trghA = x(7), trghB = x(10);
+const years = [
+  { q: 0, label: '2022' },
+  { q: 4, label: '2023' },
+  { q: 8, label: '2024' },
+  { q: 12, label: '2025' },
+];
+---
+<svg
+  class="lag"
+  viewBox="0 0 560 306"
+  role="img"
+  aria-label="Timeline. The transaction-based Green Street CPPI peaked in March 2022; the appraisal-based NCREIF NPI peaked in the second quarter of 2022, one quarter later. Green Street was down 22 percent from peak by November 2023; the NPI did not stop falling until the third quarter of 2024, three quarters later."
+  preserveAspectRatio="xMidYMid meet"
+>
+  <g stroke="var(--teal-shadow)" stroke-width="1" opacity="0.5">
+    {years.map((y) => <line x1={x(y.q)} y1="40" x2={x(y.q)} y2={AXIS_Y} />)}
+  </g>
+
+  <!-- transaction-based track -->
+  <text class="lag__track lag__track--key" x="0" y="26">Green Street CPPI · transactions</text>
+  <line x1={L} y1={A_Y} x2={RIGHT} y2={A_Y} stroke="var(--cyan)" stroke-width="2" opacity="0.55" />
+  <circle cx={peakA} cy={A_Y} r="7" fill="var(--cyan)" />
+  <circle cx={trghA} cy={A_Y} r="7" fill="var(--cyan)" />
+  <text class="lag__ev lag__ev--key" x={peakA - 6} y={A_Y - 18}>Peak Mar 2022</text>
+  <text class="lag__ev lag__ev--key" x={trghA} y={A_Y - 18} text-anchor="middle">−22%, Nov 2023</text>
+
+  <!-- appraisal-based track -->
+  <line x1={L} y1={B_Y} x2={RIGHT} y2={B_Y} stroke="var(--paper-dim)" stroke-width="2" opacity="0.55" />
+  <circle cx={peakB} cy={B_Y} r="7" fill="var(--paper-dim)" />
+  <circle cx={trghB} cy={B_Y} r="7" fill="var(--paper-dim)" />
+  <text class="lag__ev" x={peakB - 6} y={B_Y + 26}>Peak Q2 2022</text>
+  <text class="lag__ev" x={trghB} y={B_Y + 26} text-anchor="end">Trough Q3 2024</text>
+  <text class="lag__track" x="0" y={B_Y + 52}>NCREIF NPI · appraisals</text>
+
+  <!-- the two gaps -->
+  <g stroke="var(--cyan-bright)" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8">
+    <line x1={peakA} y1={A_Y + 12} x2={peakA} y2="112" />
+    <line x1={peakB} y1={B_Y - 12} x2={peakB} y2="112" />
+    <line x1={trghA} y1={A_Y + 12} x2={trghA} y2="150" />
+    <line x1={trghB} y1={B_Y - 12} x2={trghB} y2="150" />
+  </g>
+  <g stroke="var(--cyan-bright)" stroke-width="1.5">
+    <line x1={peakA} y1="112" x2={peakB} y2="112" />
+    <line x1={trghA} y1="150" x2={trghB} y2="150" />
+  </g>
+  <text class="lag__gap" x={peakB + 12} y="117">1 qtr</text>
+  <text class="lag__gap" x={trghB + 12} y="155">3 qtrs</text>
+
+  <line x1={L} y1={AXIS_Y} x2={RIGHT} y2={AXIS_Y} stroke="var(--teal-deep)" stroke-width="1.5" />
+  <g class="lag__year">
+    {years.map((y) => <text x={x(y.q)} y={AXIS_Y + 26} text-anchor="middle">{y.label}</text>)}
+  </g>
+</svg>
+
+<style>
+  .lag { width: 100%; height: auto; overflow: visible; }
+  .lag__track {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--paper-dim);
+  }
+  .lag__track--key { fill: var(--cyan); }
+  .lag__ev { font-family: var(--font-body); font-size: 19px; fill: var(--paper); }
+  .lag__ev--key { fill: var(--paper); }
+  .lag__gap {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    fill: var(--cyan-bright);
+    letter-spacing: 0.04em;
+  }
+  .lag__year { font-family: var(--font-mono); font-size: 18px; fill: var(--paper-dim); }
+</style>

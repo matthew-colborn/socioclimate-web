@@ -1,0 +1,45 @@
+---
+/** Wrapper for every chart: the figure, its caption, and its source line. */
+interface Props {
+  caption: string;
+  source: string;
+  date: string;
+  wide?: boolean;
+}
+const { caption, source, date, wide = false } = Astro.props;
+---
+<figure class={`fig ${wide ? 'fig--wide' : ''}`}>
+  <div class="fig__plot"><slot /></div>
+  <figcaption class="fig__cap">
+    <span class="fig__caption">{caption}</span>
+    <span class="fig__src">{source}, {date}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .fig { margin: var(--s-5) 0; }
+  .fig--wide { max-width: none; }
+  .fig__plot {
+    border: var(--rule-faint);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--cyan) 2.5%, var(--ink-black));
+    padding: clamp(var(--s-3), 3vw, var(--s-5));
+  }
+  .fig__cap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    margin-top: var(--s-3);
+  }
+  .fig__caption {
+    font-size: var(--step--1);
+    color: var(--paper);
+    max-width: var(--measure);
+  }
+  .fig__src {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--paper-dim);
+    letter-spacing: 0.01em;
+  }
+</style>

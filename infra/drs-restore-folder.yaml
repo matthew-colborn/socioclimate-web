@@ -1,0 +1,14 @@
+# Restores folders/764224180326 to inheriting the organisation's Domain
+# Restricted Sharing policy, undoing drs-exception-folder.yaml.
+#
+# Run this once socioclimate.io, www.socioclimate.io and
+# staging.socioclimate.io are all serving and their certificates are issued.
+# Deploys themselves do not add IAM bindings, so hosting keeps working after
+# the folder is re-restricted — but adding a NEW custom domain later will need
+# the exception put back first.
+#
+#   gcloud org-policies set-policy infra/drs-restore-folder.yaml
+#
+name: folders/764224180326/policies/iam.allowedPolicyMemberDomains
+spec:
+  inheritFromParent: true

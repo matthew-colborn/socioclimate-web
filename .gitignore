@@ -1,0 +1,7 @@
+node_modules/
+dist/
+screenshots/
+.astro/
+.firebase/
+.env
+.DS_Store

@@ -1,0 +1,248 @@
+---
+title: Thesis
+description: >-
+  Automation diffuses in proportion to how observable an asset is, not how much
+  computing power exists. The evidence, the lag, and what would make it wrong.
+heading: Observability, not compute
+standfirst: >-
+  Why the easy problem was automated thirty years before the hard one, and what
+  that implies about where the returns sit.
+door: both
+---
+
+import Cite from '../../components/Cite.astro';
+import Figure from '../../components/Figure.astro';
+import Counterweight from '../../components/Counterweight.astro';
+import ZestimateChart from '../../components/charts/ZestimateChart.astro';
+import LagTimeline from '../../components/charts/LagTimeline.astro';
+import CapRateGap from '../../components/charts/CapRateGap.astro';
+import DelinquencyGap from '../../components/charts/DelinquencyGap.astro';
+
+Fannie Mae's Desktop Underwriter reached production in June 1995 and rendered a
+credit decision in under fifteen seconds. In the same country, in 2026, an
+institutional office building is valued by a human appraiser, on an annual
+external rotation, engaged and paid by the party whose fee is a function of the
+resulting number. The technology was ready for the harder problem long before it
+was applied to the easier one.
+
+That gap is thirty-one years wide and it is not a technology gap. Both problems
+are regressions on comparable sales. The office building has more money at
+stake, better-funded counterparties, and a far smaller universe of assets to
+model. If computing power were the binding constraint, the expensive problem
+would have gone first.
+
+The constraint is observability: how often an asset's price is recorded, how
+publicly, and in how standardized a form. Automation diffuses in proportion to
+it and is largely indifferent to available computing power. Where a dense public
+price record exists, decisions get ceded to models. Where it does not, valuation
+stays with a human whose incentives are set by whoever pays for the number.
+
+## Residential is automated because it is observed
+
+The residential price record is dense, public, and standardized to a degree that
+has no analogue elsewhere in real assets. Sales are recorded, aggregated, and
+republished within days. Three national portals compete to restate the same
+facts. The consequence is that residential valuation has been quietly ceding
+decisions to models for three decades.
+
+Desktop Underwriter reviewed 62% of conventional closed loans market-wide from
+2018 to 2024. Not 62% of Fannie Mae's own book. 62% of the market.
+<Cite source="Fannie Mae, on HMDA data" date="2018–2024" />
+
+The appraisal itself is now optional on a large minority of loans. In March 2026,
+28% of GSE acquisitions carried an appraisal waiver, split 25% at Fannie Mae and
+32% at Freddie Mac; the share peaked near 49% in March 2021. A waiver is the
+clearest statement of institutional confidence available: the buyer of the loan
+has decided the model is good enough that nobody needs to visit the house.
+<Cite source="AEI Housing Center" date="March 2026" />
+
+Regulation followed, which is the reliable tell. Six federal agencies finalized
+quality-control standards for automated valuation models effective October 1,
+2025. Regulators do not write model-governance rules for tools that are not
+making decisions.
+<Cite source="Interagency AVM quality control standards" date="effective 2025-10-01" />
+
+And the profession contracted. Appraiser credentials fell from 120,551 in 2008
+to 95,731 in 2017.
+<Cite source="Appraisal Subcommittee registry, via CSBS" date="2008–2017" />
+
+None of that required a breakthrough in computing. It required a price record
+dense enough to regress on.
+
+## Institutional real estate is not, because its record is produced by interested parties
+
+One tier up: the same asset class, the same arithmetic, and almost none of the
+automation. The institutional price record is thin, slow, and produced by people
+with a stake in the answer.
+
+The frequency is annual per asset. Common practice is a third-party appraisal of
+roughly 25% of a fund's investments each quarter — each asset gets an outside
+look once a year, on a rotation.
+<Cite source="Common non-traded fund practice" date="as of 2026" />
+
+The independence is weaker than the label suggests. Surveying ten non-traded NAV
+REITs, DLA Piper found the adviser performs the NAV calculation for three of
+them, with the independent valuation advisor performing a reasonableness review
+rather than a determination. A reasonableness review is a different instrument
+from an independent number: it can reject, and only at the margin.
+<Cite source="DLA Piper, survey of ten non-traded NAV REITs" date="2023" />
+
+And the standardization is absent by design. FINRA Rule 2310 requires an annual
+valuation with third-party "material assistance or confirmation" and expressly
+declines to prescribe a methodology.
+<Cite source="FINRA Rule 2310" date="as of 2026" />
+
+No model is going to be trained on that. Not because the model is not good
+enough — because there is not enough record to train on, and what record exists
+was produced by someone whose fee depends on the number.
+
+## The lag, and its asymmetry
+
+If appraisals were merely slow but unbiased, the lag would be the same length in
+both directions. It is not.
+
+<Figure
+  caption="The transaction-based index turned first in both directions, and the gap at the bottom was three times the gap at the top."
+  source="Green Street CPPI; NCREIF NPI market value index"
+  date="2022–2024"
+>
+  <LagTimeline />
+</Figure>
+
+Green Street's CPPI peaked in March 2022. The NCREIF NPI market value index
+peaked in the second quarter of 2022, one quarter later.
+<Cite source="Green Street CPPI; NCREIF NPI" date="2022" />
+
+At the bottom the distance was three quarters. Green Street was down 22% from
+peak by November 2023 and calling a bottom. The NPI did not stop falling until
+the third quarter of 2024, after nine consecutive declining quarters.
+<Cite source="Green Street CPPI; NCREIF NPI" date="November 2023 to Q3 2024" />
+
+One quarter behind at the top and three quarters behind at the bottom is not
+latency. Latency is symmetric. This is the signature of a number produced by
+someone who is comfortable being slow to mark down and much less comfortable
+being slow to mark back up.
+
+## Still open, four years on
+
+<Figure
+  caption="Seventy basis points of residual appraisal optimism, four years after the turn — measured and published by the index administrator itself."
+  source="NCREIF Property Index"
+  date="Q1 2026"
+>
+  <CapRateGap />
+</Figure>
+
+In the first quarter of 2026 the NPI reported a 4.57% appraisal cap rate against
+5.27% on properties actually sold out of the index.
+<Cite source="NCREIF Property Index" date="Q1 2026" />
+
+The last clause is the one that matters. This is not an outside critic's
+estimate of appraisal bias. It is the number the index reports about itself,
+against its own realized sales, and it has not closed.
+
+## The people doing the work say it is data, not compute
+
+The obvious objection is that this is a story about models that are not ready
+yet, and that enough compute will eventually arrive and settle it. The
+practitioners do not describe it that way.
+
+Deloitte's 2026 Commercial Real Estate Outlook surveyed more than 850 senior
+executives. 1% reported transformative impact from AI.
+<Cite source="Deloitte, 2026 Commercial Real Estate Outlook" date="2026" />
+
+Mercer fielded 131 asset managers in February 2026. 55% have integrated AI into
+at least one investment process. Only 5% to 6% have granted it autonomous or
+semi-autonomous decision authority. And 69% name data quality or access as the
+binding barrier — ahead of regulation, ahead of cost, ahead of talent.
+<Cite source="Mercer, survey of 131 asset managers" date="February 2026" />
+
+Nobody in either survey is citing compute.
+
+<Counterweight title="What would make this wrong">
+
+Four ways. The first three are evidence that already exists and cuts against the
+argument. The fourth is the explanation most likely to be right if the argument
+is wrong.
+
+### Observability without standardization does not help
+
+Publishing a record only creates a reference point if everyone means the same
+thing by it. For July 2026, Trepp reported an overall CMBS delinquency rate of
+7.86% with office around 11%, while Fitch reported 3.49% overall and 8.89% for
+office.
+<Cite source="Trepp; Fitch Ratings" date="July 2026" />
+
+<Figure
+  caption="Two firms, one month, one headline metric, and a more than twofold gap — different rated universes and different definitions of delinquency."
+  source="Trepp; Fitch Ratings"
+  date="July 2026"
+>
+  <DelinquencyGap />
+</Figure>
+
+Both numbers are correctly computed. They cover different rated universes and
+use different delinquency definitions. A market can be observed continuously and
+still fail to produce a usable price record, which means observability is doing
+less work in this argument than it first appears.
+
+### Mandated transparency can reduce activity, not just cost
+
+Asquith, Covert and Pathak find that after TRACE, costs fell across all bond
+types but trading activity did not rise. Trades fell 11.7% overall and 71.1% in
+the last-disseminated, least-liquid tranche, as dealers withdrew from
+intermediating the least observable paper.
+<Cite source="Asquith, Covert and Pathak" date="2019" />
+
+If publishing a record can drive the intermediary out of the market it
+describes, then assembling the record and publishing its existence is not
+automatically good for that market. It may be good for us and bad for them,
+which is a worse business than it sounds.
+
+### Automation may consume information rather than produce it
+
+Weller finds the information content of prices decreases 9% to 13% per standard
+deviation of algorithmic trading activity.
+<Cite source="Weller" date="2018" />
+
+At the limit this inverts the argument. If automation degrades the price record
+that made it possible, the observation layer is not a durable position but a
+resource being drawn down by the thing it enabled.
+
+### The alternative explanation most likely to be right
+
+Transaction size. A $200 million building can support human underwriting in a way
+a $400,000 house cannot. On that reading, automation arrives wherever the
+per-transaction cost of a human exceeds the cost of building a model, and
+observability is a coincidence of which assets happen to be cheap enough to need
+one.
+
+The evidence against it is the split below. It holds transaction size fixed
+entirely — the same houses, the same housing stock, the same day, the same model
+— and varies only whether a price was published.
+
+<Figure
+  caption="Same model, same housing stock, same day. The only difference is whether a price was published. Two competing firms' independently built models converge on the same two numbers, which suggests the floor is a property of the available observations rather than of either model."
+  source="Zillow Group FY2025 Form 10-K, filed 2026-02-11; Redfin Estimate published accuracy"
+  date="2025"
+>
+  <ZestimateChart />
+</Figure>
+
+The error is four times larger on the unobserved population. Transaction size
+cannot explain that, because it does not vary.
+
+</Counterweight>
+
+## The claim in its defensible form
+
+Observability is necessary, not sufficient. A dense, public, standardized price
+record is a precondition for automation, and its absence is a reliable predictor
+that valuation will stay with a human. It does not follow that observability
+alone produces a good market, that publishing a record is always
+welfare-improving, or that a data moat is permanent once it exists.
+
+What does follow is narrower, and enough to build on: where the record does not
+exist, whoever assembles it first is the only party who can see the market, and
+that position accrues at the observation layer rather than the computation
+layer. Compute is a commodity. Observation is not.

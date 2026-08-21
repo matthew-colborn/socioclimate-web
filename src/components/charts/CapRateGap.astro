@@ -1,0 +1,59 @@
+---
+/**
+ * Four years after the turn, the residual is still there and the index
+ * administrator is the one measuring it.
+ */
+const LO = 4.0, HI = 5.6, L = 40, R = 520;
+const x = (v: number) => +(L + ((v - LO) / (HI - LO)) * (R - L)).toFixed(1);
+const appraised = 4.57, sold = 5.27;
+const Y = 120;
+---
+<svg
+  class="crg"
+  viewBox="0 0 560 210"
+  role="img"
+  aria-label="In the first quarter of 2026 the NCREIF Property Index reported a 4.57 percent appraisal capitalisation rate against 5.27 percent on properties actually sold out of the index — a gap of 70 basis points."
+  preserveAspectRatio="xMidYMid meet"
+>
+  <line x1={L} y1={Y} x2={R} y2={Y} stroke="var(--teal-shadow)" stroke-width="1.5" />
+  <line x1={x(appraised)} y1={Y} x2={x(sold)} y2={Y} stroke="var(--cyan)" stroke-width="3" />
+
+  <circle cx={x(appraised)} cy={Y} r="9" fill="var(--ink-black)" stroke="var(--paper-dim)" stroke-width="3" />
+  <circle cx={x(sold)} cy={Y} r="9" fill="var(--cyan)" />
+
+  <text class="crg__val" x={x(appraised)} y={Y - 46} text-anchor="middle">4.57%</text>
+  <text class="crg__lab" x={x(appraised)} y={Y - 24} text-anchor="middle">Appraisal cap rate</text>
+
+  <text class="crg__val crg__val--key" x={x(sold)} y={Y + 62} text-anchor="middle">5.27%</text>
+  <text class="crg__lab" x={x(sold)} y={Y + 84} text-anchor="middle">Sold out of the index</text>
+
+  <text class="crg__gap" x={(x(appraised) + x(sold)) / 2} y={Y + 28} text-anchor="middle">70 bp</text>
+
+  <text class="crg__tick" x={L} y={Y + 26}>4.0%</text>
+  <text class="crg__tick" x={R} y={Y + 26} text-anchor="end">5.6%</text>
+</svg>
+
+<style>
+  .crg { width: 100%; height: auto; overflow: visible; }
+  .crg__val {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 600;
+    fill: var(--paper);
+  }
+  .crg__val--key { fill: var(--cyan); }
+  .crg__lab {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--paper-dim);
+  }
+  .crg__gap {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    letter-spacing: 0.06em;
+    fill: var(--cyan-bright);
+  }
+  .crg__tick { font-family: var(--font-mono); font-size: 17px; fill: var(--paper-dim); }
+</style>

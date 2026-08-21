@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://socioclimate.io/sitemap-index.xml

@@ -1,0 +1,97 @@
+---
+/**
+ * Counter-evidence, given the same weight as the argument. Observability
+ * without standardisation produces two headline numbers for one month.
+ * Fitch's office figure is exact; the Trepp office figure is reported as
+ * "around 11%" and is drawn and labelled as approximate.
+ */
+const W = 560, MAXPCT = 12, GUTTER = 70;
+const SCALE = (W - GUTTER) / MAXPCT;
+const px = (v: number) => +(v * SCALE).toFixed(1);
+
+const groups = [
+  { label: 'All CMBS', trepp: 7.86, fitch: 3.49, treppApprox: false, y: 30, ratio: '2.3×' },
+  { label: 'Office', trepp: 11, fitch: 8.89, treppApprox: true, y: 166, ratio: null },
+];
+const ticks = [0, 3, 6, 9, 12];
+const AXIS_Y = 262;
+---
+<svg
+  class="dg"
+  viewBox="0 0 560 392"
+  role="img"
+  aria-label="Bar chart. CMBS delinquency for July 2026 as reported by two firms. All CMBS: Trepp 7.86 percent, Fitch 3.49 percent. Office: Trepp around 11 percent, Fitch 8.89 percent. Different rated universes and different delinquency definitions."
+  preserveAspectRatio="xMidYMid meet"
+>
+  <g stroke="var(--teal-shadow)" stroke-width="1">
+    {ticks.map((t) => <line x1={px(t)} y1="26" x2={px(t)} y2={AXIS_Y} opacity={t === 0 ? 0.9 : 0.3} />)}
+  </g>
+
+  {groups.map((g) => (
+    <g>
+      <text class="dg__label" x="0" y={g.y - 10}>{g.label}</text>
+
+      <rect x="0" y={g.y} width={px(g.trepp)} height="28" rx="1" fill="var(--paper-dim)" />
+      <text class="dg__val" x={px(g.trepp) + 12} y={g.y + 22}>
+        {g.treppApprox ? '≈11%' : `${g.trepp}%`}
+      </text>
+
+      <rect x="0" y={g.y + 36} width={px(g.fitch)} height="28" rx="1"
+            fill="none" stroke="var(--paper-dim)" stroke-width="1.5" stroke-dasharray="5 4" />
+      <text class="dg__val" x={px(g.fitch) + 12} y={g.y + 58}>{g.fitch}%</text>
+    </g>
+  ))}
+
+  <!-- the disagreement is the finding, so the gap carries the cyan -->
+  <g stroke="var(--cyan-bright)" stroke-width="1.5">
+    <line x1={px(3.49)} y1="120" x2={px(7.86)} y2="120" />
+    <line x1={px(3.49)} y1="114" x2={px(3.49)} y2="126" />
+    <line x1={px(7.86)} y1="114" x2={px(7.86)} y2="126" />
+  </g>
+  <text class="dg__gap" x={px(7.86) + 12} y="126">2.3×</text>
+
+  <line x1="0" y1={AXIS_Y} x2={px(MAXPCT)} y2={AXIS_Y} stroke="var(--teal-deep)" stroke-width="1.5" />
+  <g class="dg__tick">
+    {ticks.map((t) => <text x={px(t)} y={AXIS_Y + 26} text-anchor={t === 0 ? 'start' : 'middle'}>{t}%</text>)}
+  </g>
+  <text class="dg__axis-title" x="0" y={AXIS_Y + 52}>Delinquency rate, July 2026</text>
+
+  <g transform={`translate(0 ${AXIS_Y + 102})`}>
+    <rect x="0" y="-13" width="26" height="16" fill="var(--paper-dim)" />
+    <text class="dg__legend" x="36" y="0">Trepp</text>
+    <rect x="120" y="-13" width="26" height="16" fill="none"
+          stroke="var(--paper-dim)" stroke-width="1.5" stroke-dasharray="5 4" />
+    <text class="dg__legend" x="156" y="0">Fitch Ratings</text>
+  </g>
+</svg>
+
+<style>
+  .dg { width: 100%; height: auto; overflow: visible; }
+  .dg__label {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--paper-dim);
+  }
+  .dg__val {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 600;
+    fill: var(--paper);
+  }
+  .dg__gap {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    letter-spacing: 0.04em;
+    fill: var(--cyan-bright);
+  }
+  .dg__tick, .dg__legend { font-family: var(--font-mono); font-size: 18px; fill: var(--paper-dim); }
+  .dg__axis-title {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--paper-dim);
+  }
+</style>

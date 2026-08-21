@@ -1,0 +1,95 @@
+---
+/**
+ * A brand animation. Encoded by scripts/make-video.mjs from brand/video/.
+ *
+ * Muted, looping, silent, decorative. The poster frame is rendered a second
+ * time as an <img> and swapped in under `prefers-reduced-motion` — it is the
+ * same file the <video> already uses as its poster, so honouring the
+ * preference costs no extra request.
+ */
+interface Props {
+  name: 'mark' | 'lockup';
+  /** Intrinsic pixel size of the encoded file — reserves the box, so no shift. */
+  width: number;
+  height: number;
+  /** Accessible name. Leave empty where adjacent real text already names it. */
+  label?: string;
+  /**
+   * How the clip's own field is reconciled with the page.
+   *   'screen' — the source sits on pure black. Screen blending drops the field
+   *              to nothing over the navy and lets only the glow through.
+   *   'none'   — the source is already on a navy within a shade of --ink, so it
+   *              needs no help; screen blending would brighten it into a
+   *              visible lighter rectangle instead.
+   */
+  blend?: 'screen' | 'none';
+  /** Dissolve the clip's rectangular edge into the page. */
+  fade?: boolean;
+  class?: string;
+}
+const {
+  name, width, height,
+  label = '', blend = 'screen', fade = false, class: klass = '',
+} = Astro.props;
+const poster = `/video/${name}-poster.webp`;
+---
+<div class={`bv bv--blend-${blend} ${fade ? 'bv--fade' : ''} ${klass}`}>
+  <video
+    class="bv__video"
+    width={width}
+    height={height}
+    poster={poster}
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    aria-hidden="true"
+  >
+    <source src={`/video/${name}.mp4`} type="video/mp4" />
+  </video>
+  <img
+    class="bv__still"
+    src={poster}
+    width={width}
+    height={height}
+    alt={label}
+    aria-hidden={label ? undefined : 'true'}
+    decoding="async"
+  />
+</div>
+
+<style>
+  .bv { display: block; line-height: 0; }
+  .bv__video,
+  .bv__still {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .bv--blend-screen .bv__video,
+  .bv--blend-screen .bv__still { mix-blend-mode: screen; }
+
+  /* Two gradients intersected: a thin fade on all four edges, wide enough to
+     dissolve the seam and narrow enough to leave the wordmark alone. Where
+     mask-composite is unsupported only the vertical fade applies, which is
+     still the edge that shows most. */
+  .bv--fade .bv__video,
+  .bv--fade .bv__still {
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 10%, #000 90%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 10%, #000 90%, transparent 100%),
+      linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  .bv__still { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bv__video { display: none; }
+    .bv__still { display: block; }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import DoorPanel from '../components/DoorPanel.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  heading: string;
+  standfirst: string;
+  door?: 'partner' | 'acquire' | 'both' | 'none';
+  width?: 'measure' | 'wide';
+}
+const {
+  title, description, heading, standfirst,
+  door = 'both', width = 'measure',
+} = Astro.props;
+const doorHeading =
+  door === 'partner' ? 'If this describes what you already have'
+  : door === 'acquire' ? 'If you own one of these'
+  : 'Two doors';
+---
+<BaseLayout title={title} description={description}>
+  <header class="page-head">
+    <div class="wrap">
+      <h1>{heading}</h1>
+      <p class="lede">{standfirst}</p>
+    </div>
+  </header>
+
+  <div class="section section--flush">
+    <div class="wrap">
+      <div class={`prose reveal ${width === 'wide' ? 'prose--full' : ''}`}><slot /></div>
+    </div>
+  </div>
+
+  {door !== 'none' && <DoorPanel show={door} heading={doorHeading} />}
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-block: clamp(var(--s-6), 8vw, var(--s-7)) var(--s-5);
+    border-bottom: var(--rule-faint);
+    background:
+      radial-gradient(60rem 22rem at 12% -30%,
+        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 70%),
+      var(--ink);
+  }
+  .page-head h1 { max-width: 18ch; }
+  .page-head .lede { margin: var(--s-4) 0 0; }
+</style>

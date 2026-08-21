@@ -1,0 +1,55 @@
+---
+interface Props {
+  name: string;
+  stage: string;
+  where: string;
+  summary: string;
+  href?: string;
+}
+const { name, stage, where, summary, href = '/portfolio' } = Astro.props;
+---
+<article class="pc reveal">
+  <p class="pc__meta">
+    <span class="pc__stage">{stage}</span>
+    <span class="pc__where">{where}</span>
+  </p>
+  <h3 class="pc__name"><a href={href}>{name}</a></h3>
+  <p class="pc__summary">{summary}</p>
+</article>
+
+<style>
+  .pc {
+    border: var(--rule-faint);
+    border-top: 2px solid var(--teal-deep);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: clamp(var(--s-4), 3vw, var(--s-5));
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    transition: border-color 200ms var(--ease);
+  }
+  .pc:hover { border-top-color: var(--cyan); }
+  .pc__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .pc__stage {
+    color: var(--cyan);
+    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+    border-radius: var(--radius);
+    padding: 0.15em 0.6em;
+  }
+  .pc__where { color: var(--paper-dim); }
+  .pc__name { margin: var(--s-1) 0 0; font-size: var(--step-2); }
+  .pc__name a { color: var(--paper); text-decoration: none; }
+  .pc__name a:hover { color: var(--cyan); }
+  .pc__summary { margin: 0; color: var(--paper-dim); max-width: 48ch; }
+</style>

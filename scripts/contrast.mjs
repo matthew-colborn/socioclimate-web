@@ -1,0 +1,107 @@
+// WCAG contrast over every foreground/background pair the site actually uses,
+// plus a guard against painting text with a token that cannot carry it.
+// Token values are read from src/styles/tokens.css so this cannot drift from
+// the design system by being hand-copied.
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const css = readFileSync(resolve(root, 'src/styles/tokens.css'), 'utf8');
+
+const T = {};
+for (const m of css.matchAll(/^\s*(--[a-z-]+):\s*(#[0-9A-Fa-f]{6});/gm)) T[m[1]] = m[2];
+
+const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const lum = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => lin(v / 255));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const ratio = (a, b) => {
+  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+};
+
+// kind: 'body'  — normal text, AA needs 4.5:1
+//       'large' — >=24px or >=18.66px bold, AA needs 3:1
+//       'ui'    — non-text UI component or meaningful graphic, AA needs 3:1
+//       'deco'  — purely decorative, no requirement (still reported)
+const PAIRS = [
+  ['--paper', '--ink', 'body', 'Body text on the page background'],
+  ['--paper', '--ink-deep', 'body', 'Body text in a receded section'],
+  ['--paper', '--ink-black', 'body', 'Body text on the black field'],
+  ['--paper-dim', '--ink', 'body', 'Secondary text on the page background'],
+  ['--paper-dim', '--ink-deep', 'body', 'Secondary text in a receded section'],
+  ['--paper-dim', '--ink-black', 'body', 'Secondary text on the black field'],
+  ['--cyan', '--ink', 'body', 'Links on the page background'],
+  ['--cyan', '--ink-deep', 'body', 'Links in a receded section'],
+  ['--cyan', '--ink-black', 'body', 'Links and key chart values on black'],
+  ['--cyan-bright', '--ink', 'ui', 'Focus ring on the page background'],
+  ['--cyan-bright', '--ink-black', 'ui', 'Chart gap annotations on black'],
+  ['--cyan-glow', '--ink-black', 'ui', 'Brightest mark and gradient stop'],
+  ['--paper-dim', '--ink-black', 'ui', 'Secondary chart series on black'],
+  ['--cyan', '--ink-black', 'ui', 'Key chart series on black'],
+  ['--teal-deep', '--ink', 'deco', 'Rules, borders, card top edges'],
+  ['--teal-deep', '--ink-black', 'deco', 'Chart axis line'],
+  ['--teal-shadow', '--ink-black', 'deco', 'Chart gridlines'],
+];
+
+const NEED = { body: 4.5, large: 3, ui: 3, deco: 0 };
+
+let fails = 0;
+const rows = PAIRS.map(([fg, bg, kind, use]) => {
+  const r = ratio(T[fg], T[bg]);
+  const need = NEED[kind];
+  const pass = kind === 'deco' ? 'n/a' : r >= need ? 'PASS' : 'FAIL';
+  if (pass === 'FAIL') fails++;
+  return { fg, bg, kind, need: need || '—', ratio: r.toFixed(2) + ':1', pass, use };
+});
+
+const w = (s, n) => String(s).padEnd(n);
+console.log(
+  w('FOREGROUND', 14) + w('BACKGROUND', 12) + w('KIND', 7) + w('NEEDS', 7) +
+  w('RATIO', 9) + w('AA', 6) + 'USED FOR'
+);
+console.log('-'.repeat(112));
+for (const r of rows) {
+  console.log(
+    w(r.fg, 14) + w(r.bg, 12) + w(r.kind, 7) + w(r.need, 7) +
+    w(r.ratio, 9) + w(r.pass, 6) + r.use
+  );
+}
+console.log('-'.repeat(112));
+console.log(
+  fails === 0
+    ? 'All text and UI pairs meet WCAG AA. Decorative pairs are reported, not gated.'
+    : `${fails} pair(s) below WCAG AA.`
+);
+
+// --teal-deep and --teal-shadow sit below 3:1 on every background here. They are
+// legitimate for rules, borders and gridlines and illegitimate for anything a
+// reader has to read, so the rule is enforced rather than remembered.
+const walk = (dir, out = []) => {
+  for (const name of readdirSync(dir)) {
+    const p = resolve(dir, name);
+    if (statSync(p).isDirectory()) walk(p, out);
+    else if (/\.(astro|css|ts)$/.test(name)) out.push(p);
+  }
+  return out;
+};
+const offenders = [];
+for (const file of walk(resolve(root, 'src'))) {
+  readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, i) => {
+    if (/\bcolor:\s*var\(--teal-(deep|shadow)\)/.test(line)) {
+      offenders.push(`${file.slice(root.length + 1)}:${i + 1}  ${line.trim()}`);
+    }
+  });
+}
+console.log('');
+if (offenders.length) {
+  console.log('Text painted with a sub-3:1 token:');
+  offenders.forEach((o) => console.log('  ' + o));
+} else {
+  console.log('No text is painted with --teal-deep or --teal-shadow.');
+}
+
+process.exit(fails === 0 && offenders.length === 0 ? 0 : 1);

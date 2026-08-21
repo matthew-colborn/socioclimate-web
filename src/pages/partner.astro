@@ -1,0 +1,19 @@
+---
+import { getEntry, render } from 'astro:content';
+import ProseLayout from '../layouts/ProseLayout.astro';
+
+const entry = await getEntry('pages', 'partner');
+if (!entry) throw new Error('Missing src/content/pages/partner.mdx');
+const { Content } = await render(entry);
+const d = entry.data;
+---
+<ProseLayout
+  title={d.title}
+  description={d.description}
+  heading={d.heading}
+  standfirst={d.standfirst}
+  door={d.door}
+  width={d.width}
+>
+  <Content />
+</ProseLayout>

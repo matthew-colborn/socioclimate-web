@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "socioclimate-web-staging",
+    "prod": "socioclimate-web-prod"
+  }
+}

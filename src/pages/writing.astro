@@ -1,0 +1,39 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DoorPanel from '../components/DoorPanel.astro';
+
+const intro = await getEntry('pages', 'writing');
+if (!intro) throw new Error('Missing src/content/pages/writing.mdx');
+const { Content: Intro } = await render(intro);
+const d = intro.data;
+---
+<BaseLayout title={d.title} description={d.description}>
+  <header class="page-head">
+    <div class="wrap">
+      <h1>{d.heading}</h1>
+      <p class="lede">{d.standfirst}</p>
+    </div>
+  </header>
+
+  <div class="section section--flush">
+    <div class="wrap">
+      <div class="prose reveal"><Intro /></div>
+    </div>
+  </div>
+
+  {d.door !== 'none' && <DoorPanel show={d.door} />}
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-block: clamp(var(--s-6), 8vw, var(--s-7)) var(--s-5);
+    border-bottom: var(--rule-faint);
+    background:
+      radial-gradient(60rem 22rem at 12% -30%,
+        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 70%),
+      var(--ink);
+  }
+  .page-head h1 { max-width: 18ch; }
+  .page-head .lede { margin: var(--s-4) 0 0; }
+</style>

@@ -1,0 +1,73 @@
+---
+/**
+ * Three icons, all drawn from the two motifs the brand already owns: the
+ * circuit trace and the data ridge. Nothing here is stock.
+ *   normalize — many inputs, one bus, one output.
+ *   series    — a ridge whose early bars a new entrant cannot buy.
+ *   tedious   — many small problems, not one large one.
+ */
+interface Props { name: 'normalize' | 'series' | 'tedious'; size?: number }
+const { name, size = 56 } = Astro.props;
+
+const bars = [
+  { x: 4, h: 10 }, { x: 11, h: 16 }, { x: 18, h: 13 }, { x: 25, h: 22 },
+  { x: 32, h: 18 }, { x: 39, h: 26 }, { x: 46, h: 21 }, { x: 53, h: 28 },
+];
+const cols = [8, 20, 32, 44, 56];
+const rows = [10, 24, 38, 52];
+---
+<svg class="mi" width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  {name === 'normalize' && (
+    <g>
+      <g stroke="var(--paper-dim)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10h16l10 10" />
+        <path d="M4 20h26" />
+        <path d="M4 30h26" />
+        <path d="M4 40h26" />
+        <path d="M4 50h16l10-10" />
+      </g>
+      <path d="M30 20v20" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" />
+      <path d="M30 30h28" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" />
+      <g fill="var(--paper-dim)">
+        <circle cx="4" cy="10" r="1.9" /><circle cx="4" cy="20" r="1.9" />
+        <circle cx="4" cy="30" r="1.9" /><circle cx="4" cy="40" r="1.9" />
+        <circle cx="4" cy="50" r="1.9" />
+      </g>
+      <circle cx="58" cy="30" r="3" fill="var(--cyan)" />
+    </g>
+  )}
+
+  {name === 'series' && (
+    <g>
+      {bars.map((b, i) => (
+        i < 5
+          ? <rect x={b.x} y={54 - b.h} width="5" height={b.h} fill="var(--cyan)" opacity={0.55 + i * 0.11} />
+          : <rect x={b.x + 0.75} y={54.75 - b.h} width="3.5" height={b.h - 1.5}
+                  fill="none" stroke="var(--paper-dim)" stroke-width="1.5" />
+      ))}
+      <path d="M37.5 6v52" stroke="var(--cyan-bright)" stroke-width="1.5" stroke-dasharray="3 4" />
+      <path d="M4 56h56" stroke="var(--paper-dim)" stroke-width="1.6" stroke-linecap="round" />
+      <circle cx="37.5" cy="6" r="2.6" fill="var(--cyan-bright)" />
+    </g>
+  )}
+
+  {name === 'tedious' && (
+    <g>
+      <g stroke="var(--paper-dim)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 10h12" /><path d="M32 10h12" />
+        <path d="M20 24h12" /><path d="M44 24h6l6-6" />
+        <path d="M8 38h6l6 6h12" /><path d="M44 38h12" />
+        <path d="M8 52h12" /><path d="M32 52h12" />
+        <path d="M8 10v14" /><path d="M56 38v14" />
+      </g>
+      {rows.map((y, ri) => cols.map((x, ci) => (
+        <circle cx={x} cy={y} r={(ri + ci) % 4 === 0 ? 2.8 : 2}
+                fill={(ri + ci) % 4 === 0 ? 'var(--cyan)' : 'var(--paper-dim)'} />
+      )))}
+    </g>
+  )}
+</svg>
+
+<style>
+  .mi { flex: none; }
+</style>

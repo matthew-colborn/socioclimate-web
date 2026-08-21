@@ -1,0 +1,30 @@
+# Domain Restricted Sharing exception, scoped to the SocioClimate Web folder.
+#
+# WHY THIS EXISTS
+# constraints/iam.allowedPolicyMemberDomains is set at the organisation to allow
+# only customer C03vivshe (socioclimate.io), set 2026-08-18. Adding Firebase to a
+# project provisions Google-managed service agents and grants them IAM roles, and
+# those identities are not in C03vivshe — so `projects:addFirebase` fails with a
+# bare 403 PERMISSION_DENIED, with everything else about the caller correct:
+# roles/owner, the firebase OAuth scope, and firebase / firebasehosting /
+# cloudresourcemanager / serviceusage all enabled.
+#
+# SCOPE
+# folders/764224180326 is "SocioClimate Web" and contains exactly two projects,
+# socioclimate-web-prod and socioclimate-web-staging. Both are new, empty and not
+# linked to billing. The organisation default and every other folder — the
+# PorchLight OS folder, Deed-Restricted DB, Sandbox — are untouched and stay
+# restricted.
+#
+# LIFECYCLE
+# Keep this in place until socioclimate.io and staging.socioclimate.io are
+# serving: custom-domain provisioning creates further service agents and will
+# need the same allowance. Then restore with drs-restore-folder.yaml, which puts
+# the folder back to inheriting the organisation policy.
+#
+#   gcloud org-policies set-policy infra/drs-exception-folder.yaml
+#
+name: folders/764224180326/policies/iam.allowedPolicyMemberDomains
+spec:
+  rules:
+    - allowAll: true

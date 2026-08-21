@@ -1,0 +1,92 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DoorPanel from '../components/DoorPanel.astro';
+
+const intro = await getEntry('pages', 'portfolio');
+if (!intro) throw new Error('Missing src/content/pages/portfolio.mdx');
+const { Content: Intro } = await render(intro);
+const d = intro.data;
+
+const entries = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
+const rendered = await Promise.all(
+  entries.map(async (e) => ({ id: e.id, data: e.data, Body: (await render(e)).Content }))
+);
+---
+<BaseLayout title={d.title} description={d.description}>
+  <header class="page-head">
+    <div class="wrap">
+      <h1>{d.heading}</h1>
+      <p class="lede">{d.standfirst}</p>
+    </div>
+  </header>
+
+  <div class="section section--flush">
+    <div class="wrap">
+      <div class="prose reveal"><Intro /></div>
+
+      {rendered.map((e) => (
+        <article class="entry reveal" id={e.id}>
+          <div class="entry__head">
+            <p class="entry__meta">
+              <span class="entry__stage">{e.data.stage}</span>
+              <span class="entry__where">{e.data.where}</span>
+            </p>
+            <h2 class="entry__name">{e.data.name}</h2>
+            <p class="entry__summary">{e.data.summary}</p>
+          </div>
+          <div class="prose entry__body"><e.Body /></div>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  {d.door !== 'none' && <DoorPanel show={d.door} />}
+</BaseLayout>
+
+<style>
+  .page-head {
+    padding-block: clamp(var(--s-6), 8vw, var(--s-7)) var(--s-5);
+    border-bottom: var(--rule-faint);
+    background:
+      radial-gradient(60rem 22rem at 12% -30%,
+        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 70%),
+      var(--ink);
+  }
+  .page-head h1 { max-width: 18ch; }
+  .page-head .lede { margin: var(--s-4) 0 0; }
+
+  .entry {
+    margin-top: var(--s-7);
+    padding-top: var(--s-5);
+    border-top: var(--rule);
+  }
+  .entry__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    margin: 0 0 var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .entry__stage {
+    color: var(--cyan);
+    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+    border-radius: var(--radius);
+    padding: 0.15em 0.6em;
+  }
+  .entry__where { color: var(--paper-dim); }
+  .entry__name { font-size: var(--step-3); }
+  .entry__summary {
+    margin: var(--s-3) 0 0;
+    font-size: var(--step-1);
+    color: var(--paper-dim);
+    max-width: var(--measure);
+  }
+  .entry__body { margin-top: var(--s-5); }
+  /* The first h2 inside an entry body would otherwise draw a second rule. */
+  .entry__body :global(h2:first-child) { margin-top: 0; padding-top: 0; border-top: 0; }
+</style>

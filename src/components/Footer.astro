@@ -1,0 +1,82 @@
+---
+import Wordmark from './Wordmark.astro';
+import { NAV, SITE, MAILTO } from '../config/site';
+const year = 2026;
+---
+<footer class="site-foot">
+  <div class="wrap site-foot__inner">
+    <div class="site-foot__brand">
+      <Wordmark size="md" />
+      <p class="dim">{SITE.tagline}</p>
+    </div>
+
+    <nav class="site-foot__nav" aria-label="Footer">
+      <h2 class="site-foot__h">Site</h2>
+      <ul>
+        <li><a href="/">Home</a></li>
+        {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="site-foot__nav">
+      <h2 class="site-foot__h">Two doors</h2>
+      <ul>
+        <li><a href={MAILTO.partner}>Partner with us</a></li>
+        <li><a href={MAILTO.acquire}>Sell us your company</a></li>
+      </ul>
+      <p class="dim site-foot__note">
+        No form, no funnel. Mail reaches a person.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap site-foot__legal">
+    <p>© {year} {SITE.legalName}. San Diego, California.</p>
+    <p>Every figure on this site carries its source and its as-of date.</p>
+  </div>
+</footer>
+
+<style>
+  .site-foot {
+    border-top: var(--rule);
+    background: var(--ink-deep);
+    padding-block: var(--s-6) var(--s-4);
+    margin-top: 0;
+  }
+  .site-foot__inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--s-5);
+    align-items: start;
+  }
+  .site-foot__brand p { margin: var(--s-2) 0 0; font-size: var(--step--1); }
+  .site-foot__h {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+    margin: 0 0 var(--s-3);
+  }
+  .site-foot__nav ul { list-style: none; margin: 0; padding: 0; }
+  .site-foot__nav li { margin-bottom: var(--s-2); }
+  .site-foot__nav a { font-size: var(--step--1); text-decoration: none; }
+  .site-foot__nav a:hover { text-decoration: underline; }
+  .site-foot__note { font-size: var(--step--1); margin-top: var(--s-3); }
+
+  .site-foot__legal {
+    margin-top: var(--s-6);
+    padding-top: var(--s-3);
+    border-top: var(--rule-faint);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--s-2);
+  }
+  .site-foot__legal p {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--paper-dim);
+  }
+</style>

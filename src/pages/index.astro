@@ -1,0 +1,238 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BrandVideo from '../components/BrandVideo.astro';
+import Wordmark from '../components/Wordmark.astro';
+import MoatIcon from '../components/icons/MoatIcon.astro';
+import PortfolioCard from '../components/PortfolioCard.astro';
+import DoorPanel from '../components/DoorPanel.astro';
+import ZestimateChart from '../components/charts/ZestimateChart.astro';
+import { MAILTO } from '../config/site';
+
+const home = await getEntry('home', 'home');
+if (!home) throw new Error('Missing src/content/home.mdx');
+const { Content: Claim } = await render(home);
+const d = home.data;
+
+const portfolio = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
+---
+<BaseLayout title="SocioClimate" description={d.description} organization={true}>
+  <!-- 1. Hero -->
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <div class="hero__text">
+        <h1 class="hero__h1">
+          <Wordmark size="lg" class="hero__wordmark" />
+          <span class="hero__tagline">{d.tagline}</span>
+        </h1>
+        <p class="hero__sub">{d.subline}</p>
+        <div class="hero__doors">
+          <a class="btn" href={MAILTO.partner}>Partner with us</a>
+          <a class="btn" href={MAILTO.acquire}>Sell us your company</a>
+        </div>
+      </div>
+      <div class="hero__mark">
+        <BrandVideo name="mark" width={448} height={480} class="hero__video" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. The claim -->
+  <section class="section section--recede" aria-labelledby="claim-h">
+    <div class="wrap">
+      <p class="eyebrow" id="claim-h">The claim</p>
+      <div class="prose reveal"><Claim /></div>
+    </div>
+  </section>
+
+  <!-- 3. The proof -->
+  <section class="section section--black proof" aria-labelledby="proof-h">
+    <div class="wrap">
+      <p class="eyebrow" id="proof-h">The proof</p>
+      <h2 class="proof__h">One model. One housing stock. One day. Four times the error.</h2>
+      <div class="proof__plot reveal">
+        <ZestimateChart />
+      </div>
+      <p class="proof__cite">
+        Median error of the Zestimate was 1.8% on homes listed for sale and 7.2%
+        on off-market homes in 2025 — the same model, the same housing stock, the
+        same day. The only difference is whether a price was published.
+        Redfin's independently built model reports 1.85% and 7.27% on the same
+        two populations: two competing firms converging on the same error floor,
+        which suggests the floor is a property of the available observations
+        rather than of either model.
+      </p>
+      <p class="proof__src">
+        Zillow Group FY2025 Form 10-K, filed 2026-02-11; Redfin Estimate
+        published accuracy, 2025.
+      </p>
+      <p class="proof__more"><a href="/thesis">Read the thesis</a></p>
+    </div>
+  </section>
+
+  <!-- 4. What a data moat is -->
+  <section class="section" aria-labelledby="moat-h">
+    <div class="wrap">
+      <p class="eyebrow" id="moat-h">What a data moat is</p>
+      <h2 class="section__h">Three properties. A position that has all three is hard to take.</h2>
+      <div class="moat">
+        {d.moat.map((m) => (
+          <article class="moat__card reveal">
+            <MoatIcon name={m.icon} size={56} />
+            <p class="moat__n">{m.n}</p>
+            <h3 class="moat__name">{m.name}</h3>
+            <p class="moat__body">{m.body}</p>
+          </article>
+        ))}
+      </div>
+      <p class="section__more"><a href="/method">How one gets built</a></p>
+    </div>
+  </section>
+
+  <!-- 5. Where we're doing it -->
+  <section class="section section--recede" aria-labelledby="pf-h">
+    <div class="wrap">
+      <p class="eyebrow" id="pf-h">Where we are doing it</p>
+      <h2 class="section__h">Two, with honest stage labels.</h2>
+      <div class="pf">
+        {portfolio.map((p) => (
+          <PortfolioCard
+            name={p.data.name}
+            stage={p.data.stage}
+            where={p.data.where}
+            summary={p.data.summary}
+            href={`/portfolio#${p.id}`}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. The lockup, moving -->
+  <div class="band">
+    <div class="wrap band__inner">
+      <BrandVideo name="lockup" width={672} height={448} blend="none" fade={true} class="band__video" />
+    </div>
+  </div>
+
+  <!-- 7. Two doors -->
+  <DoorPanel show="both" />
+</BaseLayout>
+
+<style>
+  /* --- 1. Hero ----------------------------------------------------------- */
+  .hero {
+    padding-block: clamp(var(--s-6), 10vw, var(--s-8));
+    background:
+      radial-gradient(46rem 30rem at 78% 8%,
+        color-mix(in srgb, var(--cyan) 9%, transparent), transparent 68%),
+      var(--ink);
+  }
+  .hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(var(--s-4), 6vw, var(--s-7));
+    align-items: center;
+  }
+  .hero__h1 { margin: 0; }
+  .hero__h1 :global(.hero__wordmark) { display: block; }
+  .hero__tagline {
+    display: block;
+    margin-top: var(--s-3);
+    font-size: var(--step-2);
+    font-weight: 400;
+    color: var(--paper);
+    letter-spacing: -0.012em;
+  }
+  .hero__sub {
+    margin: var(--s-4) 0 0;
+    font-size: var(--step-1);
+    color: var(--paper-dim);
+    max-width: 42ch;
+  }
+  .hero__doors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+  }
+  .hero__mark { justify-self: end; }
+  .hero__mark :global(.hero__video) { width: clamp(10rem, 23vw, 19rem); }
+
+  @media (max-width: 54rem) {
+    .hero__inner { grid-template-columns: 1fr; }
+    .hero__mark { order: -1; justify-self: start; }
+    .hero__mark :global(.hero__video) { width: 11rem; }
+  }
+
+  /* --- 6. The lockup, moving --------------------------------------------- */
+  /* The source frames are #02071e in the corners, within a shade of --ink, so
+     the clip has no visible edge and needs no mask. */
+  .band {
+    padding-block: clamp(var(--s-6), 8vw, var(--s-7));
+    border-top: var(--rule-faint);
+  }
+  .band__inner { display: flex; justify-content: center; }
+  .band :global(.band__video) { width: min(100%, 34rem); }
+
+  /* --- shared section furniture ------------------------------------------ */
+  .section__h {
+    font-size: var(--step-2);
+    max-width: 28ch;
+    margin-bottom: var(--s-5);
+  }
+  .section__more, .proof__more { margin: var(--s-5) 0 0; }
+  .section__more a, .proof__more a {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .section__more a::after, .proof__more a::after { content: ' →'; }
+  .section__more a:hover, .proof__more a:hover { text-decoration: underline; }
+
+  /* --- 3. The proof ------------------------------------------------------- */
+  .proof__h { font-size: var(--step-2); max-width: 22ch; margin-bottom: var(--s-5); }
+  .proof__plot {
+    margin: var(--s-5) 0 var(--s-4);
+    max-width: 52rem;
+  }
+  .proof__cite { max-width: var(--measure); color: var(--paper-dim); }
+  .proof__src {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--paper-dim);
+    max-width: var(--measure);
+    margin: 0;
+  }
+
+  /* --- 4. Moat cards ------------------------------------------------------ */
+  .moat {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--s-5);
+  }
+  .moat__card {
+    border-top: var(--rule);
+    padding-top: var(--s-4);
+    min-width: 0;
+  }
+  .moat__card :global(.mi) { margin-bottom: var(--s-3); }
+  .moat__n {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.16em;
+    color: var(--paper-dim);
+    margin: 0 0 var(--s-1);
+  }
+  .moat__name { margin: 0 0 var(--s-2); }
+  .moat__body { margin: 0; color: var(--paper-dim); }
+
+  /* --- 5. Portfolio ------------------------------------------------------- */
+  .pf {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: var(--s-4);
+  }
+</style>

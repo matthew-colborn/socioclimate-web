@@ -1,0 +1,74 @@
+---
+import { FLAME_PATH, FLAME_SOLID_PATH, FLAME_VIEWBOX, FLAME_RATIO } from '../lib/flame';
+
+/**
+ * The mark: the flame from the stacked lockup, traced to vector. The contour
+ * follows the circuit channels as well as the outer silhouette, so filling and
+ * stroking the one path reproduces the whole drawing.
+ *
+ * This is the only element on the site permitted a glow.
+ */
+interface Props {
+  size?: number;
+  glow?: boolean;
+  animate?: boolean;
+  title?: string;
+  class?: string;
+}
+const {
+  size = 64,
+  glow = true,
+  animate = false,
+  title = 'SocioClimate',
+  class: klass = '',
+} = Astro.props;
+const uid = 'cf' + Math.random().toString(36).slice(2, 8);
+// Below about 32px the circuit channels close up into noise, so the sealed
+// silhouette is the honest rendering of the mark at that scale.
+const d = size <= 32 ? FLAME_SOLID_PATH : FLAME_PATH;
+---
+
+<svg
+  class={`mark ${glow ? 'mark--glow' : ''} ${animate ? 'mark--animate' : ''} ${klass}`}
+  width={size}
+  height={Math.round(size * FLAME_RATIO)}
+  viewBox={FLAME_VIEWBOX}
+  role={title === '' ? undefined : 'img'}
+  aria-label={title === '' ? undefined : title}
+  aria-hidden={title === '' ? 'true' : undefined}
+  fill="none"
+>
+  <defs>
+    <linearGradient id={`${uid}-fill`} x1="80" y1="0" x2="80" y2="305" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="var(--cyan-glow)" stop-opacity="0.24" />
+      <stop offset="0.5" stop-color="var(--cyan)" stop-opacity="0.15" />
+      <stop offset="1" stop-color="var(--teal-deep)" stop-opacity="0.10" />
+    </linearGradient>
+    <linearGradient id={`${uid}-edge`} x1="80" y1="0" x2="80" y2="305" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="var(--cyan-glow)" />
+      <stop offset="0.45" stop-color="var(--cyan)" />
+      <stop offset="1" stop-color="var(--cyan)" stop-opacity="0.8" />
+    </linearGradient>
+  </defs>
+
+  <path d={d} fill={`url(#${uid}-fill)`} fill-rule="evenodd" />
+  <path class="mark__edge" d={d} stroke={`url(#${uid}-edge)`} stroke-width={size <= 32 ? 4 : 1.4}
+        stroke-linejoin="round" />
+</svg>
+
+<style>
+  .mark { display: block; }
+  .mark--glow { filter: var(--glow-mark); }
+
+  /* The traces pulse in the hero and nowhere else. */
+  .mark--animate .mark__edge { animation: trace-breathe 7s ease-in-out infinite; }
+
+  @keyframes trace-breathe {
+    0%, 100% { opacity: 0.7; }
+    50%      { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark--animate .mark__edge { animation: none; opacity: 1; }
+  }
+</style>

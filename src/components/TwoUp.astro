@@ -1,0 +1,17 @@
+---
+/** Two columns of equal weight. Used by /partner for the two doors. */
+---
+<div class="twoup"><slot /></div>
+
+<style>
+  .twoup {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(var(--s-4), 5vw, var(--s-7));
+    margin: var(--s-5) 0;
+    max-width: none;
+  }
+  @media (max-width: 52rem) {
+    .twoup { grid-template-columns: 1fr; }
+  }
+</style>

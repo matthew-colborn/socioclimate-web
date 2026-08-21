@@ -1,0 +1,92 @@
+/* ---------------------------------------------------------------------------
+   SocioClimate design tokens.
+
+   Colour is sampled from the two brand lockups in brand/. Dark is the default
+   and only theme: the brand does not exist on white and there is no light mode
+   to fall back to. Do not add one.
+
+   Cyan is data, not decoration. It marks the flame, links, and the single most
+   important value in any chart. Three cyan elements above the fold is the cap.
+   --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Brand ------------------------------------------------------------- */
+  --ink:          #020A21;  /* page background; the horizontal lockup's navy */
+  --ink-deep:     #000615;  /* sections that need to recede */
+  --ink-black:    #000000;  /* the stacked lockup's field; full-bleed only */
+  --cyan:         #00D8E7;  /* primary: links, the mark, key data marks */
+  --cyan-bright:  #2AE2EA;  /* hover, active, focus ring */
+  --cyan-glow:    #99FFFF;  /* glow layers and brightest gradient stop only */
+  --teal-deep:    #006184;  /* secondary data series, borders, muted rules */
+  --teal-shadow:  #00506B;  /* chart gridlines, dividers */
+  --paper:        #FFFFFF;  /* primary text on ink */
+  --paper-dim:    #A8B6C8;  /* secondary text */
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-display: 'Outfit Variable', 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  --font-body:    'Inter Variable', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, monospace;
+
+  --step--1: clamp(0.82rem, 0.79rem + 0.15vw, 0.90rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.10rem);
+  --step-1:  clamp(1.20rem, 1.12rem + 0.40vw, 1.42rem);
+  --step-2:  clamp(1.45rem, 1.30rem + 0.75vw, 1.90rem);
+  --step-3:  clamp(1.80rem, 1.50rem + 1.50vw, 2.60rem);
+  --step-4:  clamp(2.20rem, 1.65rem + 2.75vw, 3.80rem);
+
+  --measure: 68ch;
+  --leading-prose: 1.65;
+  --leading-tight: 1.12;
+
+  /* --- Space ------------------------------------------------------------- */
+  --s-1: 0.5rem;
+  --s-2: 0.75rem;
+  --s-3: 1rem;
+  --s-4: 1.5rem;
+  --s-5: 2rem;
+  --s-6: 3rem;
+  --s-7: 4.5rem;
+  --s-8: 7rem;
+
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --wide: 76rem;
+
+  /* --- Lines and surfaces ------------------------------------------------ */
+  --rule: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+  --rule-faint: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+  --surface: color-mix(in srgb, var(--cyan) 3.5%, var(--ink-deep));
+  --radius: 2px;
+
+  /* Glow is earned. The mark glows, one hero element may glow, nothing else. */
+  --glow-mark:
+    drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 70%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent))
+    drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 25%, transparent));
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* --- Self-hosted faces. No Google Fonts request, ever. -------------------- */
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/inter-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Outfit Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/outfit-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}

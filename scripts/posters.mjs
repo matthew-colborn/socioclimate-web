@@ -7,6 +7,10 @@
 // engine, not here.
 //
 //   npm run build && npm run posters      (then rebuild so the files are copied)
+//
+// These filenames are not content-hashed and are served immutable for a year.
+// If a scene is redesigned, rename its poster or returning visitors keep the
+// old one — the same rule as the fonts.
 import puppeteer from 'puppeteer-core';
 import sharp from 'sharp';
 import { mkdirSync, statSync } from 'node:fs';

@@ -8,7 +8,9 @@ if (!intro) throw new Error('Missing src/content/pages/portfolio.mdx');
 const { Content: Intro } = await render(intro);
 const d = intro.data;
 
-const entries = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
+const entries = (await getCollection('portfolio'))
+  .filter((e) => e.data.kind === 'work')
+  .sort((a, b) => a.data.order - b.data.order);
 const rendered = await Promise.all(
   entries.map(async (e) => ({
     id: e.id,
@@ -34,9 +36,9 @@ const rendered = await Promise.all(
         <h2 class="entry__name">{e.display}</h2>
 
         <dl class="entry__facts">
-          <div><dt>What it is</dt><dd>{e.data.what}</dd></div>
-          <div><dt>Who it is for</dt><dd>{e.data.who}</dd></div>
-          <div><dt>What we built</dt><dd>{e.data.built}</dd></div>
+          {e.data.what && <div><dt>What it is</dt><dd>{e.data.what}</dd></div>}
+          {e.data.who && <div><dt>Who it is for</dt><dd>{e.data.who}</dd></div>}
+          {e.data.built && <div><dt>What we built</dt><dd>{e.data.built}</dd></div>}
         </dl>
 
         {e.data.readouts.length > 0 && (

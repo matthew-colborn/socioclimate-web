@@ -89,26 +89,34 @@ let fail = 0;
   const a = resolve(out, 'reduced-a.png');
   const b = resolve(out, 'reduced-b.png');
   await page.screenshot({ path: a, clip: { x: 0, y: 0, width: W, height: H } });
-  // Longer than the 7.2s auto-advance interval: if rotation were running, the
-  // scene would have changed by now.
-  await new Promise((r) => setTimeout(r, 8500));
+  // Comfortably longer than the 5.4s auto-advance interval: if rotation were
+  // running, the scene would have changed twice by now.
+  await new Promise((r) => setTimeout(r, 12000));
   await page.screenshot({ path: b, clip: { x: 0, y: 0, width: W, height: H } });
 
   const d = await diff(a, b);
-  const state = await page.evaluate(() => ({
-    current: document.querySelector('[data-goto][aria-current="true"]')?.textContent?.trim(),
-    pauseHidden: document.querySelector('[data-pause]')?.hasAttribute('hidden') ?? null,
-    live: document.querySelector('[data-live]')?.getAttribute('aria-live'),
-  }));
+  const state = await page.evaluate(() => {
+    const dots = [...document.querySelectorAll('[data-goto]')];
+    return {
+      current: document.querySelector('[data-goto][aria-current="true"]')?.textContent?.trim(),
+      // Derived, not hardcoded: the dot labels are zero-based and the count of
+      // scenes changes. Asserting against a literal made this fail on a
+      // renumbering while the behaviour was correct.
+      first: dots[0]?.textContent?.trim(),
+      total: dots.length,
+      pauseHidden: document.querySelector('[data-pause]')?.hasAttribute('hidden') ?? null,
+      live: document.querySelector('[data-live]')?.getAttribute('aria-live'),
+    };
+  });
 
   console.log('');
-  console.log('REDUCED MOTION  (8.5s apart, auto-advance interval is 7.2s)');
+  console.log('REDUCED MOTION  (12s apart, auto-advance interval is 5.4s)');
   console.log('-'.repeat(58));
   console.log(`  frame difference   ${d.toFixed(3)}`);
-  console.log(`  active scene       ${state.current}`);
+  console.log(`  active scene       ${state.current} (first of ${state.total})`);
   console.log(`  pause control      ${state.pauseHidden ? 'hidden' : 'VISIBLE'}`);
   console.log(`  aria-live          ${state.live}`);
-  const ok = d < 0.5 && state.current === '01' && state.pauseHidden === true;
+  const ok = d < 0.5 && state.current === state.first && state.pauseHidden === true;
   if (!ok) { fail++; console.log('  FAIL — the hero did not freeze'); }
   else console.log('  PASS — frozen, no advance, pause control withdrawn');
   await page.close();

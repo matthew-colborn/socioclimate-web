@@ -24,13 +24,24 @@
   position: relative;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 900ms var(--ease), visibility 0s linear 900ms;
+  transition: opacity 760ms var(--ease), visibility 0s linear 760ms;
 }
 .slide.is-on {
   opacity: 1;
   visibility: visible;
-  transition: opacity 900ms var(--ease), visibility 0s;
+  transition: opacity 760ms var(--ease), visibility 0s;
 }
+/* The copy lifts in behind the crossfade rather than arriving with it. A
+   straight opacity swap of everything at once reads as a slideshow; offsetting
+   the text makes it read as one composition resolving. */
+.slide__copy > * {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 620ms var(--ease), transform 620ms var(--ease);
+}
+.slide.is-on .slide__left { transition-delay: 200ms; }
+.slide.is-on .slide__right { transition-delay: 320ms; }
+.slide.is-on .slide__copy > * { opacity: 1; transform: none; }
 
 .slide__field { position: absolute; inset: 0; z-index: -1; }
 .slide__poster,
@@ -77,17 +88,32 @@
 .slide__name { color: var(--paper-dim); }
 
 .slide__headline {
-  font-size: clamp(2.4rem, 6.4vw, 5rem);
-  max-width: 15ch;
+  /* Bigger at the top end and lighter with it. The references carry a very
+     large, very thin headline; weight 300 at 5rem reads heavy, so this drops to
+     250 and gains size instead. */
+  font-size: clamp(2.5rem, 7vw, 5.6rem);
+  font-weight: 250;
+  letter-spacing: -0.028em;
+  line-height: 0.98;
+  max-width: 16ch;
   color: var(--paper);
+}
+/* The statement scene carries the longest headline and earns more room. */
+.slide--statement .slide__headline {
+  max-width: 19ch;
+  font-size: clamp(2.2rem, 5.6vw, 4.4rem);
 }
 
 .slide__right { justify-self: end; max-width: 34ch; }
 .slide__line {
   color: var(--paper-dim);
-  font-size: 0.95rem;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
   margin-bottom: var(--s-4);
+  /* A hairline tying the copy to the headline across the gap, so the two
+     bottom corners read as one band rather than two stranded blocks. */
+  padding-top: var(--s-3);
+  border-top: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
 }
 
 /* --- Controls -------------------------------------------------------------
@@ -129,6 +155,15 @@
   border-bottom: 5px solid transparent;
   width: 0;
 }
+
+.stage__count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--paper-dim);
+}
+.stage__count b { color: var(--paper); font-weight: 400; }
 
 .stage__dots { display: flex; gap: var(--s-3); list-style: none; margin: 0; padding: 0; }
 .stage__dots button[aria-current='true'] { color: var(--cyan); }

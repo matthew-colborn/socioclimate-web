@@ -13,8 +13,13 @@
 import { Engine, prefersReducedMotion } from './field/engine';
 import { SCENES, SEEDS, type SceneId } from './scenes/registry';
 
-const ADVANCE_MS = 7200;
-const FADE_MS = 900;
+// Six scenes at 7.2s is a 43-second loop, and almost nobody stays on a hero
+// that long — the last two scenes would effectively never be seen. 5.4s brings
+// the full loop to 32 seconds, which is still long but puts the invitation
+// inside a plausible visit. The numbered controls, not the interval, are what
+// actually make scene 05 reachable.
+const ADVANCE_MS = 5400;
+const FADE_MS = 760;
 
 interface Slide {
   root: HTMLElement;
@@ -36,6 +41,7 @@ export function initCarousel(root: HTMLElement): void {
   if (!slides.length) return;
 
   const live = root.querySelector<HTMLElement>('[data-live]');
+  const count = root.querySelector<HTMLElement>('[data-count]');
   const pauseBtn = root.querySelector<HTMLButtonElement>('[data-pause]');
   const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-goto]'));
   const reduced = prefersReducedMotion();
@@ -72,6 +78,10 @@ export function initCarousel(root: HTMLElement): void {
     dots.forEach((d, i) => {
       d.setAttribute('aria-current', i === index ? 'true' : 'false');
     });
+    // The visible counter matches the dot labels, which are zero-based —
+    // 00 is the statement, 05 the invitation. The aria label stays
+    // one-based ("1 of 6") because that is what a screen reader expects.
+    if (count) count.textContent = String(index).padStart(2, '0');
 
     const s = slides[index];
     ensureEngine(s);
@@ -123,6 +133,18 @@ export function initCarousel(root: HTMLElement): void {
       show(i, true);
     })
   );
+
+  // A CTA of the form #scene-N drives the rotation instead of navigating, so
+  // the statement scene can hand off to the first piece of proof.
+  root.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('[data-cta]');
+    if (!a) return;
+    const m = /^#scene-(\d+)$/.exec(a.getAttribute('href') || '');
+    if (!m) return;
+    e.preventDefault();
+    setPlaying(false);
+    show(Number(m[1]), true);
+  });
 
   root.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;

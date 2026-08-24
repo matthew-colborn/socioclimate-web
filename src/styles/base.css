@@ -92,25 +92,34 @@ img, canvas, svg { display: block; max-width: 100%; }
 /* --- The one accent control ---------------------------------------------- */
 /* Exactly one call-to-action per view. If a second one appears, one of them is
    wrong. */
+/* A filled cyan pill at full saturation was the loudest thing on a page whose
+   whole argument is restraint. Outlined at rest, filling on hover: still the
+   only accent, but it stops shouting over the focal object. */
 .cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.55em;
-  padding: 0.78em 1.5em;
+  gap: 0.6em;
+  padding: 0.82em 1.6em;
   font-family: var(--font-display);
   font-size: 0.95rem;
   font-weight: 450;
   letter-spacing: 0.01em;
   text-decoration: none;
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+  border-radius: 999px;
+  transition: color 200ms var(--ease), border-color 200ms var(--ease),
+              background 200ms var(--ease);
+}
+.cta:hover,
+.cta:focus-visible {
   color: var(--ink);
   background: var(--cyan);
-  border: 1px solid var(--cyan);
-  border-radius: 999px;
-  transition: background 180ms var(--ease), border-color 180ms var(--ease);
+  border-color: var(--cyan);
 }
-.cta:hover { color: var(--ink); background: var(--cyan-bright); border-color: var(--cyan-bright); }
-.cta__arrow { transition: transform 180ms var(--ease); }
-.cta:hover .cta__arrow { transform: translate(2px, -2px); }
+.cta__arrow { transition: transform 200ms var(--ease); }
+.cta:hover .cta__arrow { transform: translate(3px, -3px); }
 .cta--solid { border-radius: 2px; }
 
 /* --- Page furniture ------------------------------------------------------- */
@@ -139,20 +148,55 @@ img, canvas, svg { display: block; max-width: 100%; }
 .site-head__nav a:hover,
 .site-head__nav a[aria-current='page'] { color: var(--paper); }
 
+/* The footer was a copyright line and an address doing nothing. It now closes
+   the argument: the sentence the whole site is built on, the routes, and the
+   two ways to start. */
 .site-foot {
-  border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
-  padding-block: var(--s-5);
-  background: var(--ink);
+  border-top: 1px solid color-mix(in srgb, var(--teal-deep) 45%, transparent);
+  padding-block: var(--s-6) var(--s-5);
+  background: var(--ink-black);
 }
 .site-foot__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
+  gap: var(--s-5);
+  align-items: start;
+}
+.site-foot__say {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2vw, 1.5rem);
+  font-weight: 300;
+  line-height: 1.25;
+  color: var(--paper);
+  max-width: 24ch;
+  margin: var(--s-3) 0 0;
+}
+.site-foot__h {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  margin: 0 0 var(--s-2);
+  font-weight: 400;
+}
+.site-foot ul { list-style: none; margin: 0; padding: 0; }
+.site-foot li { margin-bottom: 0.45em; }
+.site-foot a { font-size: 0.85rem; text-decoration: none; }
+.site-foot a:hover { text-decoration: underline; }
+.site-foot__legal {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
   justify-content: space-between;
-  gap: var(--s-3);
+  gap: var(--s-2);
+  margin-top: var(--s-6);
+  padding-top: var(--s-3);
+  border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
 }
-.site-foot p { margin: 0; font-size: 0.8rem; color: var(--paper-dim); }
-.site-foot a { font-size: 0.8rem; }
+.site-foot__legal p { margin: 0; font-size: 0.76rem; color: var(--paper-dim); }
+@media (max-width: 52rem) {
+  .site-foot__inner { grid-template-columns: 1fr; gap: var(--s-4); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

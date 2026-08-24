@@ -8,7 +8,7 @@
  * they arrive.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, ease, flamePoints, CYAN, GLOW } from '../field/prims';
+import { dab, halo, halftone, ease, flameShape, CYAN, GLOW } from '../field/prims';
 
 interface P { a: number; r0: number; r: number; sp: number; sz: number; drift: number }
 
@@ -34,11 +34,8 @@ export const converge: Scene = {
         drift: (c.rng() - 0.5) * 0.18,
       });
     }
-    const fp = flamePoints();
-    ring = [];
-    for (let i = 0; i < fp.length; i += 3) {
-      ring.push([cx + (fp[i][0] - 0.5) * R * 0.26, cy + (fp[i][1] - 0.5) * R * 0.46]);
-    }
+    // Everything converges onto the mark itself.
+    ring = flameShape(cx, cy, R * 0.62).filter((_, i) => i % 3 === 0);
   },
 
   frame(c: SceneCtx, t: number, intro: number) {

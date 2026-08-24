@@ -10,7 +10,7 @@
  * vocabulary of the channels inside the flame mark.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, ease, CYAN, GLOW } from '../field/prims';
+import { dab, halo, halftone, ease, flameShape, resample, CYAN, GLOW } from '../field/prims';
 
 interface Seg { x1: number; y1: number; x2: number; y2: number; len: number }
 interface Trace { segs: Seg[]; total: number; delay: number; period: number; end: [number, number] }
@@ -32,39 +32,35 @@ export const traces_scene: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    const H = Math.min(c.h * 0.46, 400);
+    const H = Math.min(c.h * 0.50, 420);
     // Bounded so the routed object stays a compact focal mass between the
     // readouts rather than a band running off both edges.
-    const W = Math.min(c.w * 0.26, 300);
     trunkTop = cy - H / 2;
     trunkBot = cy + H / 2;
     traces = [];
 
-    const perSide = 7;
-    for (let side = -1 as -1 | 1; ; side = 1) {
-      for (let i = 0; i < perSide; i++) {
-        // Staggered exits along the trunk, never evenly spaced.
-        const u = (i + 0.5) / perSide + (c.rng() - 0.5) * 0.06;
-        const y0 = trunkTop + u * (trunkBot - trunkTop);
-        const run1 = W * (0.22 + c.rng() * 0.26);
-        const miter = (c.rng() < 0.5 ? -1 : 1) * W * (0.10 + c.rng() * 0.14);
-        const run2 = W * (0.18 + c.rng() * 0.34);
-        const x1 = cx + side * run1;
-        const x2 = x1 + side * Math.abs(miter);
-        const y1 = y0 + miter * 0.55;
-        const x3 = x2 + side * run2;
-        const pts: Array<[number, number]> = [[cx, y0], [x1, y0], [x2, y1], [x3, y1]];
-        const s = segs(pts);
-        const total = s.reduce((a, g) => a + g.len, 0);
-        traces.push({
-          segs: s,
-          total,
-          delay: c.rng() * 4,
-          period: 3.4 + c.rng() * 2.2,
-          end: [x3, y1],
-        });
-      }
-      if (side === 1) break;
+    // Terminals are points on the flame contour, so the routed object's
+    // outline is the mark. The routing between trunk and terminal is
+    // orthogonal, which is the vocabulary of the mark's own channels.
+    const anchors = resample(flameShape(cx, cy, H * 1.15), 16);
+    for (const [ax, ay] of anchors) {
+      const side: -1 | 1 = ax < cx ? -1 : 1;
+      const y0 = Math.min(trunkBot, Math.max(trunkTop, ay + (c.rng() - 0.5) * 40));
+      const reach = Math.abs(ax - cx);
+      const run1 = Math.max(12, reach * (0.3 + c.rng() * 0.2));
+      const x1 = cx + side * run1;
+      const x2 = ax;
+      const pts: Array<[number, number]> = [[cx, y0], [x1, y0], [x2, ay], [ax, ay]];
+      const sg = segs(pts);
+      if (!sg.length) continue;
+      const total = sg.reduce((a, g) => a + g.len, 0);
+      traces.push({
+        segs: sg,
+        total,
+        delay: c.rng() * 4,
+        period: 3.4 + c.rng() * 2.2,
+        end: [ax, ay],
+      });
     }
   },
 

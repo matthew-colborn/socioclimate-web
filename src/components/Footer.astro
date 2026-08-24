@@ -1,10 +1,31 @@
 ---
-import { SITE, MAILTO } from '../config/site';
+import Wordmark from './Wordmark.astro';
+import { SITE, MAILTO, NAV } from '../config/site';
 const year = 2026;
 ---
 <footer class="site-foot">
   <div class="wrap site-foot__inner">
+    <div>
+      <Wordmark size="md" />
+      <p class="site-foot__say">Most shops build you software. We build you an asset.</p>
+    </div>
+    <nav aria-label="Footer">
+      <h2 class="site-foot__h">Site</h2>
+      <ul>
+        <li><a href="/">Home</a></li>
+        {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+      </ul>
+    </nav>
+    <div>
+      <h2 class="site-foot__h">Start</h2>
+      <ul>
+        <li><a href="/contact">Run the diagnostic</a></li>
+        <li><a href={MAILTO}>{SITE.email}</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap site-foot__legal">
     <p>© {year} {SITE.legalName}. San Diego, California.</p>
-    <p><a href={MAILTO}>{SITE.email}</a></p>
+    <p>We build the operating layer, and stay involved in running it.</p>
   </div>
 </footer>

@@ -8,7 +8,7 @@
  * scattered dim points would say nothing.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, ease, CYAN, GLOW } from '../field/prims';
+import { dab, halo, halftone, ease, flameShape, resample, CYAN, GLOW } from '../field/prims';
 
 interface Node { x: number; y: number; r: number; a: number }
 
@@ -16,31 +16,23 @@ let A: Node[] = [];
 let B: Node[] = [];
 let cx = 0, cy = 0, R = 0;
 
-/** A ring lattice: concentric rings of evenly spaced points. */
-function build(rings: number, base: number, R: number, jitter: () => number): Node[] {
-  const out: Node[] = [];
-  for (let i = 1; i <= rings; i++) {
-    const rad = (i / rings) * R;
-    const count = base + i * 5;
-    for (let j = 0; j < count; j++) {
-      out.push({
-        x: 0,
-        y: 0,
-        r: rad * (0.96 + jitter() * 0.08),
-        a: (j / count) * Math.PI * 2,
-      });
-    }
-  }
-  return out;
-}
-
 export const lattice: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
     R = Math.min(c.w * 0.30, c.h * 0.40, 330);
-    A = build(3, 8, R, c.rng);
-    B = build(3, 8, R * 0.80, c.rng);
+    // Two copies of the flame contour rather than abstract rings: the
+    // partnership is two of the same thing meeting, not a shape invented for
+    // the occasion.
+    const outline = resample(flameShape(0, 0, R * 1.9), 34);
+    const toNodes = (scale: number): Node[] =>
+      outline.map(([x, y]) => ({
+        x: 0, y: 0,
+        r: Math.hypot(x, y) * scale,
+        a: Math.atan2(y, x),
+      }));
+    A = toNodes(1);
+    B = toNodes(0.82);
   },
 
   frame(c: SceneCtx, t: number, intro: number) {

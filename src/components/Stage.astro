@@ -4,40 +4,38 @@ import Readout from './Readout.astro';
 import { clientName, type ClientKey } from '../config/site';
 
 /**
- * The hero. Four scenes, one layout.
+ * The hero. Six scenes, one layout: statement, four pieces of proof, invitation.
  *
  * The layout never changes between scenes and that is the point — same
  * typography, same palette, same positions. Only the focal object, its motion
- * and the readouts differ, so it reads as one system breathing rather than four
- * different pages.
+ * and the readouts differ, so it reads as one system breathing.
  *
- * Composition is lifted from brand/references/ref-2: radial glow behind a
- * centred object, readouts floating around it with no connector lines, headline
- * bottom-left, supporting copy and a single CTA bottom-right, everything else
- * empty.
+ * Composition from brand/references/ref-2: radial glow behind a centred object,
+ * readouts floating around it with no connector lines, headline bottom-left,
+ * supporting copy and a single CTA bottom-right, everything else empty.
  */
 const entries = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
 const slides = entries.map((e) => ({
   ...e.data,
   display: clientName(e.data.clientKey as ClientKey, { cap: true }) ?? e.data.name,
 }));
-const positions = ['top', 'left', 'right'] as const;
+const n = slides.length;
 ---
 <section
   class="stage"
   data-carousel
   aria-roledescription="carousel"
-  aria-label="What we have built"
+  aria-label="What we do, what we have built, and how to work with us"
 >
   {slides.map((s, i) => (
     <article
-      class:list={['slide', i === 0 && 'is-on']}
+      class:list={['slide', `slide--${s.kind}`, i === 0 && 'is-on']}
       data-slide
       data-scene={s.scene}
       data-title={s.display}
       role="group"
       aria-roledescription="slide"
-      aria-label={`${i + 1} of ${slides.length}: ${s.display}`}
+      aria-label={`${i + 1} of ${n}: ${s.display}`}
       aria-hidden={i === 0 ? 'false' : 'true'}
     >
       <div class="slide__field">
@@ -57,13 +55,15 @@ const positions = ['top', 'left', 'right'] as const;
       </div>
 
       <div class="slide__readouts">
-        {s.readouts.slice(0, 3).map((r, k) => (
+        {s.readouts.map((r, k) => (
           <Readout
             label={r.label}
             value={r.value}
             note={r.note}
             pending={r.pending}
-            at={positions[k] ?? 'right'}
+            index={k}
+            total={s.readouts.length}
+            delay={420 + k * 130}
           />
         ))}
       </div>
@@ -78,8 +78,8 @@ const positions = ['top', 'left', 'right'] as const;
         </div>
         <div class="slide__right">
           <p class="slide__line">{s.line}</p>
-          <a class="cta" href="/portfolio">
-            See the work<span class="cta__arrow" aria-hidden="true">↗</span>
+          <a class="cta" href={s.ctaHref} data-cta>
+            {s.ctaLabel}<span class="cta__arrow" aria-hidden="true">↗</span>
           </a>
         </div>
       </div>
@@ -99,13 +99,14 @@ const positions = ['top', 'left', 'right'] as const;
             type="button"
             data-goto={i}
             aria-current={i === 0 ? 'true' : 'false'}
-            aria-label={`Show scene ${i + 1} of ${slides.length}: ${s.display}`}
+            aria-label={`Show scene ${i + 1} of ${n}: ${s.display}`}
           >
-            <span aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span aria-hidden="true">{String(i).padStart(2, '0')}</span>
           </button>
         </li>
       ))}
     </ul>
+    <span class="stage__count" aria-hidden="true"><b data-count>00</b> / {String(n - 1).padStart(2, '0')}</span>
   </div>
 
   <p class="visually-hidden" data-live aria-live="off" aria-atomic="true"></p>

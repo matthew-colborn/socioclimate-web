@@ -8,7 +8,7 @@
  * the finding.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, annotate, ease, noise1, CYAN, GLOW } from '../field/prims';
+import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GLOW } from '../field/prims';
 
 interface Bar { x: number; base: number; h: number; phase: number; locked: boolean }
 
@@ -21,17 +21,17 @@ export const ridge: Scene = {
     cy = c.h * 0.46;
     span = Math.min(c.w * 0.72, 760);
     const n = Math.max(48, Math.min(120, Math.round(span / 7)));
+    // The bar heights are the flame's own upper silhouette, column by column.
+    // The ridge is not noise shaped to look like the mark — it is the mark,
+    // read as a histogram.
+    const profile = flameProfile(n);
     bars = [];
     for (let i = 0; i < n; i++) {
       const u = i / (n - 1);
-      // Two octaves of value noise, tapered at both ends so it reads as a ridge
-      // rather than a bar chart that happens to be jagged.
-      const shape = Math.sin(u * Math.PI) ** 1.35;
-      const nz = noise1(u * 7, 11) * 0.62 + noise1(u * 19, 29) * 0.38;
       bars.push({
         x: cx - span / 2 + u * span,
         base: cy + span * 0.16,
-        h: shape * (0.30 + nz * 0.42) * span * 0.52,
+        h: profile[i] * span * 0.46,
         phase: c.rng() * Math.PI * 2,
         // A small minority hold their height exactly — the units that never move.
         locked: c.rng() < 0.14,

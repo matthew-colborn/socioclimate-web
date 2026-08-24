@@ -1,5 +1,6 @@
 ---
 import { FLAME_PATH, FLAME_SOLID_PATH, FLAME_VIEWBOX, FLAME_RATIO } from '../lib/flame';
+import { nextId } from '../lib/uid';
 
 /**
  * The mark: the flame from the stacked lockup, traced to vector. The contour
@@ -22,7 +23,11 @@ const {
   title = 'SocioClimate',
   class: klass = '',
 } = Astro.props;
-const uid = 'cf' + Math.random().toString(36).slice(2, 8);
+// A counter, not Math.random(). The id only has to be unique within a
+// document, and a random one made every build emit different HTML from
+// identical sources — which quietly invalidated any byte-for-byte comparison
+// between a rebuild and what is deployed.
+const uid = `cf${nextId()}`;
 // Below about 32px the circuit channels close up into noise, so the sealed
 // silhouette is the honest rendering of the mark at that scale.
 const d = size <= 32 ? FLAME_SOLID_PATH : FLAME_PATH;

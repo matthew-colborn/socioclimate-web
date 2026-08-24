@@ -20,7 +20,7 @@ export const lattice: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    R = Math.min(c.w * 0.30, c.h * 0.40, 330);
+    R = Math.min(c.w * 0.38, c.h * 0.40, 330);
     // Two copies of the flame contour rather than abstract rings: the
     // partnership is two of the same thing meeting, not a shape invented for
     // the occasion.

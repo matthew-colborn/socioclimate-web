@@ -32,7 +32,7 @@ export const traces_scene: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    const H = Math.min(c.h * 0.50, 420);
+    const H = Math.min(c.h * 0.68, c.w * 0.76, 420);
     // Bounded so the routed object stays a compact focal mass between the
     // readouts rather than a band running off both edges.
     trunkTop = cy - H / 2;

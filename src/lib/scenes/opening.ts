@@ -21,7 +21,7 @@ export const opening: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    H = Math.min(c.h * 0.56, c.w * 0.40, 440);
+    H = Math.min(c.h * 0.70, c.w * 0.76, 440);
     pts = flameShape(cx, cy, H);
   },
 

@@ -20,7 +20,7 @@ export const converge: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    R = Math.min(c.w * 0.46, c.h * 0.60, 470);
+    R = Math.min(c.w * 0.48, c.h * 0.60, 470);
     const n = Math.round(Math.min(2200, Math.max(900, (c.w * c.h) / 620)));
     ps = [];
     for (let i = 0; i < n; i++) {

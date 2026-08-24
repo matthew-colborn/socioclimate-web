@@ -169,14 +169,50 @@
 .stage__dots button[aria-current='true'] { color: var(--cyan); }
 .stage__dots button[aria-current='true'] span { border-bottom: 1px solid var(--cyan); }
 
+/* --- Narrow viewports ------------------------------------------------------
+   The floating composition does not survive a phone. Four readouts positioned
+   around a centred object in a 390x844 portrait viewport land on top of it, and
+   no amount of nudging fixes that — there is not enough room for text to orbit
+   anything. So on narrow screens the hero stops being a composition and becomes
+   a column: the object occupies a band at the top, the readouts sit under it in
+   normal flow, and the copy anchors the bottom. Nothing overlaps because
+   nothing is absolutely positioned any more. */
 @media (max-width: 52rem) {
+  .slide {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    /* Clears the field band below. */
+    padding-top: 44svh;
+    padding-bottom: 4.75rem;
+  }
+
+  .slide__field { inset: 0 0 auto 0; height: 44svh; }
+
+  .slide__readouts {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-3) var(--s-4);
+    padding-inline: var(--gutter);
+    margin-bottom: var(--s-5);
+  }
+
   .slide__copy {
+    position: static;
+    margin-top: auto;
     grid-template-columns: 1fr;
     gap: var(--s-4);
-    padding-bottom: clamp(4.5rem, 12vh, 6rem);
+    padding-bottom: 0;
   }
   .slide__right { justify-self: start; max-width: none; }
-  .slide__headline { font-size: clamp(2rem, 9vw, 2.8rem); max-width: 18ch; }
+  .slide__headline { font-size: clamp(1.9rem, 8.4vw, 2.7rem); max-width: 18ch; }
+  .slide--statement .slide__headline { font-size: clamp(1.75rem, 7.6vw, 2.4rem); max-width: none; }
+
+  .stage__controls { gap: var(--s-3); padding-bottom: var(--s-3); }
+  /* The dots already carry position on a phone, and the counter only wrapped
+     onto a second line and off the bottom of the viewport. */
+  .stage__count { display: none; }
 }
 
 /* --- Diagnostic ----------------------------------------------------------- */

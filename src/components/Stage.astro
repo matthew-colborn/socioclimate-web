@@ -71,7 +71,11 @@ const n = slides.length;
       <div class="slide__copy wrap">
         <div class="slide__left">
           <p class="slide__meta">
-            <span class="slide__stage">{s.stage}</span>
+            <span class="slide__stage">
+              {/* Work entries are labelled by section, not by stage. The honest
+                  stage label still appears on /portfolio, where it is useful. */}
+              {s.kind === 'work' ? 'Portfolio' : s.stage}
+            </span>
             <span class="slide__name">{s.display}</span>
           </p>
           <h2 class="slide__headline">{s.headline}</h2>

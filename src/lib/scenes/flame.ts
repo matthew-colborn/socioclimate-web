@@ -19,7 +19,7 @@ export const flame: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.44;
-    H = Math.min(c.h * 0.58, c.w * 0.42, 460);
+    H = Math.min(c.h * 0.72, c.w * 0.78, 460);
     pts = flameShape(cx, cy, H);
     sparks = [];
     const anchors = resample(pts, 42);

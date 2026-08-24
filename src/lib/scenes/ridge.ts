@@ -19,7 +19,7 @@ export const ridge: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
     cy = c.h * 0.46;
-    span = Math.min(c.w * 0.72, 760);
+    span = Math.min(c.w * 0.86, c.h * 1.9, 760);
     const n = Math.max(48, Math.min(120, Math.round(span / 7)));
     // The bar heights are the flame's own upper silhouette, column by column.
     // The ridge is not noise shaped to look like the mark — it is the mark,

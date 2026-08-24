@@ -110,17 +110,33 @@ const at = (LAYOUTS[total] ?? LAYOUTS[3])[index] ?? 'right';
     padding: 0.5em 0.7em;
   }
 
-  @media (max-width: 60rem) {
-    .ro { max-width: 12ch; }
-    .ro--top { top: 6%; }
-    .ro--left, .ro--right { top: 26%; }
-    .ro--left-up, .ro--right-up { top: 12%; }
-    .ro--left-down, .ro--right-down { top: 34%; }
-    .ro--left, .ro--left-up, .ro--left-down { left: var(--gutter); }
-    .ro--right, .ro--right-up, .ro--right-down { right: var(--gutter); }
-    .ro__value { font-size: 0.9rem; }
-    .ro__label { font-size: 0.6rem; }
+  /* On a phone the readouts are laid out in flow by the stage, so every
+     absolute position, offset and centring transform has to be undone here —
+     otherwise they keep floating and land on the object. */
+  @media (max-width: 52rem) {
+    .ro,
+    .ro--top,
+    .ro--left, .ro--right,
+    .ro--left-up, .ro--left-down,
+    .ro--right-up, .ro--right-down {
+      position: static;
+      left: auto;
+      right: auto;
+      top: auto;
+      max-width: none;
+      text-align: left;
+      align-items: flex-start;
+      transform: translateY(8px);
+      animation-name: ro-in;
+    }
+    .ro__value { font-size: 0.92rem; line-height: 1.25; }
+    .ro__label { font-size: 0.6rem; letter-spacing: 0.1em; }
     .ro__note { display: none; }
+    .ro--pending { padding: 0.4em 0.6em; }
+  }
+
+  @media (max-width: 52rem) and (prefers-reduced-motion: reduce) {
+    .ro, .ro--top { transform: none; }
   }
 
   /* No entrance at all when motion is not wanted. */

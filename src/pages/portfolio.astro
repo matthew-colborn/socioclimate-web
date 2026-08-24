@@ -24,10 +24,23 @@ const rendered = await Promise.all(
   <header class="ph wrap">
     <h1>{d.heading}</h1>
     <p class="ph__lede">{d.standfirst}</p>
-    <div class="ph__intro"><Intro /></div>
   </header>
 
+  <section class="moat wrap" aria-labelledby="moat-h">
+    <p class="eyebrow" id="moat-h">The thesis</p>
+    <div class="moat__body"><Intro /></div>
+  </section>
+
   <div class="wrap">
+    <header class="work-head">
+      <p class="eyebrow">The work</p>
+      <p class="work-head__p">
+        Stage labels are accurate rather than flattering. One is live, one is in
+        staging, one is being built, and one is an operating partnership. Where a
+        real number exists it is on the page; where it does not, the space is
+        left out rather than filled.
+      </p>
+    </header>
     {rendered.map((e) => (
       <article class="entry" id={e.id}>
         <p class="entry__meta">
@@ -70,7 +83,32 @@ const rendered = await Promise.all(
   .ph { padding-bottom: var(--s-6); }
   .ph h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); max-width: 18ch; }
   .ph__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 52ch; }
-  .ph__intro { color: var(--paper-dim); max-width: 60ch; margin-top: var(--s-4); font-size: 0.95rem; }
+  /* The thesis section. Prose typography lives here rather than in base.css:
+     it is the only long-form reading surface left on the site. */
+  .moat { padding-bottom: var(--s-7); }
+  .moat__body { max-width: 64ch; color: var(--paper-dim); }
+  .moat__body :global(h2) {
+    font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+    font-weight: 300;
+    color: var(--paper);
+    margin: var(--s-6) 0 var(--s-3);
+    padding-top: var(--s-4);
+    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 45%, transparent);
+    max-width: 26ch;
+  }
+  .moat__body :global(h2:first-child) { margin-top: 0; padding-top: 0; border-top: 0; }
+  .moat__body :global(p) { margin-bottom: var(--s-3); }
+  .moat__body :global(strong) { color: var(--paper); font-weight: 500; }
+  .moat__body :global(ol) { padding-left: 1.3em; margin: 0 0 var(--s-3); }
+  .moat__body :global(li) { margin-bottom: var(--s-3); }
+  .moat__body :global(li::marker) { color: var(--cyan); font-family: var(--font-mono); font-size: 0.85em; }
+
+  .work-head {
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+    padding-top: var(--s-5);
+    margin-bottom: var(--s-6);
+  }
+  .work-head__p { color: var(--paper-dim); max-width: 60ch; font-size: 0.95rem; margin: 0; }
 
   .entry {
     border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);

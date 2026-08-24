@@ -39,6 +39,7 @@ const rendered = await Promise.all(
           <div><dt>What we built</dt><dd>{e.data.built}</dd></div>
         </dl>
 
+        {e.data.readouts.length > 0 && (
         <ul class="entry__readouts">
           {e.data.readouts.map((r) => (
             <li class:list={['ero', r.pending && 'ero--pending']}>
@@ -48,6 +49,7 @@ const rendered = await Promise.all(
             </li>
           ))}
         </ul>
+        )}
 
         <div class="entry__body"><e.Body /></div>
       </article>

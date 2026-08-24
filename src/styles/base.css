@@ -1,12 +1,10 @@
-/* Base layer: reset, typography, layout primitives, motion.
-   Component styles live inside their own .astro files. */
+/* Base layer. The prose system that served the research site is gone; what is
+   left is the minimum a showcase needs, plus the shared button and layout
+   primitives. Tokens are unchanged — see tokens.css. */
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-}
+html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
@@ -14,58 +12,41 @@ body {
   color: var(--paper);
   font-family: var(--font-body);
   font-size: var(--step-0);
-  line-height: var(--leading-prose);
+  line-height: 1.6;
   font-synthesis-weight: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3 {
   font-family: var(--font-display);
-  line-height: var(--leading-tight);
-  letter-spacing: -0.018em;
-  font-weight: 600;
+  line-height: 1.08;
   margin: 0;
   text-wrap: balance;
+  /* The reference headlines are large and thin. Weight is the whole character
+     of this typography — do not let it drift heavier. */
+  font-weight: 300;
+  letter-spacing: -0.02em;
 }
 
-h1 { font-size: var(--step-4); }
-h2 { font-size: var(--step-3); }
-h3 { font-size: var(--step-1); letter-spacing: -0.01em; }
-h4 { font-size: var(--step-0); letter-spacing: 0; }
-
-p, ul, ol, blockquote, figure, table { margin: 0 0 var(--s-4); }
-p { text-wrap: pretty; }
-ul, ol { padding-left: 1.25em; }
-li { margin-bottom: var(--s-2); }
-li::marker { color: var(--paper-dim); }
-strong { font-weight: 620; color: var(--paper); }
+p { margin: 0 0 var(--s-3); text-wrap: pretty; }
 
 a {
   color: var(--cyan);
   text-decoration-color: color-mix(in srgb, var(--cyan) 45%, transparent);
   text-underline-offset: 0.22em;
-  text-decoration-thickness: 1px;
-  transition: color 160ms var(--ease), text-decoration-color 160ms var(--ease);
+  transition: color 160ms var(--ease);
 }
-a:hover { color: var(--cyan-bright); text-decoration-color: var(--cyan-bright); }
+a:hover { color: var(--cyan-bright); }
 
 :focus-visible {
   outline: 2px solid var(--cyan-bright);
   outline-offset: 3px;
-  border-radius: var(--radius);
+  border-radius: 2px;
 }
 
-img, svg { max-width: 100%; height: auto; display: block; }
-
-hr {
-  border: 0;
-  border-top: var(--rule-faint);
-  margin: var(--s-6) 0;
-}
-
-/* --- Layout primitives ---------------------------------------------------- */
+img, canvas, svg { display: block; max-width: 100%; }
 
 .wrap {
   width: 100%;
@@ -74,142 +55,26 @@ hr {
   padding-inline: var(--gutter);
 }
 
-.measure { max-width: var(--measure); }
+.measure { max-width: 62ch; }
+.dim { color: var(--paper-dim); }
 
-.section {
-  padding-block: clamp(var(--s-6), 9vw, var(--s-8));
-  border-top: var(--rule-faint);
-}
-.section--recede { background: var(--ink-deep); }
-.section--black { background: var(--ink-black); }
-.section--flush { border-top: 0; }
-
-/* The small uppercase label that opens each section. Mono, not display: it is
-   a coordinate, not a heading. */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--paper-dim);
   margin: 0 0 var(--s-3);
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-}
-.eyebrow::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--teal-deep), transparent);
 }
 
-.lede {
-  font-size: var(--step-1);
-  color: var(--paper-dim);
-  max-width: var(--measure);
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-
-.dim { color: var(--paper-dim); }
-
-/* --- Prose ---------------------------------------------------------------- */
-
-.prose { max-width: var(--measure); }
-/* Pages that lay out in columns cap each text block at the measure instead of
-   capping the whole body, so the columns get the full container width. */
-.prose--full { max-width: none; }
-.prose--full > p,
-.prose--full > ul,
-.prose--full > ol,
-.prose--full > h2,
-.prose--full > h3,
-.prose--full > blockquote { max-width: var(--measure); }
-.prose > * + * { margin-top: var(--s-4); }
-.prose h2 {
-  font-size: var(--step-2);
-  margin-top: var(--s-7);
-  padding-top: var(--s-4);
-  border-top: var(--rule-faint);
-}
-.prose h3 { margin-top: var(--s-5); }
-.prose h2 + p, .prose h3 + p { margin-top: var(--s-3); }
-.prose figure { max-width: none; }
-.prose blockquote {
-  margin-inline: 0;
-  padding-left: var(--s-4);
-  border-left: 2px solid var(--teal-deep);
-  color: var(--paper-dim);
-}
-/* A <Cite> on its own line is a source line for the paragraph above it, so it
-   sits close to that paragraph and leaves a full gap before the next one. */
-.prose > cite {
-  display: block;
-  margin-top: var(--s-2);
-}
-.prose > cite + * { margin-top: var(--s-5); }
-
-.prose code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  color: var(--paper-dim);
-}
-
-/* --- Buttons -------------------------------------------------------------- */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: 0.72em 1.35em;
-  font-family: var(--font-display);
-  font-size: var(--step-0);
-  font-weight: 500;
-  letter-spacing: -0.005em;
-  text-decoration: none;
-  border: 1px solid var(--teal-deep);
-  border-radius: var(--radius);
-  color: var(--paper);
-  background: transparent;
-  transition: border-color 180ms var(--ease), background 180ms var(--ease),
-    color 180ms var(--ease);
-}
-.btn:hover {
-  color: var(--paper);
-  border-color: var(--cyan);
-  background: color-mix(in srgb, var(--cyan) 9%, transparent);
-}
-/* No glowing buttons. The two doors carry equal weight, so there is no
-   primary/secondary pair here — only a fill difference to separate them. */
-.btn--solid {
-  background: color-mix(in srgb, var(--cyan) 12%, transparent);
-  border-color: color-mix(in srgb, var(--cyan) 60%, transparent);
-}
-.btn--solid:hover { background: color-mix(in srgb, var(--cyan) 20%, transparent); }
-
-.btn__arrow { color: var(--cyan); transition: transform 180ms var(--ease); }
-.btn:hover .btn__arrow { transform: translateX(3px); }
-
-/* --- Motion: one reveal per section, nothing more ------------------------- */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 260ms var(--ease), transform 260ms var(--ease);
-  will-change: opacity, transform;
-}
-.reveal.is-in { opacity: 1; transform: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
-  *, *::before, *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* --- Skip link ------------------------------------------------------------ */
 
 .skip {
   position: absolute;
@@ -219,16 +84,81 @@ hr {
   background: var(--ink-deep);
   border: 1px solid var(--cyan);
   padding: 0.6em 1em;
-  border-radius: var(--radius);
+  border-radius: 2px;
   text-decoration: none;
 }
 .skip:focus { top: var(--s-3); }
 
-.visually-hidden {
+/* --- The one accent control ---------------------------------------------- */
+/* Exactly one call-to-action per view. If a second one appears, one of them is
+   wrong. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  padding: 0.78em 1.5em;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 450;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--cyan);
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  transition: background 180ms var(--ease), border-color 180ms var(--ease);
+}
+.cta:hover { color: var(--ink); background: var(--cyan-bright); border-color: var(--cyan-bright); }
+.cta__arrow { transition: transform 180ms var(--ease); }
+.cta:hover .cta__arrow { transform: translate(2px, -2px); }
+.cta--solid { border-radius: 2px; }
+
+/* --- Page furniture ------------------------------------------------------- */
+
+.site-head {
   position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  padding-block: var(--s-4);
+}
+.site-head__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+.site-head__brand { display: inline-flex; align-items: center; gap: 0.55rem; text-decoration: none; }
+.site-head__nav { display: flex; gap: clamp(1rem, 2.5vw, 2rem); }
+.site-head__nav a {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--paper-dim);
+  text-decoration: none;
+}
+.site-head__nav a:hover,
+.site-head__nav a[aria-current='page'] { color: var(--paper); }
+
+.site-foot {
+  border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+  padding-block: var(--s-5);
+  background: var(--ink);
+}
+.site-foot__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.site-foot p { margin: 0; font-size: 0.8rem; color: var(--paper-dim); }
+.site-foot a { font-size: 0.8rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

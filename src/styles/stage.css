@@ -1,0 +1,234 @@
+/* The hero stage, and the diagnostic that reuses its vocabulary.
+
+   Layout, from brand/references/ref-2: the focal object holds the centre, the
+   readouts float around it, the headline anchors bottom-left and the supporting
+   copy plus the single CTA sit bottom-right. The entire middle band stays
+   empty. That emptiness is doing work — nothing decorative is allowed to
+   compete with the focal object. */
+
+.stage {
+  position: relative;
+  /* svh so mobile browser chrome does not crop the composition. */
+  min-height: 100svh;
+  display: grid;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 80% at 50% 34%,
+      color-mix(in srgb, var(--teal-deep) 26%, transparent) 0%,
+      transparent 62%),
+    linear-gradient(180deg, var(--ink-deep) 0%, var(--ink) 55%, var(--ink-black) 100%);
+}
+
+.slide {
+  grid-area: 1 / 1;
+  position: relative;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 900ms var(--ease), visibility 0s linear 900ms;
+}
+.slide.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 900ms var(--ease), visibility 0s;
+}
+
+.slide__field { position: absolute; inset: 0; z-index: -1; }
+.slide__poster,
+.slide__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The poster carries first paint and hands over once the canvas has a frame. */
+.slide__poster { transition: opacity 600ms var(--ease); }
+.slide__poster.is-faded { opacity: 0; }
+.slide__canvas { opacity: 1; }
+
+.slide__readouts { position: absolute; inset: 0; }
+
+.slide__copy {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding-bottom: clamp(5rem, 9vh, 7rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  align-items: end;
+  gap: var(--s-5);
+}
+
+.slide__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.slide__stage {
+  color: var(--cyan);
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 999px;
+  padding: 0.2em 0.7em;
+}
+.slide__name { color: var(--paper-dim); }
+
+.slide__headline {
+  font-size: clamp(2.4rem, 6.4vw, 5rem);
+  max-width: 15ch;
+  color: var(--paper);
+}
+
+.slide__right { justify-self: end; max-width: 34ch; }
+.slide__line {
+  color: var(--paper-dim);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: var(--s-4);
+}
+
+/* --- Controls -------------------------------------------------------------
+   Always visible, never a hover-only affordance, and ordinary buttons in flow
+   so keyboard focus is never trapped inside the carousel. */
+.stage__controls {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding-bottom: var(--s-4);
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  z-index: 3;
+}
+.ctl,
+.stage__dots button {
+  background: transparent;
+  border: 0;
+  color: var(--paper-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.4em 0.2em;
+}
+.ctl { display: inline-flex; align-items: center; gap: 0.5em; }
+.ctl:hover, .stage__dots button:hover { color: var(--paper); }
+.ctl__glyph {
+  width: 8px; height: 9px;
+  border-left: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+.ctl[aria-pressed='true'] .ctl__glyph {
+  border: 0;
+  border-left: 7px solid currentColor;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  width: 0;
+}
+
+.stage__dots { display: flex; gap: var(--s-3); list-style: none; margin: 0; padding: 0; }
+.stage__dots button[aria-current='true'] { color: var(--cyan); }
+.stage__dots button[aria-current='true'] span { border-bottom: 1px solid var(--cyan); }
+
+@media (max-width: 52rem) {
+  .slide__copy {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+    padding-bottom: clamp(4.5rem, 12vh, 6rem);
+  }
+  .slide__right { justify-self: start; max-width: none; }
+  .slide__headline { font-size: clamp(2rem, 9vw, 2.8rem); max-width: 18ch; }
+}
+
+/* --- Diagnostic ----------------------------------------------------------- */
+
+.diag { position: relative; padding-block: var(--s-7) var(--s-8); isolation: isolate; }
+/* Sticky, not absolute. The section is thousands of pixels tall, so an
+   absolutely positioned field centres itself far below the fold and is never
+   seen. Sticking it to the viewport — with a negative margin so it occupies no
+   layout space — keeps the field behind the questions the whole way down,
+   which is the point: it has to be visibly responding while you answer. */
+.diag__field {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  z-index: -1;
+  pointer-events: none;
+}
+.diag__field canvas { width: 100%; height: 100%; }
+.diag__inner { position: relative; }
+
+.diag__list { list-style: none; margin: 0 0 var(--s-6); padding: 0; max-width: 46rem; }
+.q { border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 45%, transparent); padding: var(--s-4) 0; }
+.q fieldset { border: 0; margin: 0; padding: 0; }
+.q__legend { display: flex; gap: 0.9rem; align-items: baseline; padding: 0; }
+.q__n {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+.q__text { font-family: var(--font-display); font-size: var(--step-1); font-weight: 350; line-height: 1.25; }
+.q__help { color: var(--paper-dim); font-size: 0.88rem; margin: var(--s-2) 0 var(--s-3) 2.2rem; max-width: 54ch; }
+.q__opts { display: flex; gap: var(--s-2); margin-left: 2.2rem; flex-wrap: wrap; }
+
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.opt span {
+  display: inline-block;
+  padding: 0.45em 1.1em;
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 70%, transparent);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+  transition: color 160ms var(--ease), border-color 160ms var(--ease), background 160ms var(--ease);
+}
+.opt input:hover + span { color: var(--paper); }
+.opt input:focus-visible + span { outline: 2px solid var(--cyan-bright); outline-offset: 2px; }
+.opt input:checked + span {
+  color: var(--ink);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.diag__result {
+  border-left: 2px solid var(--cyan);
+  padding: var(--s-4) 0 var(--s-4) var(--s-4);
+  margin-bottom: var(--s-7);
+  max-width: 52rem;
+}
+.diag__score { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; color: var(--cyan); margin-bottom: var(--s-2); }
+.diag__verdict { font-size: var(--step-2); margin-bottom: var(--s-3); }
+.diag__reason { color: var(--paper-dim); max-width: 60ch; margin: 0; }
+
+.diag__send { max-width: 34rem; }
+.diag__sendh { font-size: var(--step-1); margin-bottom: var(--s-2); }
+.diag__sendp { color: var(--paper-dim); font-size: 0.9rem; margin-bottom: var(--s-4); }
+.fld { display: block; margin-bottom: var(--s-3); }
+.fld span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  margin-bottom: 0.4em;
+}
+.fld input, .fld textarea {
+  width: 100%;
+  background: color-mix(in srgb, var(--cyan) 3%, var(--ink-deep));
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 60%, transparent);
+  border-radius: 2px;
+  color: var(--paper);
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.65em 0.8em;
+}
+.fld input:focus-visible, .fld textarea:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 1px; }
+.diag__status { font-family: var(--font-mono); font-size: 0.78rem; color: var(--paper-dim); margin: var(--s-3) 0 0; min-height: 1.2em; }
+.diag__alt { font-size: 0.82rem; color: var(--paper-dim); margin-top: var(--s-2); }

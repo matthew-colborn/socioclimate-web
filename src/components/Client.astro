@@ -1,0 +1,13 @@
+---
+/**
+ * Renders a client's name, or the anonymised label until permission is given.
+ * Used inside MDX bodies so no prose ever hardcodes a name we are not yet
+ * allowed to publish — flipping `usePublicName` in src/config/site.ts is the
+ * only change required.
+ */
+import { clientName, type ClientKey } from '../config/site';
+interface Props { key?: ClientKey; cap?: boolean }
+const { key = 'branshe', cap = false } = Astro.props;
+const name = clientName(key, { cap });
+---
+<span>{name}</span>

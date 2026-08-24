@@ -29,22 +29,24 @@ const ratio = (a, b) => {
 //       'deco'  — purely decorative, no requirement (still reported)
 const PAIRS = [
   ['--paper', '--ink', 'body', 'Body text on the page background'],
-  ['--paper', '--ink-deep', 'body', 'Body text in a receded section'],
+  ['--paper', '--ink-deep', 'body', 'Body text on the receded field'],
   ['--paper', '--ink-black', 'body', 'Body text on the black field'],
-  ['--paper-dim', '--ink', 'body', 'Secondary text on the page background'],
-  ['--paper-dim', '--ink-deep', 'body', 'Secondary text in a receded section'],
+  ['--paper-dim', '--ink', 'body', 'Secondary text, hero supporting copy'],
+  ['--paper-dim', '--ink-deep', 'body', 'Readout labels and notes'],
   ['--paper-dim', '--ink-black', 'body', 'Secondary text on the black field'],
-  ['--cyan', '--ink', 'body', 'Links on the page background'],
-  ['--cyan', '--ink-deep', 'body', 'Links in a receded section'],
-  ['--cyan', '--ink-black', 'body', 'Links and key chart values on black'],
-  ['--cyan-bright', '--ink', 'ui', 'Focus ring on the page background'],
-  ['--cyan-bright', '--ink-black', 'ui', 'Chart gap annotations on black'],
-  ['--cyan-glow', '--ink-black', 'ui', 'Brightest mark and gradient stop'],
-  ['--paper-dim', '--ink-black', 'ui', 'Secondary chart series on black'],
-  ['--cyan', '--ink-black', 'ui', 'Key chart series on black'],
-  ['--teal-deep', '--ink', 'deco', 'Rules, borders, card top edges'],
-  ['--teal-deep', '--ink-black', 'deco', 'Chart axis line'],
-  ['--teal-shadow', '--ink-black', 'deco', 'Chart gridlines'],
+  ['--cyan', '--ink', 'body', 'Links, stage labels, question numbers'],
+  ['--cyan', '--ink-deep', 'body', 'Links on the receded field'],
+  ['--cyan', '--ink-black', 'body', 'Links on the black field'],
+  // The one accent control: dark text on a filled cyan pill.
+  ['--ink', '--cyan', 'body', 'CTA label and checked answer, on cyan'],
+  ['--ink', '--cyan-bright', 'body', 'CTA label on hover'],
+  ['--cyan-bright', '--ink', 'ui', 'Focus ring'],
+  ['--cyan-bright', '--ink-black', 'ui', 'Focus ring on the black field'],
+  ['--cyan-glow', '--ink-black', 'ui', 'Brightest points in the generative field'],
+  ['--cyan', '--ink-black', 'ui', 'Generative field marks on black'],
+  ['--teal-deep', '--ink', 'deco', 'Rules, borders, input outlines'],
+  ['--teal-deep', '--ink-black', 'deco', 'Routed trace lines'],
+  ['--teal-shadow', '--ink-black', 'deco', 'Section dividers'],
 ];
 
 const NEED = { body: 4.5, large: 3, ui: 3, deco: 0 };

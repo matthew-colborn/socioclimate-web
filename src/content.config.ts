@@ -1,8 +1,43 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// Every word of prose on this site lives in src/content/ as MDX. Components
-// read these collections; editing copy never means opening a .astro file.
+/**
+ * One collection carries both registers. Frontmatter is the cinematic hero
+ * copy; the MDX body is the precise portfolio copy. Same file, so the two never
+ * drift apart, and the difference in voice stays deliberate.
+ */
+const portfolio = defineCollection({
+  loader: glob({ base: './src/content/portfolio', pattern: '**/*.mdx' }),
+  schema: z.object({
+    order: z.number(),
+    /** Public name. For a client who has not agreed, the anonymised label. */
+    name: z.string(),
+    /** Resolves through src/config/site.ts CLIENTS when the real name is gated. */
+    clientKey: z.enum(['none', 'branshe']).default('none'),
+    scene: z.enum(['ridge', 'traces', 'converge', 'lattice']),
+    stage: z.string(),
+    /** Hero, bottom-left. Short, evocative, no citations. */
+    headline: z.string(),
+    /** Hero, bottom-right. Two lines at most. */
+    line: z.string(),
+    /** Portfolio page, precise register. */
+    what: z.string(),
+    who: z.string(),
+    built: z.string(),
+    readouts: z
+      .array(
+        z.object({
+          label: z.string(),
+          value: z.string(),
+          note: z.string().optional(),
+          /** True until a real figure replaces it. Renders unmistakably unfilled. */
+          pending: z.boolean().default(false),
+        })
+      )
+      .max(4),
+    href: z.string().optional(),
+  }),
+});
 
 const pages = defineCollection({
   loader: glob({ base: './src/content/pages', pattern: '**/*.mdx' }),
@@ -11,58 +46,24 @@ const pages = defineCollection({
     description: z.string(),
     heading: z.string(),
     standfirst: z.string(),
-    /** Rendered as the closing door panel. Which of the two doors this page ends
-     *  on. 'none' is for /partner, whose body already is both doors. */
-    door: z.enum(['partner', 'acquire', 'both', 'none']).default('both'),
-    /** 'wide' drops the 68ch cap on the page body and applies it per block
-     *  instead, for pages that lay content out in columns. Not called `layout`:
-     *  Astro's MDX integration treats that frontmatter key as a component
-     *  import and the build fails trying to resolve it. */
-    width: z.enum(['measure', 'wide']).default('measure'),
   }),
 });
 
-const home = defineCollection({
-  loader: glob({ base: './src/content', pattern: 'home.mdx' }),
+const diagnostic = defineCollection({
+  loader: glob({ base: './src/content', pattern: 'diagnostic.mdx' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    tagline: z.string(),
-    subline: z.string(),
-    moat: z.array(
+    heading: z.string(),
+    standfirst: z.string(),
+    questions: z.array(
       z.object({
-        n: z.string(),
-        name: z.string(),
-        body: z.string(),
-        icon: z.enum(['normalize', 'series', 'tedious']),
+        key: z.string(),
+        text: z.string(),
+        help: z.string(),
       })
     ),
   }),
 });
 
-const portfolio = defineCollection({
-  loader: glob({ base: './src/content/portfolio', pattern: '**/*.mdx' }),
-  schema: z.object({
-    name: z.string(),
-    order: z.number(),
-    /** Honest stage label. Nothing here is shipped to a customer. */
-    stage: z.string(),
-    where: z.string(),
-    summary: z.string(),
-  }),
-});
-
-
-
-const doors = defineCollection({
-  loader: glob({ base: './src/content/doors', pattern: '**/*.mdx' }),
-  schema: z.object({
-    key: z.enum(['partner', 'acquire']),
-    order: z.number(),
-    kicker: z.string(),
-    title: z.string(),
-    cta: z.string(),
-  }),
-});
-
-export const collections = { pages, home, portfolio, doors };
+export const collections = { portfolio, pages, diagnostic };

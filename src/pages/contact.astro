@@ -1,0 +1,22 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Diagnostic from '../components/Diagnostic.astro';
+import '../styles/stage.css';
+
+const d = (await getEntry('pages', 'contact'))!.data;
+---
+<BaseLayout title={d.title} description={d.description}>
+  <header class="ch wrap">
+    <p class="eyebrow">Data moat diagnostic</p>
+    <h1>{d.heading}</h1>
+    <p class="ch__lede">{d.standfirst}</p>
+  </header>
+  <Diagnostic />
+</BaseLayout>
+
+<style>
+  .ch { padding-bottom: var(--s-5); }
+  .ch h1 { font-size: clamp(2.2rem, 6vw, 4rem); max-width: 14ch; }
+  .ch__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 48ch; }
+</style>

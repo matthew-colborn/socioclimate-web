@@ -1,0 +1,84 @@
+---
+/**
+ * One floating labelled value, the pattern from brand/references/ref-2: small
+ * dim label above, larger white value below, no connector line.
+ *
+ * This is real DOM text on purpose. It is the substance under the atmosphere,
+ * so it has to be selectable, translatable and readable by a screen reader —
+ * never painted into the canvas.
+ */
+interface Props {
+  label: string;
+  value: string;
+  note?: string;
+  pending?: boolean;
+  /** Placement around the focal object. */
+  at: 'top' | 'left' | 'right';
+}
+const { label, value, note, pending = false, at } = Astro.props;
+---
+<div class:list={['ro', `ro--${at}`, pending && 'ro--pending']}>
+  <span class="ro__label">{label}</span>
+  <span class="ro__value">{value}</span>
+  {note && <span class="ro__note">{note}</span>}
+</div>
+
+<style>
+  .ro {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28em;
+    max-width: 15ch;
+    pointer-events: none;
+  }
+  .ro--top { left: 50%; transform: translateX(-50%); top: 12%; text-align: center; align-items: center; }
+  .ro--left { left: max(var(--gutter), 12%); top: 31%; text-align: right; align-items: flex-end; }
+  .ro--right { right: max(var(--gutter), 12%); top: 31%; text-align: left; align-items: flex-start; }
+
+  .ro__label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+  .ro__value {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+    font-weight: 450;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    line-height: 1.15;
+  }
+  .ro__note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--paper-dim);
+    opacity: 0.75;
+    line-height: 1.3;
+  }
+
+  /* An unfilled readout must be impossible to mistake for a real figure. */
+  .ro--pending .ro__label,
+  .ro--pending .ro__value,
+  .ro--pending .ro__note { color: var(--paper-dim); }
+  .ro--pending .ro__value {
+    letter-spacing: 0.18em;
+    opacity: 0.55;
+  }
+  .ro--pending {
+    border: 1px dashed color-mix(in srgb, var(--paper-dim) 35%, transparent);
+    border-radius: 2px;
+    padding: 0.5em 0.7em;
+  }
+
+  @media (max-width: 52rem) {
+    .ro { max-width: 11ch; }
+    .ro--top { top: 7%; }
+    .ro--left { left: var(--gutter); top: 24%; }
+    .ro--right { right: var(--gutter); top: 24%; }
+    .ro__value { font-size: 0.95rem; }
+    .ro__label, .ro__note { font-size: 0.62rem; }
+  }
+</style>

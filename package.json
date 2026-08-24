@@ -10,7 +10,6 @@
     "preview": "astro preview",
     "check": "astro check",
     "fonts": "node scripts/copy-fonts.mjs",
-    "og": "node scripts/make-og.mjs",
     "contrast": "node scripts/contrast.mjs",
     "links": "node scripts/linkcheck.mjs",
     "deploy:staging": "astro build && firebase deploy --only hosting -P staging",
@@ -21,8 +20,9 @@
     "budget": "node scripts/budget.mjs",
     "csp": "node scripts/csp-check.mjs",
     "verify": "npm run check && npm run build && npm run contrast && npm run links && npm run csp",
-    "video": "node scripts/make-video.mjs",
-    "video:check": "node scripts/video-check.mjs"
+    "og": "node scripts/make-og.mjs",
+    "posters": "node scripts/posters.mjs",
+    "scenes": "node scripts/scene-check.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.0",

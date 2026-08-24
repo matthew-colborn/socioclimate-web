@@ -1,7 +1,7 @@
 // Walks dist/ and checks three things:
 //   1. every internal link resolves to a file that was actually built
 //   2. every external link is a syntactically real, absolute https URL
-//   3. every <cite> carries a source and an as-of date
+//   3. no unfilled placeholder ever became a link target
 // Run after `npm run build`.
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
@@ -42,7 +42,7 @@ const note = (kind, page, detail) => {
   console.log(`  ${kind.padEnd(9)} ${rel(page).padEnd(24)} ${detail}`);
 };
 
-let internal = 0, external = 0, mail = 0, cites = 0;
+let internal = 0, external = 0, mail = 0;
 
 console.log('LINKS AND CITATIONS');
 console.log('-'.repeat(90));
@@ -73,15 +73,6 @@ for (const page of pages) {
     if (!resolves(href)) note('404', page, href);
   }
 
-  for (const m of html.matchAll(/<cite[^>]*>([\s\S]*?)<\/cite>/g)) {
-    cites++;
-    const text = m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
-    const hasDate = /\b(19|20)\d{2}\b/.test(text);
-    const hasSource = text.replace(/[^A-Za-z]/g, '').length > 3;
-    if (!hasDate) note('NO DATE', page, text.slice(0, 60));
-    if (!hasSource) note('NO SOURCE', page, text.slice(0, 60));
-  }
-
   // A placeholder must never have been rendered as a link target.
   for (const m of html.matchAll(/(?:href|src)="([^"]*MATTHEW TO FILL[^"]*)"/g)) {
     note('TO FILL', page, m[1]);
@@ -92,7 +83,7 @@ if (!problems) console.log('  no problems found');
 console.log('-'.repeat(90));
 console.log(
   `${pages.length} pages · ${internal} internal links · ${external} external links · ` +
-  `${mail} mailto links · ${cites} citations`
+  `${mail} mailto links`
 );
 console.log(problems === 0 ? 'PASS' : `${problems} problem(s)`);
 process.exit(problems === 0 ? 0 : 1);

@@ -38,19 +38,14 @@ if (!existsSync(dist)) {
   process.exit(1);
 }
 
-const token = execFileSync('gcloud', ['auth', 'application-default', 'print-access-token'], {
-  encoding: 'utf8',
-  shell: true,
-}).trim();
-
 const API = 'https://firebasehosting.googleapis.com/v1beta1';
-const H = {
-  Authorization: `Bearer ${token}`,
-  'x-goog-user-project': project,
-  'Content-Type': 'application/json',
-};
 
 const call = async (url, init = {}) => {
+  const H = {
+    Authorization: `Bearer ${token}`,
+    'x-goog-user-project': project,
+    'Content-Type': 'application/json',
+  };
   const res = await fetch(url, { ...init, headers: { ...H, ...(init.headers || {}) } });
   const text = await res.text();
   if (!res.ok) {
@@ -111,11 +106,46 @@ if (config.rewrites?.length) {
   process.exit(1);
 }
 
+// --- production gate -------------------------------------------------------
+// Unfilled readouts are deliberately loud on staging, and must never reach the
+// public site. The failure mode this exists for is a hurried deploy weeks from
+// now, when nobody remembers the placeholders are still in there — so the check
+// lives here rather than in anyone's memory.
+//
+// To lift it: replace the pending readouts in src/content/portfolio/*.mdx with
+// real figures, or delete those slots. Do not add a bypass flag.
+if (/-prod$/.test(project)) {
+  const offenders = walk(dist)
+    .filter((abs) => abs.endsWith('.html'))
+    .map((abs) => ({
+      path: '/' + abs.slice(dist.length + 1).replace(/\\/g, '/'),
+      n: (readFileSync(abs, 'utf8').match(/FIGURE PENDING/g) || []).length,
+    }))
+    .filter((e) => e.n > 0);
+  if (offenders.length) {
+    console.error('\nREFUSING TO DEPLOY TO PRODUCTION.');
+    console.error('Unfilled placeholder readouts are still in the build:');
+    for (const o of offenders) console.error(`  ${o.path}  ${o.n} occurrence(s) of "FIGURE PENDING"`);
+    console.error('\nThese are fine on staging and must not reach socioclimate.io.');
+    console.error('Fill the readouts in src/content/portfolio/*.mdx, or remove the slots.');
+    process.exit(1);
+  }
+  console.log('gate      no placeholder readouts in the build');
+}
+
 if (args.includes('--dry-run')) {
   console.log('\n--dry-run: nothing sent. Config that would be posted:\n');
   console.log(JSON.stringify(config, null, 2));
   process.exit(0);
 }
+
+// Credentials are fetched last. Every check above — the rewrite refusal, the
+// production placeholder gate, the config translation — is answerable without
+// them, and an expired token should never mask a failing gate.
+const token = execFileSync('gcloud', ['auth', 'application-default', 'print-access-token'], {
+  encoding: 'utf8',
+  shell: true,
+}).trim();
 
 // --- version --------------------------------------------------------------
 const version = await call(`${API}/sites/${site}/versions`, {

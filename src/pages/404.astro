@@ -3,35 +3,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { NAV } from '../config/site';
 ---
 <BaseLayout title="Not found" description="That page does not exist on socioclimate.io.">
-  <section class="nf">
-    <div class="wrap">
-      <p class="eyebrow">404</p>
-      <h1>Nothing is recorded at this address.</h1>
-      <p class="lede">Which is the whole problem, elsewhere. Here it just means the link is wrong.</p>
-      <ul class="nf__list">
-        <li><a href="/">Home</a></li>
-        {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
-      </ul>
-    </div>
+  <section class="nf wrap">
+    <p class="eyebrow">404</p>
+    <h1>Nothing is recorded at this address.</h1>
+    <p class="nf__p">Which is the whole problem, elsewhere. Here it just means the link is wrong.</p>
+    <ul class="nf__list">
+      <li><a href="/">Home</a></li>
+      {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+    </ul>
   </section>
 </BaseLayout>
 
 <style>
-  .nf { padding-block: clamp(var(--s-7), 12vw, var(--s-8)); }
-  .nf h1 { max-width: 20ch; }
-  .nf .lede { margin-top: var(--s-4); }
+  .nf { padding-block: clamp(3rem, 10vh, 6rem) var(--s-8); }
+  .nf h1 { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 20ch; }
+  .nf__p { color: var(--paper-dim); font-size: var(--step-1); margin-top: var(--s-4); }
   .nf__list {
-    list-style: none;
-    padding: 0;
-    margin: var(--s-6) 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--s-4);
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    list-style: none; padding: 0; margin: var(--s-6) 0 0;
+    display: flex; flex-wrap: wrap; gap: var(--s-4);
+    font-family: var(--font-mono); font-size: 0.78rem;
+    text-transform: uppercase; letter-spacing: 0.12em;
   }
   .nf__list a { text-decoration: none; }
-  .nf__list a:hover { text-decoration: underline; }
 </style>

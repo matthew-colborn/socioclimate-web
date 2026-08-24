@@ -11,57 +11,9 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
       <Wordmark size="sm" />
     </a>
     <nav class="site-head__nav" aria-label="Primary">
-      {NAV.map((item) => (
-        <a href={item.href} aria-current={path === item.href ? 'page' : undefined}>
-          {item.label}
-        </a>
+      {NAV.map((i) => (
+        <a href={i.href} aria-current={path === i.href ? 'page' : undefined}>{i.label}</a>
       ))}
     </nav>
   </div>
 </header>
-
-<style>
-  .site-head {
-    border-bottom: var(--rule-faint);
-    background: color-mix(in srgb, var(--ink) 88%, transparent);
-    backdrop-filter: blur(8px);
-    position: sticky;
-    top: 0;
-    z-index: 20;
-  }
-  .site-head__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--s-4);
-    padding-block: var(--s-3);
-    flex-wrap: wrap;
-  }
-  .site-head__brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    text-decoration: none;
-  }
-  .site-head__brand :global(.mark) { flex: none; }
-
-  .site-head__nav {
-    display: flex;
-    gap: clamp(0.85rem, 2.4vw, 1.75rem);
-    flex-wrap: wrap;
-  }
-  .site-head__nav a {
-    font-family: var(--font-display);
-    font-size: var(--step--1);
-    letter-spacing: 0.01em;
-    color: var(--paper-dim);
-    text-decoration: none;
-    padding-block: 0.25rem;
-    border-bottom: 1px solid transparent;
-  }
-  .site-head__nav a:hover { color: var(--paper); }
-  .site-head__nav a[aria-current='page'] {
-    color: var(--cyan);
-    border-bottom-color: var(--cyan);
-  }
-</style>

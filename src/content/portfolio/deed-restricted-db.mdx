@@ -1,40 +1,53 @@
 ---
-name: Deed-Restricted DB
 order: 1
+name: Deed-Restricted DB
+clientKey: none
+scene: ridge
 stage: Building
-where: San Diego, California
-summary: >-
-  Deed-restricted affordable for-sale housing — an unobserved asset class
-  sitting inside the most instrumented housing market in the world.
+headline: The price nobody publishes
+line: >-
+  An entire class of homes, priced by formula in a market that publishes
+  everything else.
+what: >-
+  A record of deed-restricted affordable for-sale housing in San Diego — which
+  parcels carry a restriction, what the terms are, and when they expire.
+who: >-
+  Buyers and agents who need to know what a restricted unit can actually sell
+  for, and the agencies and researchers who currently cannot answer that from
+  standing systems.
+built: >-
+  The program guidelines normalised to machine-readable form, a covenant index
+  keyed to parcel, and a listings record that only means anything once the first
+  two exist.
+readouts:
+  - label: City of San Diego
+    value: "23,440"
+    note: deed-restricted units, May 2020
+  - label: Expiring 2020–2040
+    value: "~4,200"
+    note: covenants
+  - label: Longest observed listing
+    value: 317 days
+    note: zero price reductions
+href: ""
 ---
 
-import Cite from '../../components/Cite.astro';
+Every parcel around these is priced in public, continuously, by three national
+portals. These are not. The price is set administratively by a housing agency,
+and the pricing rule is not published anywhere.
 
-Every parcel around it is priced in public, continuously, by three national
-portals. These are not. Price is set administratively by a housing agency, and
-the pricing rule is not published.
+The effect shows up in the listings. Across the San Diego listings observed so
+far, list price equals original price on every one — including a unit that sat
+for 317 days without a single reduction. A market where nothing is ever marked
+down is not a market with patient sellers. It is a market where the number is
+not being negotiated.
 
-The effect shows up in the listings. Across the first six San Diego listings
-observed, list price equals original price on every one — including units that
-sat 317 days and 298 days. Zero price reductions, because the price is a formula
-output rather than an offer. A market where nothing ever gets marked down is not
-a market with confident sellers. It is a market where the number is not being
-negotiated.
+The stock is not small, and the agency administering it cannot see it either.
+The City of San Diego held 23,440 deed-restricted units as of May 2020, with
+roughly 4,200 covenants expiring between 2020 and 2040. Those figures exist
+because the City paid a consultant to go and count.
 
-The stock is not small, and the agency that administers it cannot see it either.
-The City of San Diego held 23,440 deed-restricted units as of May 2020, roughly
-14% of its multifamily rental stock, with roughly 4,200 covenants expiring
-between 2020 and 2040. Those figures exist only because the City paid a
-consultant to go and count. The question could not be answered from standing
-systems.
-<Cite source="City of San Diego, commissioned consultant study" date="as of May 2020" />
-
-## Three layers, built in reverse order of glamour
-
-1. **The rulebook.** Program guidelines normalized to machine-readable form.
-   Published in full, with quotes and sources.
-2. **The covenant index.** Recorded documents, APN-keyed, durable 45 to 55
-   years. Whether a parcel carries a restriction is the public good; the terms
-   and the expiration date are the product.
-3. **The events.** Listings, sales, days on market. Worthless without the first
-   two, which is why they are built last.
+Three layers, built in the least glamorous order: the rulebook first, then the
+covenant index keyed to parcel, then the events. Listings and sales are the part
+everyone wants to start with and the part that is worth nothing without the two
+beneath it.

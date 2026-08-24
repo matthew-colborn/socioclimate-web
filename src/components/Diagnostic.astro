@@ -1,0 +1,96 @@
+---
+import { getEntry } from 'astro:content';
+import { FORM, SITE } from '../config/site';
+
+const entry = await getEntry('diagnostic', 'diagnostic');
+if (!entry) throw new Error('Missing src/content/diagnostic.mdx');
+const qs = entry.data.questions;
+const options = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'partly', label: 'Partly' },
+  { value: 'no', label: 'No' },
+];
+---
+<div class="diag" data-diagnostic>
+  <div class="diag__field" aria-hidden="true">
+    <canvas data-field></canvas>
+  </div>
+
+  <div class="diag__inner wrap">
+    <form class="diag__qs" data-endpoint={FORM.endpoint} data-key={FORM.key}>
+      <input type="hidden" name="subject" value="Data moat diagnostic" />
+      <input type="hidden" name="from_name" value="socioclimate.io" />
+      <input type="hidden" name="diagnostic" data-payload />
+      <!-- Web3Forms' built-in honeypot. Hidden from assistive technology as well
+           as from sight: it is not a control any person should ever meet. -->
+      <div class="visually-hidden" aria-hidden="true">
+        <label>
+          Leave this field empty
+          <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" />
+        </label>
+      </div>
+
+      <ol class="diag__list">
+        {qs.map((q, i) => (
+          <li class="q" data-question={q.key}>
+            <fieldset>
+              <legend class="q__legend">
+                <span class="q__n">{String(i + 1).padStart(2, '0')}</span>
+                <span class="q__text" data-qtext>{q.text}</span>
+              </legend>
+              <p class="q__help">{q.help}</p>
+              <div class="q__opts">
+                {options.map((o) => (
+                  <label class="opt">
+                    <input type="radio" name={q.key} value={o.value} />
+                    <span>{o.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </li>
+        ))}
+      </ol>
+
+      <div class="diag__result" data-result>
+        <p class="diag__score" data-score>0 / {qs.length}</p>
+        <h2 class="diag__verdict" data-verdict>Answer the five</h2>
+        <p class="diag__reason" data-reason>
+          Nothing is sent anywhere and no address is required to see the result.
+        </p>
+      </div>
+
+      <div class="diag__send">
+        <h2 class="diag__sendh">Want the conversation?</h2>
+        <p class="diag__sendp">
+          Optional. The result above is yours either way — it is not held back
+          behind this. If you send it, your answers come with it so the reply is
+          about your situation rather than a template.
+        </p>
+        <label class="fld">
+          <span>Your name</span>
+          <input type="text" name="name" autocomplete="name" required />
+        </label>
+        <label class="fld">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="email" required />
+        </label>
+        <label class="fld">
+          <span>What do you record?</span>
+          <textarea name="message" rows="4" required></textarea>
+        </label>
+        <button class="cta cta--solid" type="submit">Send<span class="cta__arrow" aria-hidden="true">↗</span></button>
+        <p class="diag__status" data-status role="status" aria-live="polite"></p>
+        <p class="diag__alt">
+          Or just mail <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  import { initDiagnostic } from '../lib/diagnostic';
+  const root = document.querySelector<HTMLElement>('[data-diagnostic]');
+  if (root) initDiagnostic(root);
+</script>

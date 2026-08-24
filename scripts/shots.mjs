@@ -13,7 +13,7 @@ mkdirSync(out, { recursive: true });
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 // The brief asks for / and /thesis. Extra routes can be appended as arguments
 // when reviewing the rest of the site.
-const PAGES = process.argv.length > 3 ? process.argv.slice(3) : ['/', '/thesis'];
+const PAGES = process.argv.length > 3 ? process.argv.slice(3) : ['/', '/portfolio', '/contact'];
 const WIDTHS = [390, 1440];
 
 const browser = await puppeteer.launch({

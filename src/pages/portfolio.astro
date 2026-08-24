@@ -1,7 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import DoorPanel from '../components/DoorPanel.astro';
+import { clientName, type ClientKey } from '../config/site';
 
 const intro = await getEntry('pages', 'portfolio');
 if (!intro) throw new Error('Missing src/content/pages/portfolio.mdx');
@@ -10,83 +10,132 @@ const d = intro.data;
 
 const entries = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
 const rendered = await Promise.all(
-  entries.map(async (e) => ({ id: e.id, data: e.data, Body: (await render(e)).Content }))
+  entries.map(async (e) => ({
+    id: e.id,
+    data: e.data,
+    display: clientName(e.data.clientKey as ClientKey, { cap: true }) ?? e.data.name,
+    Body: (await render(e)).Content,
+  }))
 );
 ---
 <BaseLayout title={d.title} description={d.description}>
-  <header class="page-head">
-    <div class="wrap">
-      <h1>{d.heading}</h1>
-      <p class="lede">{d.standfirst}</p>
-    </div>
+  <header class="ph wrap">
+    <h1>{d.heading}</h1>
+    <p class="ph__lede">{d.standfirst}</p>
+    <div class="ph__intro"><Intro /></div>
   </header>
 
-  <div class="section section--flush">
-    <div class="wrap">
-      <div class="prose reveal"><Intro /></div>
+  <div class="wrap">
+    {rendered.map((e) => (
+      <article class="entry" id={e.id}>
+        <p class="entry__meta">
+          <span class="entry__stage">{e.data.stage}</span>
+        </p>
+        <h2 class="entry__name">{e.display}</h2>
 
-      {rendered.map((e) => (
-        <article class="entry reveal" id={e.id}>
-          <div class="entry__head">
-            <p class="entry__meta">
-              <span class="entry__stage">{e.data.stage}</span>
-              <span class="entry__where">{e.data.where}</span>
-            </p>
-            <h2 class="entry__name">{e.data.name}</h2>
-            <p class="entry__summary">{e.data.summary}</p>
-          </div>
-          <div class="prose entry__body"><e.Body /></div>
-        </article>
-      ))}
-    </div>
+        <dl class="entry__facts">
+          <div><dt>What it is</dt><dd>{e.data.what}</dd></div>
+          <div><dt>Who it is for</dt><dd>{e.data.who}</dd></div>
+          <div><dt>What we built</dt><dd>{e.data.built}</dd></div>
+        </dl>
+
+        <ul class="entry__readouts">
+          {e.data.readouts.map((r) => (
+            <li class:list={['ero', r.pending && 'ero--pending']}>
+              <span class="ero__label">{r.label}</span>
+              <span class="ero__value">{r.value}</span>
+              {r.note && <span class="ero__note">{r.note}</span>}
+            </li>
+          ))}
+        </ul>
+
+        <div class="entry__body"><e.Body /></div>
+      </article>
+    ))}
   </div>
 
-  {d.door !== 'none' && <DoorPanel show={d.door} />}
+  <section class="tail wrap">
+    <p class="eyebrow">Next</p>
+    <h2 class="tail__h">Find out whether you have one.</h2>
+    <p class="tail__p">Five questions, scored as you answer, nothing gated.</p>
+    <a class="cta" href="/contact">Run the diagnostic<span class="cta__arrow" aria-hidden="true">↗</span></a>
+  </section>
 </BaseLayout>
 
 <style>
-  .page-head {
-    padding-block: clamp(var(--s-6), 8vw, var(--s-7)) var(--s-5);
-    border-bottom: var(--rule-faint);
-    background:
-      radial-gradient(60rem 22rem at 12% -30%,
-        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 70%),
-      var(--ink);
-  }
-  .page-head h1 { max-width: 18ch; }
-  .page-head .lede { margin: var(--s-4) 0 0; }
+  .ph { padding-bottom: var(--s-6); }
+  .ph h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); max-width: 18ch; }
+  .ph__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 52ch; }
+  .ph__intro { color: var(--paper-dim); max-width: 60ch; margin-top: var(--s-4); font-size: 0.95rem; }
 
   .entry {
-    margin-top: var(--s-7);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
     padding-top: var(--s-5);
-    border-top: var(--rule);
+    margin-bottom: var(--s-8);
   }
-  .entry__meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--s-2) var(--s-3);
-    margin: 0 0 var(--s-3);
-    font-family: var(--font-mono);
-    font-size: var(--step--1);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
+  .entry__meta { margin: 0 0 var(--s-3); }
   .entry__stage {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--cyan);
     border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
-    border-radius: var(--radius);
-    padding: 0.15em 0.6em;
+    border-radius: 999px;
+    padding: 0.2em 0.7em;
   }
-  .entry__where { color: var(--paper-dim); }
-  .entry__name { font-size: var(--step-3); }
-  .entry__summary {
-    margin: var(--s-3) 0 0;
-    font-size: var(--step-1);
+  .entry__name { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: var(--s-5); }
+
+  .entry__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: var(--s-4);
+    margin: 0 0 var(--s-5);
+  }
+  .entry__facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--paper-dim);
-    max-width: var(--measure);
+    margin-bottom: 0.5em;
   }
-  .entry__body { margin-top: var(--s-5); }
-  /* The first h2 inside an entry body would otherwise draw a second rule. */
-  .entry__body :global(h2:first-child) { margin-top: 0; padding-top: 0; border-top: 0; }
+  .entry__facts dd { margin: 0; font-size: 0.95rem; color: var(--paper); }
+
+  .entry__readouts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-5);
+    list-style: none;
+    margin: 0 0 var(--s-5);
+    padding: var(--s-4) 0;
+    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+  }
+  .ero { display: flex; flex-direction: column; gap: 0.3em; }
+  .ero__label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--paper-dim);
+  }
+  .ero__value { font-family: var(--font-display); font-size: var(--step-2); font-weight: 400; }
+  .ero__note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--paper-dim); }
+  .ero--pending {
+    border: 1px dashed color-mix(in srgb, var(--paper-dim) 35%, transparent);
+    border-radius: 2px;
+    padding: 0.6em 0.8em;
+  }
+  .ero--pending .ero__value { color: var(--paper-dim); letter-spacing: 0.18em; opacity: 0.55; }
+
+  .entry__body { max-width: 62ch; color: var(--paper-dim); }
+  .entry__body :global(p) { margin-bottom: var(--s-3); }
+
+  .tail {
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+    padding-block: var(--s-7) var(--s-8);
+  }
+  .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 18ch; }
+  .tail__p { color: var(--paper-dim); margin: var(--s-3) 0 var(--s-5); }
 </style>

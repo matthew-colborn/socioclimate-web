@@ -4,12 +4,12 @@ import { ridge } from './ridge';
 import { traces_scene } from './traces';
 import { converge } from './converge';
 import { lattice } from './lattice';
-import { opening } from './opening';
+import { threshold } from './threshold';
 import { process } from './process';
 import { waves } from './waves';
 
 export type SceneId =
-  | 'flame' | 'ridge' | 'traces' | 'converge' | 'lattice' | 'opening'
+  | 'flame' | 'ridge' | 'traces' | 'converge' | 'lattice' | 'threshold'
   | 'process' | 'waves';
 
 /**
@@ -24,7 +24,7 @@ export const SCENES: Record<SceneId, Scene> = {
   traces: traces_scene,
   converge,
   lattice,
-  opening,
+  threshold,
   process,
   waves,
 };
@@ -36,7 +36,7 @@ export const SEEDS: Record<SceneId, number> = {
   traces: 71104,
   converge: 33871,
   lattice: 54029,
-  opening: 60627,
+  threshold: 60627,
   process: 81140,
   waves: 46201,
 };

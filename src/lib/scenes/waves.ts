@@ -1,29 +1,35 @@
 /**
- * The site background: the wave surface from beneath the flame, across the
- * whole page.
+ * The site background: the ridge from the horizontal lockup, as slow swell.
  *
- * This is the same field the hero ridge dissolves into — rows of points fanning
- * back in perspective, travelling — with the column heights taken from
- * flameProfile, so the undulation carries the mark's own silhouette as its
- * envelope. It is the flame's waves, not a generic particle background.
+ * brand/logo-horizontal.jpeg is the reference for the character. The ridge
+ * there is not a set of thin lines — it is two or three solid mountain forms
+ * with a bright edge along the crest and a filled body falling away beneath.
+ * Weight and volume are the point, so this draws few, heavy, filled layers
+ * rather than many hairlines.
  *
- * It is deliberately at the edge of visibility. "One moving focal thing per
- * viewport" is the rule that keeps this site from reading as a screensaver, and
- * a background that competes with the scene in front of it breaks that rule
- * just as surely as a second scene would. So: peak alpha around 0.07, no
- * bright points, no glow, nothing that resolves into a shape you could look at
- * directly. If you can find it without looking for it, it is turned up too far.
+ * Slow on purpose. Large things move slowly, and that is most of what separates
+ * swell from ripple: the travelling term runs at about a fifth of what it did
+ * and the breath is an eleven-second cycle. Fast motion at this scale reads as
+ * a screensaver, which is the opposite of what it is for.
+ *
+ * Still ground, not figure. Peak alpha stays low enough that text over it clears
+ * AA — scripts/scene-check.mjs measures that against real composited pixels and
+ * fails the run if it slips.
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { flameProfile, CYAN, GLOW } from '../field/prims';
 import { drift, breath } from '../field/life';
 
-const ROWS = 10;
-/** Points per row. Kept low: this runs on every page, all the time. */
-const COLS = 74;
+/** Four layers, not ten rows. Fewer and heavier is the brief. */
+const LAYERS = 4;
+/** Samples along each crest. Enough for a smooth curve, no more. */
+const STEPS = 88;
+
+/** How far a crest lifts toward the pointer, and how wide that reach is. */
+const PULL_LIFT = 26;
+const PULL_REACH = 0.26;
 
 let prof: number[] = [];
-let jit: number[] = [];
 let W = 0, H = 0;
 
 export const waves: Scene = {
@@ -31,92 +37,124 @@ export const waves: Scene = {
     W = c.w;
     H = c.h;
 
-    const raw = flameProfile(COLS);
+    const raw = flameProfile(STEPS);
     let lo = Infinity, hi = -Infinity;
     for (const v of raw) { if (v < lo) lo = v; if (v > hi) hi = v; }
-    const norm = raw.map((v) => Math.pow((v - lo) / ((hi - lo) || 1), 1.35));
-    // Smoothed, because at background contrast the column-to-column noise just
-    // reads as dither rather than as terrain.
-    prof = norm.map((_, i) => {
-      const a = norm[Math.max(0, i - 1)];
-      const b = norm[i];
-      const d = norm[Math.min(COLS - 1, i + 1)];
-      return (a + b * 2 + d) / 4;
-    });
-
-    jit = [];
-    for (let i = 0; i < COLS; i++) jit.push(c.rng() * 6.283);
+    const norm = raw.map((v) => Math.pow((v - lo) / ((hi - lo) || 1), 1.2));
+    // Smoothed twice: the lockup's peaks are broad and rounded, and the raw
+    // column noise reads as dither at this scale rather than as terrain.
+    const pass = (a: number[]): number[] =>
+      a.map((_, i) => (a[Math.max(0, i - 1)] + a[i] * 2 + a[Math.min(a.length - 1, i + 1)]) / 4);
+    prof = pass(pass(norm));
   },
 
   frame(c: SceneCtx, t: number) {
     const { ctx } = c;
 
-    // Its own breath period again, so the background never syncs with whatever
-    // scene is in front of it.
-    const br = breath(t, 6.7, 1.9);
+    // Eleven seconds. The swell should feel unhurried.
+    const br = breath(t, 11, 1.9);
 
-    // Low and wide like the ridge under the flame, but fanned far enough back
-    // to reach most of the viewport — as a page background, a band along the
-    // bottom leaves the top half dead.
-    const base = H * 0.94;
-    const amp = Math.min(H * 0.15, 150) * (0.85 + br * 0.3);
-    const spanY = H * 0.82;
+    const floor = H * 1.04;
+    const horizon = H * 0.3;
 
     ctx.globalCompositeOperation = 'lighter';
 
     // ---- atmosphere ------------------------------------------------------
-    // The references are not flat near-black. ref-2 is a luminous blue field
-    // that lightens toward whatever it is holding, and that lift is most of
-    // why it reads as depth rather than as a dark page. This is that: a wide
-    // wash centred a little above the horizon, drifting so it never sits
-    // still, kept dim enough that text over it still clears AA.
-    const gx = W * (0.5 + drift(t, 0.045, 2.2) * 0.06);
-    const gy = H * (0.58 + drift(t, 0.037, 5.1) * 0.05);
+    // ref-2 is a luminous field that lightens toward what it holds, and that
+    // lift is most of why it reads as depth rather than as a dark page.
+    const gx = W * (0.5 + drift(t, 0.012, 2.2) * 0.06);
+    const gy = H * (0.56 + drift(t, 0.01, 5.1) * 0.05);
     const gr = Math.max(W, H) * (0.78 + br * 0.1);
     const wash = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
-    wash.addColorStop(0, `rgba(30, 111, 168, ${0.30 + br * 0.05})`);
-    wash.addColorStop(0.42, 'rgba(22, 78, 126, 0.15)');
+    wash.addColorStop(0, `rgba(30, 111, 168, ${0.23 + br * 0.04})`);
+    wash.addColorStop(0.42, 'rgba(22, 78, 126, 0.11)');
     wash.addColorStop(1, 'rgba(6, 32, 56, 0)');
     ctx.globalAlpha = 1;
     ctx.fillStyle = wash;
     ctx.fillRect(0, 0, W, H);
 
-    // A horizon: the line the wave field recedes to. Thin, wide, and the
-    // brightest thing in the backdrop, which is what gives it a far distance.
-    const hy = base - spanY * 0.78;
+    // The far distance the swell recedes to.
     const hor = ctx.createLinearGradient(0, 0, W, 0);
     hor.addColorStop(0, `rgba(${CYAN}, 0)`);
-    hor.addColorStop(0.5, `rgba(${GLOW}, ${0.055 + br * 0.02})`);
+    hor.addColorStop(0.5, `rgba(${GLOW}, ${0.05 + br * 0.02})`);
     hor.addColorStop(1, `rgba(${CYAN}, 0)`);
     ctx.fillStyle = hor;
-    ctx.fillRect(0, hy - 1, W, 2);
+    ctx.fillRect(0, horizon - 1, W, 2);
 
-    ctx.lineWidth = 1;
+    // ---- the swell -------------------------------------------------------
+    // Back to front, so nearer layers sit over further ones and the stack reads
+    // as depth rather than as overlapping curves.
+    for (let L = LAYERS - 1; L >= 0; L--) {
+      const d = L / (LAYERS - 1); // 0 = nearest, 1 = furthest
+      const baseY = floor - (floor - horizon) * (0.18 + d * 0.62);
+      const amp = H * (0.13 - d * 0.055) * (0.85 + br * 0.3);
+      const squeeze = 1 - d * 0.22;
 
-    for (let r = 0; r < ROWS; r++) {
-      const d = r / (ROWS - 1);
-      // Rows further back are narrower, higher and dimmer: the same perspective
-      // fan the hero ridge opens into.
-      const persp = 1 - d * 0.34;
-      const rowY = base - d * spanY;
-      // Fades with depth so the top of the page is quieter than the bottom,
-      // which keeps the heaviest text areas the cleanest.
-      const a = (0.10 - d * 0.062) * (0.8 + br * 0.4);
-      if (a <= 0.002) continue;
+      // Each layer travels at its own slow rate and phase, so they never stack
+      // into one thick band.
+      const speed = 0.11 - d * 0.03;
+      const phase = L * 2.1;
 
-      ctx.strokeStyle = `rgba(${CYAN}, ${a})`;
-      ctx.beginPath();
-      for (let i = 0; i < COLS; i++) {
-        const u = i / (COLS - 1);
-        const x = W * 0.5 + (u - 0.5) * W * 1.06 * persp;
-        // Travelling wave, with the flame's profile as the envelope and a slow
-        // layered drift so successive passes are never identical.
-        const wave =
-          Math.sin(u * 8.4 - t * 0.62 + d * 2.0) * 0.7 +
-          drift(t, 0.11, jit[i]) * 0.3;
-        const y = rowY + wave * amp * (0.4 + 0.6 * prof[i]) * (0.4 + 0.6 * d);
-        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      const crest: number[] = [];
+      for (let i = 0; i < STEPS; i++) {
+        const u = i / (STEPS - 1);
+        const x = W * 0.5 + (u - 0.5) * W * 1.08 * squeeze;
+
+        // Two slow components plus the mark's own silhouette as the envelope,
+        // which is what gives the crest a few dominant peaks rather than an
+        // even ripple.
+        const swell =
+          Math.sin(u * 3.1 - t * speed + phase) * 0.62 +
+          Math.sin(u * 5.7 + t * speed * 0.7 + phase * 1.7) * 0.24 +
+          drift(t, 0.03, phase) * 0.14;
+
+        let y = baseY - (0.45 + 0.55 * prof[i]) * amp * (0.6 + swell);
+
+        // The field notices the pointer: a local swell rising toward it that
+        // settles once it has gone. c.pstr is already zero under
+        // prefers-reduced-motion, so this freezes with everything else. On
+        // touch the engine substitutes scroll velocity for pointer strength.
+        if (c.pstr > 0.002 && c.px >= 0) {
+          const dx = Math.abs(x - c.px) / (W * PULL_REACH);
+          if (dx < 1) {
+            const g = (1 - dx) * (1 - dx);
+            const near = 1 - Math.min(1, Math.abs(y - c.py) / (H * 0.5));
+            y -= g * PULL_LIFT * c.pstr * (0.45 + 0.55 * near) * (1 - d * 0.5);
+          }
+        }
+        crest.push(x, y);
       }
+
+      // The body: filled from the crest down, so the form has volume.
+      let top = Infinity;
+      for (let i = 1; i < crest.length; i += 2) if (crest[i] < top) top = crest[i];
+      const fill = ctx.createLinearGradient(0, top, 0, floor);
+      // The fill is what lifts the composited background, and at 0.085 it
+      // pushed --paper-dim to 4.11:1 — under AA. Turned down here rather than
+      // in the crest stroke, because the stroke is what gives the form its
+      // definition and the fill is only body.
+      const a = (0.05 - d * 0.028) * (0.85 + br * 0.3);
+      fill.addColorStop(0, `rgba(${CYAN}, ${a})`);
+      fill.addColorStop(0.55, `rgba(${CYAN}, ${a * 0.35})`);
+      fill.addColorStop(1, `rgba(${CYAN}, 0)`);
+
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.moveTo(crest[0], crest[1]);
+      for (let i = 2; i < crest.length; i += 2) ctx.lineTo(crest[i], crest[i + 1]);
+      ctx.lineTo(W + 40, floor);
+      ctx.lineTo(-40, floor);
+      ctx.closePath();
+      ctx.fill();
+
+      // The bright edge along the crest — the line that gives the lockup's
+      // peaks their definition.
+      ctx.strokeStyle = `rgba(${GLOW}, ${(0.1 - d * 0.055) * (0.85 + br * 0.3)})`;
+      ctx.lineWidth = 1.4 - d * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(crest[0], crest[1]);
+      for (let i = 2; i < crest.length; i += 2) ctx.lineTo(crest[i], crest[i + 1]);
       ctx.stroke();
     }
 

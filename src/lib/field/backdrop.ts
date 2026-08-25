@@ -14,8 +14,13 @@
 import { Engine, prefersReducedMotion, beginSession } from './engine';
 import { SCENES, SEEDS } from '../scenes/registry';
 
-/** Slower than the focal cap. Nothing here moves fast enough to need more. */
-const BACKDROP_FPS = 20;
+/**
+ * 15fps. The swell is deliberately slow now, and at this speed nothing in it
+ * moves far enough between frames for the difference to be visible — which is
+ * what pays for the filled forms being more expensive to draw than the
+ * hairlines they replaced.
+ */
+const BACKDROP_FPS = 15;
 
 let engine: Engine | undefined;
 

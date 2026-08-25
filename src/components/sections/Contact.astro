@@ -15,11 +15,10 @@ const d = (await getEntry('pages', 'contact'))!.data;
       <h2 class="section-h">{d.heading}</h2>
       <p class="ch__lede">{d.standfirst}</p>
     </div>
-    {/* Two complete copies of the mark parting to open a threshold. It is the
-        invitation scene, and this is the page the invitation is on. The field
-        behind the questions below is a different thing doing a different job —
-        it is ambient and it responds to the score. */}
-    <div class="ch__field"><Field scene="opening" variant="panel" /></div>
+    {/* A way through rather than an object to look at, which is what a contact
+        section is. The flame stays at the top of the page: a mark loses its
+        weight when it appears twice. */}
+    <div class="ch__field"><Field scene="threshold" variant="panel" /></div>
   </header>
 
   <Diagnostic />

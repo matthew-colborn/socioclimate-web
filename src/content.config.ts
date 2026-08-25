@@ -22,7 +22,7 @@ const portfolio = defineCollection({
     name: z.string(),
     /** Resolves through src/config/site.ts CLIENTS when the real name is gated. */
     clientKey: z.enum(['none', 'branshe']).default('none'),
-    scene: z.enum(['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening']),
+    scene: z.enum(['flame', 'ridge', 'traces', 'converge', 'lattice', 'threshold']),
     /** Honest rather than flattering: Building, In staging, Live, Operating. */
     stage: z.string(),
     /** One line under the name. What the entry is about. */

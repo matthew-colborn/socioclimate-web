@@ -6,15 +6,11 @@
  * obvious next step and is never required — a gated result would make the tool
  * a lead form wearing a diagnostic's clothes.
  */
-import { Engine, prefersReducedMotion } from './field/engine';
-import { registerField } from './field/mount';
-import { diagnosticField, state } from './scenes/diagnostic-field';
 
 type Answer = 'yes' | 'partly' | 'no';
 const WEIGHT: Record<Answer, number> = { yes: 1, partly: 0.5, no: 0 };
 
 export function initDiagnostic(root: HTMLElement): void {
-  const canvas = root.querySelector<HTMLCanvasElement>('[data-diag-field]');
   const groups = Array.from(root.querySelectorAll<HTMLElement>('[data-question]'));
   const scoreEl = root.querySelector<HTMLElement>('[data-score]');
   const verdictEl = root.querySelector<HTMLElement>('[data-verdict]');
@@ -25,20 +21,6 @@ export function initDiagnostic(root: HTMLElement): void {
   const status = root.querySelector<HTMLElement>('[data-status]');
 
   const answers = new Map<string, Answer>();
-
-  let engine: Engine | undefined;
-  if (canvas) {
-    engine = new Engine({
-      canvas,
-      scene: diagnosticField,
-      seed: 90210,
-      still: prefersReducedMotion(),
-    });
-    // Under the page-wide governor rather than running unconditionally: this
-    // field and the scene in the page header are both on /contact, and only one
-    // of them may move at a time.
-    if (!prefersReducedMotion()) registerField(engine, canvas.closest('.diag__field') ?? canvas);
-  }
 
   function verdict(score: number, answered: number): { title: string; body: string } {
     if (answered === 0) {
@@ -82,9 +64,6 @@ export function initDiagnostic(root: HTMLElement): void {
     let score = 0;
     for (const v of answers.values()) score += WEIGHT[v];
     const answered = answers.size;
-
-    state.target = score;
-    state.total = groups.length;
 
     if (scoreEl) scoreEl.textContent = `${score % 1 === 0 ? score : score.toFixed(1)} / ${groups.length}`;
     const v = verdict(score, answered);

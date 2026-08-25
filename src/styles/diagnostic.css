@@ -9,20 +9,6 @@
 /* --- Diagnostic ----------------------------------------------------------- */
 
 .diag { position: relative; padding-block: var(--s-7) var(--s-8); isolation: isolate; }
-/* Sticky, not absolute. The section is thousands of pixels tall, so an
-   absolutely positioned field centres itself far below the fold and is never
-   seen. Sticking it to the viewport — with a negative margin so it occupies no
-   layout space — keeps the field behind the questions the whole way down,
-   which is the point: it has to be visibly responding while you answer. */
-.diag__field {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  margin-bottom: -100svh;
-  z-index: -1;
-  pointer-events: none;
-}
-.diag__field canvas { width: 100%; height: 100%; }
 .diag__inner { position: relative; }
 
 .diag__list { list-style: none; margin: 0 0 var(--s-6); padding: 0; max-width: 46rem; }

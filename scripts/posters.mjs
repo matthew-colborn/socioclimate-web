@@ -28,7 +28,7 @@ mkdirSync(out, { recursive: true });
 // field into view first, because they are built lazily on approach.
 const ROUTES = ['/'];
 // Every scene in the registry must be reachable from one of those routes.
-const EXPECTED = ['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening', 'process'];
+const EXPECTED = ['flame', 'ridge', 'traces', 'converge', 'lattice', 'threshold', 'process'];
 
 const W = 1440;
 const H = 900;

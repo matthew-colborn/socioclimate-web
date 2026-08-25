@@ -80,3 +80,38 @@
 .fld input:focus-visible, .fld textarea:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 1px; }
 .diag__status { font-family: var(--font-mono); font-size: 0.78rem; color: var(--paper-dim); margin: var(--s-3) 0 0; min-height: 1.2em; }
 .diag__alt { font-size: 0.82rem; color: var(--paper-dim); margin-top: var(--s-2); }
+
+/* --- Open on click -------------------------------------------------------- */
+/* The summary carries the call-to-action styling directly rather than wrapping
+   a button in it, because a button inside a summary is two focus stops for one
+   action. */
+.reveal-form { margin-top: var(--s-5); }
+.reveal-form__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.82em 1.6em;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
+  border-radius: 999px;
+  cursor: pointer;
+  list-style: none;
+  width: max-content;
+  transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
+              background var(--dur-2) var(--ease);
+}
+.reveal-form__cta::-webkit-details-marker { display: none; }
+.reveal-form__cta:hover,
+.reveal-form__cta:focus-visible {
+  color: var(--ink);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+.reveal-form__arrow { transition: transform var(--dur-2) var(--ease); }
+.reveal-form[open] .reveal-form__arrow { transform: rotate(180deg); }
+.reveal-form[open] .reveal-form__cta { margin-bottom: var(--s-6); }

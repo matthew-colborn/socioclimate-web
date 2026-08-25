@@ -91,18 +91,33 @@ export function initNav(): void {
     }
   };
 
+  // Document-space tops, measured once and on resize. Reading a bounding rect
+  // per section per frame while the page is scrolling forces layout during the
+  // exact frames that need to be cheapest.
+  let tops: number[] = [];
+  const measure = (): void => {
+    tops = targets.map((el) => el.getBoundingClientRect().top + window.scrollY);
+  };
+  measure();
+  let mt = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(mt);
+    mt = window.setTimeout(measure, 150);
+  });
+
   let ticking = false;
   const pick = (): void => {
     ticking = false;
     // The section whose top is nearest to just under the header wins, which
     // matches what a reader would say they are "in".
     const line = window.innerHeight * 0.32;
+    const y = window.scrollY;
     let best = targets[0];
     let bestD = Infinity;
-    for (const el of targets) {
-      const top = el.getBoundingClientRect().top;
+    for (let i = 0; i < targets.length; i++) {
+      const top = tops[i] - y;
       const d = top <= line ? line - top : (top - line) * 3;
-      if (d < bestD) { bestD = d; best = el; }
+      if (d < bestD) { bestD = d; best = targets[i]; }
     }
     mark(best.id);
   };

@@ -41,6 +41,13 @@ export interface Scene {
   /** Called on first mount and on every resize. */
   init(c: SceneCtx): void;
   /**
+   * Optional. While this returns true the engine ignores its own frame cap and
+   * runs at the shared 30fps ceiling instead. The wave stream uses it while it
+   * is catching up to a scroll: a cap is right for ambient drift and wrong for
+   * the one moment the field has to track something.
+   */
+  wantsFullRate?(): boolean;
+  /**
    * @param t      seconds since the scene became active
    * @param intro  0..1 entrance progress, for the transition between scenes
    */
@@ -130,6 +137,15 @@ export class Engine {
   private minFrameMs = MIN_FRAME_MS;
   private rect: DOMRect | null = null;
   /**
+   * The canvas's position in DOCUMENT space, captured on resize. The client
+   * rect is derived from it by subtracting the cached scroll offset, so nothing
+   * calls getBoundingClientRect while the page is moving — a layout read per
+   * canvas per frame during scroll is exactly the wrong thing to be doing.
+   */
+  private docTop = 0;
+  private docLeft = 0;
+  private fixed = false;
+  /**
    * Set by the governor in mount.ts. While true this engine will not run no
    * matter what its own observer sees — otherwise a field the governor has
    * deliberately stopped would restart itself the moment it scrolled into view,
@@ -187,6 +203,9 @@ export class Engine {
     this.c.w = w;
     this.c.h = h;
     this.rect = r;
+    this.fixed = getComputedStyle(this.canvas).position === 'fixed';
+    this.docLeft = r.left + (this.fixed ? 0 : window.scrollX);
+    this.docTop = r.top + (this.fixed ? 0 : window.scrollY);
     this.scene.init(this.c);
     if (this.still || !this.running) this.renderOnce(0);
   }
@@ -200,11 +219,6 @@ export class Engine {
     this.c.px = -1; this.c.py = -1; this.c.pstr = 0; this.c.idle = 0;
     this.c.ctx.clearRect(0, 0, this.c.w, this.c.h);
     this.scene.frame(this.c, t, 1);
-  }
-
-  /** Cheap enough to call on scroll; never called inside the frame loop. */
-  refreshRect(): void {
-    this.rect = this.canvas.getBoundingClientRect();
   }
 
   /** Stop, and stay stopped until play() is called. The governor's off switch. */
@@ -257,7 +271,10 @@ export class Engine {
 
     // Frame cap. Ambient drift does not need 60fps and the cap roughly halves
     // the idle cost; the RAF chain still runs so the browser can throttle it.
-    if (now - this.lastFrame < this.minFrameMs) return;
+    // A scene that is tracking something gets the full rate; ambient drift
+    // keeps its own cap.
+    const cap = this.scene.wantsFullRate?.() ? MIN_FRAME_MS : this.minFrameMs;
+    if (now - this.lastFrame < cap) return;
     const dt = this.lastFrame ? (now - this.lastFrame) / 1000 : 0;
     this.lastFrame = now;
 
@@ -267,8 +284,8 @@ export class Engine {
     // rect every frame would be a layout read per frame per canvas, so it is
     // refreshed on resize and scroll instead.
     if (viewer.strength > 0.002 && viewer.x >= 0 && this.rect) {
-      this.c.px = viewer.x - this.rect.left;
-      this.c.py = viewer.y - this.rect.top;
+      this.c.px = viewer.x - (this.docLeft - (this.fixed ? 0 : window.scrollX));
+      this.c.py = viewer.y - (this.docTop - (this.fixed ? 0 : viewer.scrollY));
       this.c.pstr = viewer.strength;
     } else {
       this.c.px = -1;

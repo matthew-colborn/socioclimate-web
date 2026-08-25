@@ -74,6 +74,33 @@ function shapeFor(n: number): Crest {
 let prof: number[] = [];
 let W = 0, H = 0;
 
+/**
+ * Damped following.
+ *
+ * The field used to take viewer.scrollY straight, and a wheel delivers scroll
+ * in 100-120px jumps, so the field inherited every step. Now the scroll handler
+ * only records where the page is and this eases toward it each frame: the
+ * stream chases your scroll rather than being welded to it, which is also what
+ * absorbs the difference between a coarse wheel and a smooth trackpad.
+ *
+ * Exponential, not a fixed lerp factor — 1 - e^(-k dt) is frame-rate
+ * independent, so the damping feels identical at 15fps and at 60. Critically
+ * damped by construction: it approaches and never overshoots, so there is no
+ * wobble to tune out.
+ *
+ * The glide to rest is the same curve. When scrolling stops the target stops
+ * moving and the field coasts the last few pixels in, then the idle drift term
+ * carries on underneath with no seam, because it was never switched off.
+ */
+const FOLLOW = 7.5;
+/** Below this the field has arrived and the frame cap goes back on. */
+const SETTLED = 0.4;
+
+let smooth = 0;
+let started = false;
+let lastT = -1;
+let chasing = false;
+
 export const waves: Scene = {
   init(c: SceneCtx) {
     W = c.w;
@@ -88,8 +115,20 @@ export const waves: Scene = {
     prof = pass(pass(norm));
   },
 
+  wantsFullRate(): boolean {
+    return chasing;
+  },
+
   frame(c: SceneCtx, t: number) {
     const { ctx } = c;
+
+    const dt = lastT < 0 ? 0 : Math.min(0.1, t - lastT);
+    lastT = t;
+
+    const target = viewer.scrollY;
+    if (!started) { smooth = target; started = true; }
+    smooth += (target - smooth) * (1 - Math.exp(-FOLLOW * dt));
+    chasing = Math.abs(target - smooth) > SETTLED;
 
     const br = breath(t, 11, 1.9);
     const horizon = H * 0.16;
@@ -119,7 +158,7 @@ export const waves: Scene = {
     // ---- the stream ------------------------------------------------------
     // One offset drives everything. Scroll moves it; time moves it a little
     // more, so the stream still travels when nobody is scrolling.
-    const offset = viewer.scrollY * PARALLAX + t * DRIFT;
+    const offset = smooth * PARALLAX + t * DRIFT;
 
     // Which crests land on screen. Only these are drawn — the rest of the
     // stream costs nothing because it is never computed.

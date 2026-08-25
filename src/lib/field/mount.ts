@@ -179,24 +179,6 @@ export function mountFields(scope: ParentNode = document): void {
     rt = window.setTimeout(() => items.forEach((it) => it.engine?.resize()), 150);
   });
 
-  // The pointer has to be translated into each canvas's own space, and that
-  // needs the canvas rect. Reading it per frame would be a layout read per
-  // frame per canvas, so it is refreshed here instead — on scroll, throttled
-  // to one read per frame across all of them.
-  let pending = false;
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (pending) return;
-      pending = true;
-      requestAnimationFrame(() => {
-        pending = false;
-        for (const it of items) it.engine?.refreshRect();
-      });
-    },
-    { passive: true }
-  );
-
   // Nothing runs while the tab is hidden.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) items.forEach((it) => it.engine?.hold());

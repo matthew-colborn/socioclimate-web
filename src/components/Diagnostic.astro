@@ -13,6 +13,17 @@ const options = [
 ---
 <div class="diag" data-diagnostic>
   <div class="diag__inner wrap">
+    {/* Opens on click rather than sitting open. <details> rather than a button
+        and a JS toggle: it works with no script at all, it is keyboard
+        operable and announced correctly for free, and the questions stay in
+        the DOM either way so nothing is hidden from a crawler or from anyone
+        whose script failed. */}
+    <details class="reveal-form">
+      <summary class="reveal-form__cta">
+        <span>Run the diagnostic</span>
+        <span class="reveal-form__arrow" aria-hidden="true">↓</span>
+      </summary>
+
     <form class="diag__qs" data-endpoint={FORM.endpoint} data-key={FORM.key}>
       <input type="hidden" name="subject" value="Data moat diagnostic" />
       <input type="hidden" name="from_name" value="socioclimate.io" />
@@ -84,6 +95,7 @@ const options = [
         </p>
       </div>
     </form>
+    </details>
   </div>
 </div>
 

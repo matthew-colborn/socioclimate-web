@@ -57,18 +57,31 @@ export function initProcess(): void {
   });
 
   // Whichever step is closest to the middle of the viewport wins.
+  // Cached once, for the same reason as the nav: no layout reads during scroll.
+  let tops: number[] = [];
+  let heights: number[] = [];
+  const measure = (): void => {
+    tops = steps.map((el) => el.getBoundingClientRect().top + window.scrollY);
+    heights = steps.map((el) => el.offsetHeight);
+  };
+  measure();
+  let mt = 0;
+  window.addEventListener('resize', () => { clearTimeout(mt); mt = window.setTimeout(measure, 150); });
+
   let ticking = false;
   const pick = (): void => {
     ticking = false;
     const mid = window.innerHeight / 2;
     let best = -1;
     let bestD = Infinity;
+    const y = window.scrollY;
     for (let i = 0; i < steps.length; i++) {
-      const r = steps[i].getBoundingClientRect();
+      const top = tops[i] - y;
+      const h = heights[i];
       // Skip steps entirely off screen so scrolling past the section does not
       // drag the state to whichever end happens to be nearer.
-      if (r.bottom < 0 || r.top > window.innerHeight) continue;
-      const d = Math.abs(r.top + r.height / 2 - mid);
+      if (top + h < 0 || top > window.innerHeight) continue;
+      const d = Math.abs(top + h / 2 - mid);
       if (d < bestD) { bestD = d; best = i; }
     }
     if (best >= 0) {

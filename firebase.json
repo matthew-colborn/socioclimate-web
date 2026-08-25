@@ -100,6 +100,23 @@
           }
         ]
       }
+    ],
+    "redirects": [
+      {
+        "source": "/what-we-do",
+        "destination": "/#01-what-we-do",
+        "type": 301
+      },
+      {
+        "source": "/portfolio",
+        "destination": "/#02-portfolio",
+        "type": 301
+      },
+      {
+        "source": "/contact",
+        "destination": "/#03-contact",
+        "type": 301
+      }
     ]
   }
 }

@@ -24,11 +24,22 @@ export const MAILTO = `mailto:${SITE.email}`;
  * of the label and are rendered in mono beside it.
  */
 export const NAV = [
-  { n: '00', href: '/', label: 'Home' },
-  { n: '01', href: '/what-we-do', label: 'What we do' },
-  { n: '02', href: '/portfolio', label: 'Portfolio' },
-  { n: '03', href: '/contact', label: 'Contact' },
+  { n: '00', href: '#top', label: 'Home' },
+  { n: '01', href: '#01-what-we-do', label: 'What we do' },
+  { n: '02', href: '#02-portfolio', label: 'Portfolio' },
+  { n: '03', href: '#03-contact', label: 'Contact' },
 ] as const;
+
+/**
+ * The routes these sections used to live at. They are indexed and shared, so
+ * they redirect to their anchor rather than 404 — the redirect itself is in
+ * firebase.json; this is here so the mapping lives with the nav it mirrors.
+ */
+export const LEGACY_ROUTES = {
+  '/what-we-do': '/#01-what-we-do',
+  '/portfolio': '/#02-portfolio',
+  '/contact': '/#03-contact',
+} as const;
 
 /**
  * Clients whose name is not ours to publish yet.

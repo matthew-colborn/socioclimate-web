@@ -1,17 +1,18 @@
 ---
 import { getEntry } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Diagnostic from '../components/Diagnostic.astro';
-import Field from '../components/Field.astro';
-import '../styles/diagnostic.css';
+import Diagnostic from '../Diagnostic.astro';
+import Field from '../Field.astro';
+import '../../styles/diagnostic.css';
 
 const d = (await getEntry('pages', 'contact'))!.data;
 ---
-<BaseLayout title={d.title} description={d.description}>
+<section id="03-contact" class="site-section" tabindex="-1" aria-labelledby="s03-h">
+  <span id="s03-h" class="visually-hidden">Contact</span>
+
   <header class="ch wrap">
     <div class="ch__copy">
       <p class="eyebrow"><span class="ch__n">{d.section}</span> Contact</p>
-      <h1>{d.heading}</h1>
+      <h2 class="section-h">{d.heading}</h2>
       <p class="ch__lede">{d.standfirst}</p>
     </div>
     {/* Two complete copies of the mark parting to open a threshold. It is the
@@ -22,21 +23,10 @@ const d = (await getEntry('pages', 'contact'))!.data;
   </header>
 
   <Diagnostic />
-</BaseLayout>
-
-<script>
-  import { mountFields } from '../lib/field/mount';
-  // Re-run after every view transition: with ClientRouter the document is
-  // never torn down, so a plain top-level call would only ever fire once.
-  const boot = () => {
-    mountFields();
-  };
-  boot();
-  document.addEventListener('astro:page-load', boot);
-</script>
+</section>
 
 <style>
-  .ch {
+.ch {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);
     align-items: center;

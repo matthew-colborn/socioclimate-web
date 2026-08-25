@@ -1,8 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Field from '../components/Field.astro';
-import { clientName, type ClientKey } from '../config/site';
+import Field from '../Field.astro';
+import { clientName, type ClientKey } from '../../config/site';
 
 const page = await getEntry('pages', 'portfolio');
 if (!page) throw new Error('Missing src/content/pages/portfolio.mdx');
@@ -20,10 +19,12 @@ const entries = await Promise.all(
     }))
 );
 ---
-<BaseLayout title={d.title} description={d.description}>
+<section id="02-portfolio" class="site-section" tabindex="-1" aria-labelledby="s02-h">
+  <span id="s02-h" class="visually-hidden">Portfolio</span>
+
   <header class="page-head wrap">
     <p class="eyebrow"><span class="page-head__n">{d.section}</span> Portfolio</p>
-    <h1>{d.heading}</h1>
+    <h2 class="section-h">{d.heading}</h2>
     <p class="page-head__lede">{d.standfirst}</p>
   </header>
 
@@ -38,7 +39,7 @@ const entries = await Promise.all(
           <div class="entry__figure"><Field scene={e.data.scene} variant="panel" /></div>
           <div class="entry__head">
             <p class="entry__meta"><span class="entry__stage">{e.data.stage}</span></p>
-            <h2 class="entry__name">{e.display}</h2>
+            <h3 class="entry__name">{e.display}</h3>
             <p class="entry__headline">{e.data.headline}</p>
           </div>
         </div>
@@ -79,12 +80,12 @@ const entries = await Promise.all(
     <p class="eyebrow">Next</p>
     <h2 class="tail__h">Find out whether you have one.</h2>
     <p class="tail__p">Five questions, scored as you answer, nothing gated.</p>
-    <a class="cta" href="/contact">Run the diagnostic<span class="cta__arrow" aria-hidden="true">↗</span></a>
+    <a class="cta" href="#03-contact">Run the diagnostic<span class="cta__arrow" aria-hidden="true">↗</span></a>
   </section>
-</BaseLayout>
+</section>
 
 <style>
-  .page-head__n { color: var(--cyan); margin-right: 0.5em; }
+.page-head__n { color: var(--cyan); margin-right: 0.5em; }
   .intro { padding-bottom: var(--s-7); }
 
   .entry {
@@ -175,14 +176,3 @@ const entries = await Promise.all(
   .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 18ch; }
   .tail__p { color: var(--paper-dim); margin: var(--s-3) 0 var(--s-5); }
 </style>
-
-<script>
-  import { mountFields } from '../lib/field/mount';
-  // Re-run after every view transition: with ClientRouter the document is
-  // never torn down, so a plain top-level call would only ever fire once.
-  const boot = () => {
-    mountFields();
-  };
-  boot();
-  document.addEventListener('astro:page-load', boot);
-</script>

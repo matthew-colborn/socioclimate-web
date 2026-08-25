@@ -1,7 +1,6 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Field from '../components/Field.astro';
+import Field from '../Field.astro';
 
 const page = await getEntry('pages', 'what-we-do');
 if (!page) throw new Error('Missing src/content/pages/what-we-do.mdx');
@@ -14,10 +13,12 @@ const moves = await Promise.all(
     .map(async (m) => ({ id: m.id, data: m.data, Body: (await render(m)).Content }))
 );
 ---
-<BaseLayout title={d.title} description={d.description}>
+<section id="01-what-we-do" class="site-section" tabindex="-1" aria-labelledby="s01-h">
+  <span id="s01-h" class="visually-hidden">What we do</span>
+
   <header class="page-head wrap">
     <p class="eyebrow"><span class="page-head__n">{d.section}</span> What we do</p>
-    <h1>{d.heading}</h1>
+    <h2 class="section-h">{d.heading}</h2>
     <p class="page-head__lede">{d.standfirst}</p>
   </header>
 
@@ -34,7 +35,7 @@ const moves = await Promise.all(
         <article class="move" data-reveal data-step={m.data.step} id={m.id} tabindex="-1">
           <div class="move__head">
             <span class="move__n" aria-hidden="true">{m.data.step}</span>
-            <h2 class="move__name">{m.data.name}</h2>
+            <h3 class="move__name">{m.data.name}</h2>
           </div>
           <p class="move__line">{m.data.line}</p>
           <div class="move__body prose"><m.Body /></div>
@@ -56,12 +57,12 @@ const moves = await Promise.all(
     <p class="eyebrow">Next</p>
     <h2 class="tail__h">Four builds, labelled honestly.</h2>
     <p class="tail__p">What the businesses were, what was found inside them, and what it produced.</p>
-    <a class="cta" href="/portfolio">See the work<span class="cta__arrow" aria-hidden="true">↗</span></a>
+    <a class="cta" href="#02-portfolio">See the work<span class="cta__arrow" aria-hidden="true">↗</span></a>
   </section>
-</BaseLayout>
+</section>
 
 <style>
-  .page-head__n { color: var(--cyan); margin-right: 0.5em; }
+.page-head__n { color: var(--cyan); margin-right: 0.5em; }
 
   .move {
     border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
@@ -158,16 +159,3 @@ const moves = await Promise.all(
   .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 20ch; }
   .tail__p { color: var(--paper-dim); max-width: 56ch; margin: var(--s-4) 0 var(--s-5); }
 </style>
-
-<script>
-  import { mountFields } from '../lib/field/mount';
-  import { initProcess } from '../lib/process-controller';
-  // Re-run after every view transition: with ClientRouter the document is
-  // never torn down, so a plain top-level call would only ever fire once.
-  const boot = () => {
-    mountFields();
-    initProcess();
-  };
-  boot();
-  document.addEventListener('astro:page-load', boot);
-</script>

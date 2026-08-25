@@ -1,7 +1,10 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Field from '../components/Field.astro';
+import WhatWeDo from '../components/sections/WhatWeDo.astro';
+import Portfolio from '../components/sections/Portfolio.astro';
+import Contact from '../components/sections/Contact.astro';
 import { SITE } from '../config/site';
 import POSTERS from '../data/posters.json';
 
@@ -10,7 +13,6 @@ if (!page) throw new Error('Missing src/content/pages/home.mdx');
 const { Content } = await render(page);
 const d = page.data;
 
-const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.data.order);
 const beats = d.beats ?? [];
 ---
 <BaseLayout
@@ -21,6 +23,7 @@ const beats = d.beats ?? [];
   preloadImage={POSTERS.flame}
 >
   <section
+    id="top"
     class="hero wrap"
     data-thesis
     aria-roledescription="carousel"
@@ -65,7 +68,7 @@ const beats = d.beats ?? [];
       {/* Outside the rotation on purpose. Nothing a visitor wants is behind a
           beat coming round. */}
       <div class="hero__act">
-        <a class="cta" href="/what-we-do">
+        <a class="cta" href="#01-what-we-do">
           How it works<span class="cta__arrow" aria-hidden="true">↗</span>
         </a>
         <div class="beat-ctl">
@@ -102,22 +105,6 @@ const beats = d.beats ?? [];
     <div class="prose"><Content /></div>
   </section>
 
-  <section class="band wrap" data-reveal aria-labelledby="moves-h">
-    <p class="eyebrow" id="moves-h">The process</p>
-    <h2 class="band__h">Four moves, in order.</h2>
-    <ol class="moves">
-      {moves.map((m) => (
-        <li>
-          <a class="panel move" href={`/what-we-do#${m.id}`}>
-            <span class="move__n">{m.data.step}</span>
-            <span class="move__name">{m.data.name}</span>
-            <span class="move__line">{m.data.line}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
-  </section>
-
   <section class="band wrap" data-reveal aria-labelledby="lines-h">
     <p class="eyebrow" id="lines-h">What delivery includes</p>
     <h2 class="band__h">The mechanism is custom software.</h2>
@@ -145,8 +132,12 @@ const beats = d.beats ?? [];
       worth more the longer it runs. The portfolio is what that has produced so
       far, labelled honestly.
     </p>
-    <a class="cta" href="/portfolio">See the work<span class="cta__arrow" aria-hidden="true">↗</span></a>
+    <a class="cta" href="#02-portfolio">See the work<span class="cta__arrow" aria-hidden="true">↗</span></a>
   </section>
+
+  <WhatWeDo />
+  <Portfolio />
+  <Contact />
 </BaseLayout>
 
 <style>
@@ -380,12 +371,16 @@ const beats = d.beats ?? [];
 <script>
   import { mountFields } from '../lib/field/mount';
   import { initThesis } from '../lib/thesis';
+  import { initProcess } from '../lib/process-controller';
+  import { initNav } from '../lib/nav';
   // Re-run after every view transition: with ClientRouter the document is
   // never torn down, so a plain top-level call would only ever fire once.
   const boot = () => {
     mountFields();
     const hero = document.querySelector<HTMLElement>('[data-thesis]');
     if (hero) initThesis(hero);
+    initProcess();
+    initNav();
   };
   boot();
   document.addEventListener('astro:page-load', boot);

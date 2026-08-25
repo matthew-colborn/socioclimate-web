@@ -4,7 +4,15 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+/* Reduced motion turns every scroll into an instant jump, including the ones
+   the browser performs itself for a fragment link on a cold load. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 body {
   margin: 0;
@@ -169,8 +177,8 @@ img, canvas, svg { display: block; max-width: 100%; }
 }
 .site-head__nav a:hover { color: var(--paper); }
 /* Where you are now — one of the few things cyan is spent on. */
-.site-head__nav a[aria-current='page'] { color: var(--paper); }
-.site-head__nav a[aria-current='page'] .n { color: var(--cyan); }
+.site-head__nav a[aria-current] { color: var(--paper); }
+.site-head__nav a[aria-current] .n { color: var(--cyan); }
 
 /* All four items with their numbers do not fit beside the full lockup on a
    375px screen — "What we do" wraps onto three lines and the header collapses.
@@ -344,7 +352,10 @@ img, canvas, svg { display: block; max-width: 100%; }
 .reveal-ready [data-reveal] {
   opacity: 0;
   transform: translateY(16px);
-  transition: opacity 460ms var(--ease), transform 560ms var(--ease-out-back);
+  /* Weighted, not bouncy: a hard start and a long settle. easeOutBack
+     overshoots, and on a page this long an overshoot on every section reads as
+     a wobble rather than as mass. */
+  transition: opacity 380ms var(--ease-reveal), transform 480ms var(--ease-reveal);
 }
 .reveal-ready [data-reveal].is-in {
   opacity: 1;
@@ -383,6 +394,18 @@ img, canvas, svg { display: block; max-width: 100%; }
   animation-name: sc-rule;
 }
 @keyframes sc-rule { 50% { border-color: color-mix(in srgb, var(--teal-deep) 42%, transparent); } }
+
+/* --- Sections on one page ------------------------------------------------- */
+/* Focus targets, not just scroll targets: keyboard navigation has to land
+   focus inside the section or the next Tab jumps somewhere unrelated. The
+   outline is suppressed for the programmatic focus and kept for real
+   keyboard focus. */
+.site-section { scroll-margin-top: 5.5rem; }
+.site-section:focus { outline: none; }
+.site-section:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 8px; }
+
+/* The section headings that used to be page h1s. */
+.section-h { font-size: clamp(2.1rem, 5.2vw, 3.5rem); max-width: 20ch; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

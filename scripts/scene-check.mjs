@@ -58,6 +58,8 @@ let fail = 0;
   await page.goto(base + '/', { waitUntil: 'networkidle0' });
   await new Promise((r) => setTimeout(r, 2200));  // past the draw-in ramp
 
+  await page.evaluate(() => document.querySelector('.hero__field .field')?.scrollIntoView({ block: 'center' }));
+  await new Promise((r) => setTimeout(r, 800));
   const clip = await clipTo(page, '.hero__field .field');
   const frames = [];
   for (let i = 0; i <= 6; i++) {
@@ -82,15 +84,18 @@ let fail = 0;
 }
 
 // ---------- 2. reduced motion freezes every scene ----------------------------
+// One page now, so both live on it. Fields are built lazily on approach, which
+// is why each is scrolled to before being measured.
 for (const [route, sel, name] of [
-  ['/', '.hero__field .field', 'flame (home)'],
-  ['/portfolio', '.entry__figure .field', 'ridge (portfolio)'],
+  ['/', '.hero__field .field', 'flame (hero)'],
+  ['/', '.entry__figure .field', 'ridge (portfolio section)'],
 ]) {
   const page = await browser.newPage();
   await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
   await page.goto(base + route, { waitUntil: 'networkidle0' });
-  await new Promise((r) => setTimeout(r, 1500));
+  await page.evaluate((s) => document.querySelector(s)?.scrollIntoView({ block: 'center' }), sel);
+  await new Promise((r) => setTimeout(r, 1800));
 
   const clip = await clipTo(page, sel);
   const slug = name.split(' ')[0];

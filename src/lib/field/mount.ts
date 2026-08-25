@@ -24,10 +24,35 @@ const DRAW_MS = 900;
 const MIN_RATIO = 0.12;
 
 interface Mounted {
-  engine: Engine;
+  /** Null until the field has come near the viewport. See `ensure`. */
+  engine: Engine | null;
+  canvas: HTMLCanvasElement;
+  id: SceneId;
   el: HTMLElement;
   ratio: number;
   ramped: boolean;
+  reduced: boolean;
+}
+
+/**
+ * Construct on approach, not on load.
+ *
+ * The whole site is one page now, so every canvas on it exists in the document
+ * from the start. Building eight engines up front means eight scene inits and
+ * eight first paints before anything has been scrolled to, which is time spent
+ * on work nobody can see yet. Space is reserved by the aspect-ratio on .field,
+ * so nothing shifts when one of these finally arrives.
+ */
+function ensure(it: Mounted): Engine | null {
+  if (it.engine) return it.engine;
+  const scene = SCENES[it.id];
+  if (!scene) return null;
+  it.engine = new Engine({
+    canvas: it.canvas, scene, seed: SEEDS[it.id], still: it.reduced,
+  });
+  if (!it.reduced) it.engine.hold();
+  it.el.classList.add('is-live');
+  return it.engine;
 }
 
 /**
@@ -42,17 +67,17 @@ let io: IntersectionObserver | null = null;
 function govern(): void {
   let best: Mounted | null = null;
   for (const it of items) {
-    if (it.ratio < MIN_RATIO) continue;
+    if (it.ratio < MIN_RATIO || !it.engine) continue;
     if (!best || it.ratio > best.ratio) best = it;
   }
   if (best === active) return;
 
   // The outgoing field holds its last painted frame rather than clearing.
-  if (active) active.engine.hold();
+  if (active?.engine) active.engine.hold();
   active = best;
-  if (!active) return;
+  if (!active || !active.engine) return;
 
-  const current = active;
+  const current = active as Mounted & { engine: Engine };
   current.engine.play();
   if (!current.ramped) {
     current.ramped = true;
@@ -73,13 +98,22 @@ function observer(): IntersectionObserver {
     (entries) => {
       for (const entry of entries) {
         const it = items.find((x) => x.el === entry.target);
-        if (it) it.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+        if (!it) continue;
+        it.ratio = entry.isIntersecting ? entry.intersectionRatio : 0;
+        // Anything the observer reports at all is within rootMargin, which is
+        // the cue to build it. Under reduced motion this draws its one still.
+        if (entry.isIntersecting) ensure(it);
       }
       govern();
     },
     // A spread of thresholds, so "which is most visible" is answered with real
     // numbers as the page scrolls rather than by a single on/off flip.
-    { threshold: [0, 0.12, 0.25, 0.4, 0.6, 0.8, 1] }
+    {
+      threshold: [0, 0.12, 0.25, 0.4, 0.6, 0.8, 1],
+      // Build a field roughly half a screen before it is reached, so it is
+      // ready by the time it matters and idle until then.
+      rootMargin: '45% 0px 45% 0px',
+    }
   );
   return io;
 }
@@ -88,7 +122,10 @@ function observer(): IntersectionObserver {
 export function registerField(engine: Engine, el: HTMLElement): void {
   if (prefersReducedMotion()) return;
   engine.hold();
-  items.push({ engine, el, ratio: 0, ramped: true });
+  items.push({
+    engine, el, ratio: 0, ramped: true, reduced: false,
+    canvas: el.querySelector('canvas') as HTMLCanvasElement, id: 'flame' as SceneId,
+  });
   observer().observe(el);
 }
 
@@ -99,7 +136,7 @@ export function mountFields(scope: ParentNode = document): void {
   // and the governor starts choosing between fields that are no longer there.
   for (let i = items.length - 1; i >= 0; i--) {
     if (!items[i].el.isConnected) {
-      items[i].engine.stop();
+      items[i].engine?.stop();
       if (active === items[i]) active = null;
       io?.unobserve(items[i].el);
       items.splice(i, 1);
@@ -126,24 +163,20 @@ export function mountFields(scope: ParentNode = document): void {
     const el = (canvas.closest('.field') as HTMLElement) ?? canvas;
     if (known.has(el)) continue;
 
-    const engine = new Engine({ canvas, scene, seed: SEEDS[id], still: reduced });
-    if (!reduced) engine.hold();
-    items.push({ engine, el, ratio: 0, ramped: false });
-
-    // Hands the surface over from the poster to the canvas. Under reduced
-    // motion the Engine has already drawn its single frame in the constructor.
-    el.classList.add('is-live');
+    // Registered, not built. `ensure` constructs it when it comes near.
+    items.push({ engine: null, canvas, id, el, ratio: 0, ramped: false, reduced });
   }
 
-  if (reduced || !items.length) return;
+  if (!items.length) return;
 
   items.forEach((it) => observer().observe(it.el));
+  if (reduced) return;
   govern();
 
   let rt = 0;
   window.addEventListener('resize', () => {
     clearTimeout(rt);
-    rt = window.setTimeout(() => items.forEach((it) => it.engine.resize()), 150);
+    rt = window.setTimeout(() => items.forEach((it) => it.engine?.resize()), 150);
   });
 
   // The pointer has to be translated into each canvas's own space, and that
@@ -158,7 +191,7 @@ export function mountFields(scope: ParentNode = document): void {
       pending = true;
       requestAnimationFrame(() => {
         pending = false;
-        for (const it of items) it.engine.refreshRect();
+        for (const it of items) it.engine?.refreshRect();
       });
     },
     { passive: true }
@@ -166,7 +199,7 @@ export function mountFields(scope: ParentNode = document): void {
 
   // Nothing runs while the tab is hidden.
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) items.forEach((it) => it.engine.hold());
-    else if (active) active.engine.play();
+    if (document.hidden) items.forEach((it) => it.engine?.hold());
+    else if (active?.engine) active.engine.play();
   });
 }

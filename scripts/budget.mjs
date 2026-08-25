@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer-core';
 import { gzipSync } from 'node:zlib';
 
 const base = (process.argv[2] || 'http://localhost:4332').replace(/\/$/, '');
-const PATHS = ['/', '/portfolio', '/contact'];
+const PATHS = ['/'];
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });

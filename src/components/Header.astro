@@ -2,7 +2,6 @@
 import CircuitFlame from './CircuitFlame.astro';
 import Wordmark from './Wordmark.astro';
 import { NAV } from '../config/site';
-const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
 ---
 <header class="site-head">
   <div class="wrap site-head__inner">
@@ -12,7 +11,7 @@ const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
     </a>
     <nav class="site-head__nav" aria-label="Primary">
       {NAV.map((i) => (
-        <a href={i.href} aria-current={path === i.href ? 'page' : undefined}>
+        <a href={i.href} aria-current={i.n === '00' ? 'true' : undefined}>
           <span class="n" aria-hidden="true">{i.n}</span>
           <span class="label">{i.label}</span>
         </a>

@@ -24,7 +24,9 @@ const base = (process.argv[2] || 'http://localhost:4332').replace(/\/$/, '');
 const out = resolve(root, 'public/scenes');
 mkdirSync(out, { recursive: true });
 
-const ROUTES = ['/', '/what-we-do', '/portfolio', '/contact'];
+// One page now, so every scene is captured from it. The script scrolls each
+// field into view first, because they are built lazily on approach.
+const ROUTES = ['/'];
 // Every scene in the registry must be reachable from one of those routes.
 const EXPECTED = ['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening', 'process'];
 
@@ -63,6 +65,14 @@ for (const route of ROUTES) {
     // Anything not in the registry is somebody else's canvas, not a scene.
     // Without this an empty or unknown id writes a file named ".webp".
     if (!EXPECTED.includes(id) || seen.includes(id)) continue;
+
+    // Fields are constructed when they approach the viewport, so each one has
+    // to be scrolled to before it has drawn anything at all.
+    await page.evaluate((sceneId) => {
+      document.querySelector(`canvas[data-field="${sceneId}"]`)
+        ?.closest('.field')?.scrollIntoView({ block: 'center' });
+    }, id);
+    await new Promise((r) => setTimeout(r, 600));
 
     // Hide the poster img so an older poster cannot be captured into the new one.
     await page.evaluate((sceneId) => {

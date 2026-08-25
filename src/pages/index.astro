@@ -11,6 +11,7 @@ const { Content } = await render(page);
 const d = page.data;
 
 const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.data.order);
+const beats = d.beats ?? [];
 ---
 <BaseLayout
   title="SocioClimate"
@@ -19,19 +20,81 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
   bleed={true}
   preloadImage={POSTERS.flame}
 >
-  <section class="hero wrap">
+  <section
+    class="hero wrap"
+    data-thesis
+    aria-roledescription="carousel"
+    aria-label="The argument, in four beats"
+  >
     <div class="hero__copy">
-      <p class="hero__eyebrow">
-        <span class="hero__n">{d.section}</span>
-        <span>Data leverage</span>
-      </p>
-      <h1 class="hero__h">{d.heading}</h1>
-      <p class="hero__line">{d.standfirst}</p>
-      <a class="cta" href="/what-we-do">
-        How it works<span class="cta__arrow" aria-hidden="true">↗</span>
-      </a>
+      {/* One heading for the document, and it does not rotate. Giving each beat
+          its own h1 put four of them on the page, three aria-hidden at any
+          moment, and made the page's main heading depend on when you looked. */}
+      <h1 class="visually-hidden">{d.heading}</h1>
+
+      <div class="hero__stack" data-beat-stack>
+        {beats.map((b, i) => (
+          <article
+            class:list={['beat', i === 0 && 'is-on']}
+            data-beat={b.headline}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`Beat ${i + 1} of ${beats.length}`}
+            aria-hidden={i === 0 ? 'false' : 'true'}
+          >
+            <p class="hero__eyebrow">
+              <span class="hero__n">{b.n}</span>
+              <span>{i === 0 ? 'Data leverage' : 'The argument'}</span>
+            </p>
+            <p class="hero__h">{b.headline}</p>
+            <p class="hero__line">{b.line}</p>
+            {b.readouts.length > 0 && (
+              <ul class="beat__readouts">
+                {b.readouts.map((r) => (
+                  <li class="readout">
+                    <span class="readout__label">{r.label}</span>
+                    <span class="beat__value">{r.value}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+        ))}
+      </div>
+
+      {/* Outside the rotation on purpose. Nothing a visitor wants is behind a
+          beat coming round. */}
+      <div class="hero__act">
+        <a class="cta" href="/what-we-do">
+          How it works<span class="cta__arrow" aria-hidden="true">↗</span>
+        </a>
+        <div class="beat-ctl">
+          <button class="beat-ctl__pause" type="button" data-beat-pause aria-pressed="false">
+            <span class="beat-ctl__glyph" aria-hidden="true"></span>
+            <span data-beat-pause-label>Pause</span>
+            <span class="visually-hidden"> the rotation</span>
+          </button>
+          <ul class="beat-ctl__dots">
+            {beats.map((b, i) => (
+              <li>
+                <button
+                  type="button"
+                  data-beat-goto={i}
+                  aria-current={i === 0 ? 'true' : 'false'}
+                  aria-label={`Show beat ${i + 1} of ${beats.length}`}
+                >
+                  <span aria-hidden="true">{b.n}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
+
     <div class="hero__field"><Field scene="flame" priority={true} /></div>
+
+    <p class="visually-hidden" data-beat-live aria-live="off" aria-atomic="true"></p>
   </section>
 
   <section class="band wrap" aria-labelledby="thesis-h">
@@ -88,10 +151,9 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
 
 <style>
   /* --- Hero ---------------------------------------------------------------
-     Two columns: the thesis on the left, the mark on the right. The mark used
-     to sit centred behind the copy and the headline ran straight through it —
-     legible, but the two were fighting for the same space. Side by side, each
-     gets to be itself. */
+     Two columns: the argument on the left, the mark on the right. The mark is
+     one continuously running scene and never restarts between beats — what
+     cycles is the text. */
   .hero {
     min-height: 100svh;
     display: grid;
@@ -102,6 +164,27 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
   }
   .hero__copy { position: relative; z-index: 1; }
   .hero__field { justify-self: center; width: 100%; max-width: 30rem; }
+
+  /* Every beat occupies the same grid cell, so the stack is as tall as the
+     tallest one and swapping between them shifts nothing. A fixed min-height
+     would be a magic number that goes stale the moment the copy changes. */
+  .hero__stack { display: grid; }
+  .beat {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition: opacity 520ms var(--ease), transform 520ms var(--ease),
+                visibility 0s linear 520ms;
+  }
+  .beat.is-on {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 520ms var(--ease), transform 520ms var(--ease),
+                visibility 0s;
+  }
+
   .hero__eyebrow {
     display: flex;
     align-items: baseline;
@@ -115,21 +198,81 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
   }
   .hero__n { color: var(--gold); }
   .hero__h {
-    font-size: clamp(2.1rem, 4.6vw, 3.5rem);
+    font-size: clamp(1.9rem, 4.2vw, 3.2rem);
     font-weight: 250;
     letter-spacing: -0.025em;
-    max-width: 17ch;
+    max-width: 18ch;
   }
   .hero__line {
-    font-family: var(--font-mono);
-    font-size: clamp(0.86rem, 1.4vw, 1rem);
-    letter-spacing: 0.02em;
+    font-size: clamp(0.95rem, 1.5vw, 1.08rem);
     color: var(--ink-2);
-    margin: var(--s-4) 0 var(--s-5);
+    margin: var(--s-4) 0 0;
+    max-width: 46ch;
   }
 
-  /* Below this the hero stops being a composition and becomes a column: mark
-     first, then the thesis. Two columns at this width give neither any room. */
+  .beat__readouts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-5);
+    list-style: none;
+    margin: var(--s-5) 0 0;
+    padding: var(--s-3) 0 0;
+    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  }
+  /* Not .readout__value: these are short qualitative claims rather than
+     measurements, so they are set in the body face. Mono here would dress an
+     assertion up as a reading. */
+  .beat__value {
+    font-size: 0.98rem;
+    color: var(--ink);
+    line-height: 1.3;
+    max-width: 18ch;
+  }
+
+  /* --- Act: the fixed CTA and the rotation controls ------------------------ */
+  .hero__act {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--s-4) var(--s-5);
+    margin-top: var(--s-6);
+  }
+  .beat-ctl { display: flex; align-items: center; gap: var(--s-4); }
+  .beat-ctl__pause,
+  .beat-ctl__dots button {
+    background: none;
+    border: 0;
+    padding: 0.3em 0.1em;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: color var(--dur-1) var(--ease);
+  }
+  .beat-ctl__pause { display: inline-flex; align-items: center; gap: 0.5em; }
+  .beat-ctl__pause:hover,
+  .beat-ctl__dots button:hover { color: var(--ink); }
+  .beat-ctl__glyph {
+    width: 7px; height: 9px;
+    border-left: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+  }
+  .beat-ctl__pause[aria-pressed='true'] .beat-ctl__glyph {
+    border: 0;
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid currentColor;
+  }
+  .beat-ctl__dots { display: flex; gap: var(--s-3); list-style: none; margin: 0; padding: 0; }
+  .beat-ctl__dots button[aria-current='true'] { color: var(--gold); }
+  .beat-ctl__dots button[aria-current='true'] span {
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 2px;
+  }
+
   @media (max-width: 60rem) {
     .hero {
       min-height: 0;
@@ -140,10 +283,17 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
     }
     /* The mark leads on a phone. `order` rather than column-reverse so the
        reading order stays copy-first and only the paint order changes. */
-    /* 16rem, not 22: at 4/5 a 22rem mark is 440px tall and eats half a phone
-       before a word of the thesis is visible. */
     .hero__field { order: -1; max-width: 16rem; align-self: center; }
-    .hero__h { font-size: clamp(1.9rem, 7.5vw, 2.6rem); max-width: 20ch; }
+    .hero__h { font-size: clamp(1.75rem, 6.5vw, 2.4rem); max-width: 20ch; }
+    .beat__readouts { gap: var(--s-4); }
+    .beat__value { font-size: 0.9rem; }
+  }
+
+  /* No crossfade when motion is not wanted. The rotator does not auto-advance
+     either, so this only affects the jump when a dot is pressed. */
+  @media (prefers-reduced-motion: reduce) {
+    .beat { transition: none; transform: none; }
+    .beat.is-on { transition: none; }
   }
 
   /* --- Bands --------------------------------------------------------------- */
@@ -218,5 +368,8 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
 
 <script>
   import { mountFields } from '../lib/field/mount';
+  import { initThesis } from '../lib/thesis';
   mountFields();
+  const hero = document.querySelector<HTMLElement>('[data-thesis]');
+  if (hero) initThesis(hero);
 </script>

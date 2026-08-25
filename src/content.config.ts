@@ -80,6 +80,27 @@ const pages = defineCollection({
     lines: z
       .array(z.object({ label: z.string(), note: z.string() }))
       .optional(),
+    /**
+     * The home hero rotation: the argument in four beats.
+     *
+     * Deliberately not the portfolio and not the four moves — those have their
+     * own pages now, and a hero that re-tells them is just a slower way to read
+     * the nav. These are the claim, the observation, the problem and the
+     * consequence.
+     */
+    beats: z
+      .array(
+        z.object({
+          n: z.string(),
+          headline: z.string(),
+          line: z.string(),
+          readouts: z
+            .array(z.object({ label: z.string(), value: z.string() }))
+            .max(3)
+            .default([]),
+        })
+      )
+      .optional(),
   }),
 });
 

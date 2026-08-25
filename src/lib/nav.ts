@@ -40,15 +40,68 @@ export function initNav(): void {
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /** Scroll to a section and move focus into it. */
+  /**
+   * Scroll to a section and move focus into it.
+   *
+   * Not scrollIntoView({behavior:'smooth'}): the browser's own smooth scroll
+   * scales its duration with distance, and on a page this long a jump from the
+   * hero to contact crawls. This runs a fixed budget instead — the same
+   * half-second whether the section is one screen away or six — so the nav
+   * feels equally quick everywhere.
+   */
+  const DURATION = 520;
+
   const go = (rawId: string): void => {
     const id = resolve(rawId);
     const el = document.getElementById(id);
     if (!el) return;
-    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-    // preventScroll, because scrollIntoView is already doing that part and
-    // letting focus scroll too fights the smooth animation.
-    el.focus({ preventScroll: true });
+
+    const focusIt = (): void => el.focus({ preventScroll: true });
+
+    // scroll-margin-top only applies to scrollIntoView and fragment navigation,
+    // and this scrolls by hand — so without reading it the section lands under
+    // the fixed header.
+    const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+
+    if (reduced) {
+      // Instant, because a long eased scroll is exactly the vestibular motion
+      // the setting exists to stop.
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.scrollY - margin,
+        behavior: 'instant',
+      });
+      focusIt();
+      return;
+    }
+
+    const from = window.scrollY;
+    const to = Math.max(
+      0,
+      Math.min(
+        document.documentElement.scrollHeight - window.innerHeight,
+        el.getBoundingClientRect().top + from - margin
+      )
+    );
+    if (Math.abs(to - from) < 2) { focusIt(); return; }
+
+    const t0 = performance.now();
+    // Eased both ends: leaves without a jerk, arrives without a stop.
+    const easeInOut = (x: number): number =>
+      x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+    const step = (now: number): void => {
+      const k = Math.min(1, (now - t0) / DURATION);
+      // 'instant' is load-bearing. base.css sets scroll-behavior: smooth for
+      // plain fragment links, and without this override the browser applies its
+      // own smooth scroll to EVERY frame of this one — each call restarting a
+      // fresh animation toward a moving target. The result was a 1.3-1.6s
+      // distance-scaled crawl that never reached where it was going, which is
+      // what made the section jumps feel slow.
+      window.scrollTo({ top: from + (to - from) * easeInOut(k), behavior: 'instant' });
+      if (k < 1) requestAnimationFrame(step);
+      else focusIt();
+    };
+    requestAnimationFrame(step);
   };
 
   if (!wired) {

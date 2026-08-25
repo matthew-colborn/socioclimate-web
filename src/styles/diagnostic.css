@@ -115,3 +115,70 @@
 .reveal-form__arrow { transition: transform var(--dur-2) var(--ease); }
 .reveal-form[open] .reveal-form__arrow { transform: rotate(180deg); }
 .reveal-form[open] .reveal-form__cta { margin-bottom: var(--s-6); }
+
+/* --- One question at a time ----------------------------------------------
+   .is-stepped is added by the script. Without it every question renders in
+   order and the form still works, so nothing here is load-bearing for content —
+   it is presentation on top of a list that is already complete. */
+.diag.is-stepped .q {
+  display: none;
+  opacity: 0;
+  transform: translateY(10px);
+}
+.diag.is-stepped .q.is-on {
+  display: block;
+  opacity: 1;
+  transform: none;
+  /* Arrives with weight: quick out of the gate, long settle, never overshoots. */
+  transition: opacity 340ms var(--ease-reveal), transform 420ms var(--ease-reveal);
+}
+/* The outgoing question leaves before the next arrives, so they never overlap. */
+.diag.is-stepped .q.is-leaving {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms var(--ease), transform 300ms var(--ease);
+}
+
+/* The list holds its tallest question's height so answering never jolts the
+   page. A stepped form that resizes under the cursor is the classic way this
+   pattern goes wrong. */
+.diag.is-stepped .diag__list { min-height: 15rem; }
+.diag.is-stepped.is-done .diag__list { min-height: 0; }
+
+.diag__bar {
+  height: 1px;
+  background: color-mix(in srgb, var(--teal-deep) 60%, transparent);
+  margin-bottom: var(--s-5);
+  max-width: 46rem;
+}
+.diag__bar span {
+  display: block;
+  height: 100%;
+  width: calc(var(--k, 0) * 100%);
+  background: var(--cyan);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--cyan) 70%, transparent);
+  transition: width 420ms var(--ease-reveal);
+}
+.diag:not(.is-stepped) .diag__bar { display: none; }
+
+.diag__back {
+  background: none;
+  border: 0;
+  padding: 0.4em 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  cursor: pointer;
+  transition: color var(--dur-1) var(--ease);
+}
+.diag__back:hover { color: var(--paper); }
+.diag:not(.is-stepped) .diag__back,
+.diag.is-stepped.is-done .diag__back { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .diag.is-stepped .q.is-on,
+  .diag.is-stepped .q.is-leaving { transition: none; transform: none; }
+  .diag__bar span { transition: none; }
+}

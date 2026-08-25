@@ -26,9 +26,25 @@ const BEAM = 40;
 
 interface Mote { t0: number; sp: number; off: number; side: number }
 
+/**
+ * The gateway answers the form.
+ *
+ * Rather than adding a second canvas for the diagnostic's moments, the graphic
+ * that is already there responds: it swings open when the questions appear,
+ * pulses as each one is answered, and surges on submit. Cheaper than another
+ * scene, and it makes the icon part of the interaction instead of decoration
+ * sitting beside it.
+ *
+ * All three decay to zero on their own, so a missed reset cannot leave the
+ * scene stuck bright.
+ */
+export const gate = { open: 0, pulse: 0, surge: 0 };
+
 let lightProf: number[] = [];
 let motes: Mote[] = [];
 let cx = 0, floorY = 0, apW = 0, apH = 0, jambT = 0;
+let gLast = -1;
+let gOpen = 0;
 
 export const threshold: Scene = {
   init(c: SceneCtx) {
@@ -59,11 +75,20 @@ export const threshold: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-    const br = breath(t, 7.4, c.phase);
-    const lit = 0.84 + br * 0.32;
+    const dt = gLast < 0 ? 0 : Math.min(0.1, t - gLast);
+    gLast = t;
+    // Weighted decay: the pulse leaves quickly, the surge lingers, and `open`
+    // eases toward whatever the form last set rather than snapping.
+    gate.pulse = Math.max(0, gate.pulse - dt * 2.2);
+    gate.surge = Math.max(0, gate.surge - dt * 0.75);
+    gOpen += (gate.open - gOpen) * (1 - Math.exp(-4.5 * dt));
 
-    const left = cx - apW / 2;
-    const right = cx + apW / 2;
+    const br = breath(t, 7.4, c.phase);
+    const lit = (0.84 + br * 0.32) * (1 + gOpen * 0.5 + gate.pulse * 0.7 + gate.surge * 1.1);
+
+    const wide = apW * (1 + gOpen * 0.16 + gate.surge * 0.1);
+    const left = cx - wide / 2;
+    const right = cx + wide / 2;
     const head = floorY - apH;
 
     halo(c, cx, floorY - apH * 0.45, apH * (0.6 + br * 0.12), e * 0.85);
@@ -91,10 +116,10 @@ export const threshold: Scene = {
     // through the door is the mark even though the door is not.
     for (let i = 0; i < BEAM; i++) {
       const u = i / (BEAM - 1);
-      const x = left + u * apW;
+      const x = left + u * wide;
       // Overlapped generously: at DPR 3 a 1px overlap still leaves seams, and
       // a striped doorway reads as a barcode rather than as light.
-      const w = apW / BEAM + 3;
+      const w = wide / BEAM + 3;
       const a = lightProf[i] * 0.16 * lit * e;
       const col = ctx.createLinearGradient(0, head, 0, floorY);
       col.addColorStop(0, `rgba(${CYAN}, 0)`);

@@ -10,6 +10,15 @@
 type Answer = 'yes' | 'partly' | 'no';
 const WEIGHT: Record<Answer, number> = { yes: 1, partly: 0.5, no: 0 };
 
+/**
+ * One question at a time.
+ *
+ * Progressive enhancement: with this module absent every question renders, in
+ * order, and the form still works — the stepping is added on top, never relied
+ * on. The class that hides the inactive ones is only ever applied from here.
+ */
+import { gate } from './scenes/threshold';
+
 export function initDiagnostic(root: HTMLElement): void {
   const groups = Array.from(root.querySelectorAll<HTMLElement>('[data-question]'));
   const scoreEl = root.querySelector<HTMLElement>('[data-score]');
@@ -81,16 +90,66 @@ export function initDiagnostic(root: HTMLElement): void {
     }
   }
 
+  // ---- one at a time --------------------------------------------------
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let at = 0;
+
+  // Only now does anything get hidden, so a failed script leaves all five
+  // questions visible rather than an empty form.
+  root.classList.add('is-stepped');
+
+  const show = (i: number, instant = false): void => {
+    at = Math.max(0, Math.min(groups.length, i));
+    groups.forEach((g, k) => {
+      g.classList.toggle('is-on', k === at);
+      // Off-screen questions must not be reachable by keyboard either.
+      g.querySelectorAll<HTMLElement>('input').forEach((el) => {
+        if (k === at) el.removeAttribute('tabindex');
+        else el.setAttribute('tabindex', '-1');
+      });
+    });
+    root.classList.toggle('is-done', at >= groups.length);
+    if (progress) progress.style.setProperty('--k', String(at / groups.length));
+    if (!instant && !reduced) gate.pulse = 1;
+  };
+
+  const progress = root.querySelector<HTMLElement>('[data-progress]');
+
   for (const g of groups) {
     g.addEventListener('change', (e) => {
       const input = e.target as HTMLInputElement;
       if (input.type !== 'radio') return;
       answers.set(g.dataset.question!, input.value as Answer);
       update();
+
+      // Let the choice register visually, then hand over to the next.
+      const i = groups.indexOf(g);
+      if (i !== at) return;
+      g.classList.add('is-leaving');
+      window.setTimeout(() => {
+        g.classList.remove('is-leaving');
+        show(at + 1);
+        // Moving focus keeps a keyboard user with the question that just
+        // arrived instead of stranding them on a hidden radio.
+        if (at < groups.length) groups[at].querySelector<HTMLElement>('input')?.focus();
+      }, reduced ? 0 : 380);
     });
   }
 
+  // Stepping back, for anyone who wants to change an answer.
+  root.querySelector('[data-back]')?.addEventListener('click', () => {
+    if (at > 0) show(at - 1);
+  });
+
+  show(0, true);
   update();
+
+  // The gateway swings open when the questions appear.
+  const details = root.closest('.diag')?.querySelector<HTMLDetailsElement>('.reveal-form');
+  details?.addEventListener('toggle', () => {
+    gate.open = details.open ? 1 : 0;
+    if (details.open && !reduced) gate.pulse = 1;
+  });
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -103,6 +162,7 @@ export function initDiagnostic(root: HTMLElement): void {
       return;
     }
     status.textContent = 'Sending…';
+    gate.surge = 1;
     const body = Object.fromEntries(new FormData(form).entries());
     try {
       const res = await fetch(endpoint, {
@@ -113,6 +173,7 @@ export function initDiagnostic(root: HTMLElement): void {
       status.textContent = res.ok
         ? 'Sent. You will get a reply from a person, not a sequence.'
         : 'That did not send. Mail matthew@socioclimate.io instead.';
+      gate.surge = res.ok ? 1 : 0;
       if (res.ok) form.reset();
     } catch {
       status.textContent = 'That did not send. Mail matthew@socioclimate.io instead.';

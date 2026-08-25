@@ -37,6 +37,10 @@ const options = [
         </label>
       </div>
 
+      {/* Progress and a way back. Both are inert without script, which is the
+          state in which every question is visible anyway. */}
+      <div class="diag__bar" data-progress aria-hidden="true"><span></span></div>
+
       <ol class="diag__list">
         {qs.map((q, i) => (
           <li class="q" data-question={q.key}>
@@ -58,6 +62,8 @@ const options = [
           </li>
         ))}
       </ol>
+
+      <button class="diag__back" type="button" data-back>Back</button>
 
       <div class="diag__result" data-result>
         <p class="diag__score" data-score>0 / {qs.length}</p>

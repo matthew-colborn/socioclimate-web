@@ -24,9 +24,12 @@ const base = (process.argv[2] || 'http://localhost:4332').replace(/\/$/, '');
 const out = resolve(root, 'public/scenes');
 mkdirSync(out, { recursive: true });
 
-const ROUTES = ['/', '/portfolio', '/contact'];
+const ROUTES = ['/', '/what-we-do', '/portfolio', '/contact'];
 // Every scene in the registry must be reachable from one of those routes.
-const EXPECTED = ['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening'];
+const EXPECTED = [
+  'flame', 'ridge', 'traces', 'converge', 'lattice', 'opening',
+  'find', 'capture', 'understand', 'revenue',
+];
 
 const W = 1440;
 const H = 900;

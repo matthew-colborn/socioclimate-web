@@ -1,5 +1,5 @@
 // Measures what a browser actually downloads for each page against the budgets
-// for the showcase build: JavaScript under 120 KB gzipped. The old 400 KB total
+// for the motion build: JavaScript under 40 KB gzipped. The old 400 KB total
 // cap does not apply now that the hero paints a poster frame — the poster is
 // reported so it stays visible, because it is the LCP element.
 //   node scripts/budget.mjs http://localhost:4332
@@ -62,7 +62,7 @@ console.log('-'.repeat(92));
 const worstTotal = Math.max(...rows.map((r) => r.raw));
 const worstJs = Math.max(...rows.map((r) => r.jsGz));
 const okTotal = true;
-const okJs = worstJs < 120 * 1024;
+const okJs = worstJs < 40 * 1024;
 console.log(`Heaviest page ${kb(worstTotal)} KB total (no cap; reported for visibility)`);
-console.log(`Most JS ${kb(worstJs)} KB gzipped (budget 120 KB) — ${okJs ? 'PASS' : 'FAIL'}`);
+console.log(`Most JS ${kb(worstJs)} KB gzipped (budget 40 KB) — ${okJs ? 'PASS' : 'FAIL'}`);
 process.exit(okTotal && okJs ? 0 : 1);

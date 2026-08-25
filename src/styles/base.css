@@ -333,6 +333,23 @@ img, canvas, svg { display: block; max-width: 100%; }
 }
 .readout--pending .readout__value { color: var(--paper-dim); letter-spacing: 0.18em; opacity: 0.55; }
 
+/* --- Section transitions -------------------------------------------------- */
+/* Gated on .reveal-ready, which src/lib/reveal.ts adds only after it has run.
+   Without that gate a script failure leaves every section permanently at
+   opacity 0, and the page is blank for the visitor rather than merely static. */
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 460ms var(--ease), transform 460ms var(--ease);
+}
+.reveal-ready [data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

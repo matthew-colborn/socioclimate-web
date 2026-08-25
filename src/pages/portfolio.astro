@@ -27,13 +27,13 @@ const entries = await Promise.all(
     <p class="page-head__lede">{d.standfirst}</p>
   </header>
 
-  <section class="intro wrap">
+  <section class="intro wrap" data-reveal>
     <div class="prose"><Intro /></div>
   </section>
 
   <div class="wrap">
     {entries.map((e) => (
-      <article class="entry" id={e.id}>
+      <article class="entry" data-reveal id={e.id}>
         <div class="entry__top">
           <div class="entry__figure"><Field scene={e.data.scene} variant="panel" /></div>
           <div class="entry__head">
@@ -75,7 +75,7 @@ const entries = await Promise.all(
     ))}
   </div>
 
-  <section class="tail wrap">
+  <section class="tail wrap" data-reveal>
     <p class="eyebrow">Next</p>
     <h2 class="tail__h">Find out whether you have one.</h2>
     <p class="tail__p">Five questions, scored as you answer, nothing gated.</p>

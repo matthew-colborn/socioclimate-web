@@ -7,6 +7,7 @@
  * a lead form wearing a diagnostic's clothes.
  */
 import { Engine, prefersReducedMotion } from './field/engine';
+import { registerField } from './field/mount';
 import { diagnosticField, state } from './scenes/diagnostic-field';
 
 type Answer = 'yes' | 'partly' | 'no';
@@ -33,7 +34,10 @@ export function initDiagnostic(root: HTMLElement): void {
       seed: 90210,
       still: prefersReducedMotion(),
     });
-    if (!prefersReducedMotion()) engine.play();
+    // Under the page-wide governor rather than running unconditionally: this
+    // field and the scene in the page header are both on /contact, and only one
+    // of them may move at a time.
+    if (!prefersReducedMotion()) registerField(engine, canvas.closest('.diag__field') ?? canvas);
   }
 
   function verdict(score: number, answered: number): { title: string; body: string } {

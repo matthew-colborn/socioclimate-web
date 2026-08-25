@@ -82,6 +82,13 @@ export class Engine {
   private io?: IntersectionObserver;
   private visible = true;
   private seed: number;
+  /**
+   * Set by the governor in mount.ts. While true this engine will not run no
+   * matter what its own observer sees — otherwise a field the governor has
+   * deliberately stopped would restart itself the moment it scrolled into view,
+   * and "one moving thing per viewport" would quietly stop being true.
+   */
+  private suspended = false;
   /** Entrance progress, ramped by mountFields as the scene draws itself in. */
   intro = 1;
 
@@ -101,7 +108,7 @@ export class Engine {
         (es) => {
           this.visible = es[0].isIntersecting;
           if (!this.visible) this.pause();
-          else if (this.running) this.loop();
+          else if (this.running && !this.suspended) this.startLoop();
         },
         { threshold: 0 }
       );
@@ -135,11 +142,23 @@ export class Engine {
     this.scene.frame(this.c, t, 1);
   }
 
+  /** Stop, and stay stopped until play() is called. The governor's off switch. */
+  hold(): void {
+    this.suspended = true;
+    this.pause();
+  }
+
   play(): void {
-    if (this.still || this.running) return;
+    this.suspended = false;
+    if (this.still || this.running) {
+      // Already running, or a still — but if a hold cancelled the frame loop
+      // while running stayed true, it has to be restarted here.
+      if (this.running && this.visible) this.startLoop();
+      return;
+    }
     this.running = true;
     this.start = performance.now();
-    if (this.visible) this.loop();
+    if (this.visible) this.startLoop();
   }
 
   pause(): void {
@@ -153,8 +172,23 @@ export class Engine {
     this.io?.disconnect();
   }
 
-  private loop = (): void => {
-    this.raf = requestAnimationFrame(this.loop);
+  /**
+   * Start the frame loop, at most once.
+   *
+   * The guard is the whole point. `tick` schedules its own successor, so every
+   * extra call to it starts a second independent chain that pause() cannot
+   * cancel — it only ever holds the newest id. Both the observer and play()
+   * can fire more than once, and without this the chains accumulated: eight of
+   * them on a four-scene page, which is how "one moving thing per viewport"
+   * turned into every scene running at once and 480 frame callbacks a second.
+   */
+  private startLoop(): void {
+    if (this.raf) return;
+    this.raf = requestAnimationFrame(this.tick);
+  }
+
+  private tick = (): void => {
+    this.raf = requestAnimationFrame(this.tick);
     const t = (performance.now() - this.start) / 1000;
     this.c.ctx.clearRect(0, 0, this.c.w, this.c.h);
     this.scene.frame(this.c, t, this.intro);

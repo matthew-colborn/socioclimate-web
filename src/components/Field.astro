@@ -10,7 +10,8 @@ import type { SceneId } from '../lib/scenes/registry';
 // Content-hashed filenames, written by scripts/posters.mjs. /scenes/** is served
 // immutable for a year, so the hash is what makes a redrawn poster reach anyone
 // who has already visited.
-import POSTERS from '../data/posters.json';
+import postersJson from '../data/posters.json';
+const POSTERS = postersJson as Record<string, string>;
 
 interface Props {
   scene: SceneId;

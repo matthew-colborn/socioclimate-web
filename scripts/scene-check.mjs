@@ -1,10 +1,14 @@
-// Proves two things about the hero rather than asserting them:
+// Proves two things about the generative scenes rather than asserting them:
 //
-//   1. A scene transition actually happens — captured as a frame sequence
-//      across a switch, with a per-frame difference score so the change is a
-//      number and not an impression.
-//   2. Under prefers-reduced-motion the hero freezes: no auto-advance, the
-//      pause control is hidden, and successive frames are pixel-identical.
+//   1. A scene is actually animating — captured as a frame sequence with a
+//      per-frame difference score, so "it moves" is a number.
+//   2. Under prefers-reduced-motion every scene freezes: successive frames a
+//      long way apart are pixel-identical, through the same code path.
+//
+// The carousel this used to drive is gone. There is no transition to measure
+// any more, because there is nothing to transition between — each scene now
+// sits on the page it belongs to and simply runs. So test 1 measures motion
+// within one scene instead of a switch between two.
 //
 //   node scripts/scene-check.mjs http://localhost:4332
 import puppeteer from 'puppeteer-core';
@@ -31,37 +35,39 @@ async function diff(a, b) {
   return s / x.length;
 }
 
-const browser = await puppeteer.launch({
-  executablePath: CHROME,
-  headless: 'new',
-  args: ['--autoplay-policy=no-user-gesture-required'],
-});
+const clipTo = async (page, sel) => {
+  const box = await page.$eval(sel, (el) => {
+    const r = el.getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  });
+  return {
+    x: Math.max(0, Math.round(box.x)),
+    y: Math.max(0, Math.round(box.y)),
+    width: Math.round(box.width),
+    height: Math.round(box.height),
+  };
+};
 
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
 let fail = 0;
 
-// ---------- 1. transition ----------------------------------------------------
+// ---------- 1. the scene animates -------------------------------------------
 {
   const page = await browser.newPage();
   await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
   await page.goto(base + '/', { waitUntil: 'networkidle0' });
-  await new Promise((r) => setTimeout(r, 2000));
+  await new Promise((r) => setTimeout(r, 2200));  // past the draw-in ramp
 
+  const clip = await clipTo(page, '.hero__field .field');
   const frames = [];
-  const shot = async (n) => {
-    const f = resolve(out, `transition-${String(n).padStart(2, '0')}.png`);
-    await page.screenshot({ path: f, clip: { x: 0, y: 0, width: W, height: H } });
+  for (let i = 0; i <= 6; i++) {
+    const f = resolve(out, `motion-${String(i).padStart(2, '0')}.png`);
+    await page.screenshot({ path: f, clip });
     frames.push(f);
-  };
-
-  await shot(0);
-  // Drive the switch through the real control, not an internal call.
-  await page.evaluate(() => document.querySelectorAll('[data-goto]')[1].click());
-  for (let i = 1; i <= 6; i++) {
-    await new Promise((r) => setTimeout(r, 180));
-    await shot(i);
+    if (i < 6) await new Promise((r) => setTimeout(r, 220));
   }
 
-  console.log('SCENE TRANSITION  (frame → difference from frame 0)');
+  console.log('SCENE MOTION  (frame → difference from frame 0)');
   console.log('-'.repeat(58));
   let peak = 0;
   for (let i = 1; i < frames.length; i++) {
@@ -69,60 +75,42 @@ let fail = 0;
     peak = Math.max(peak, d);
     console.log(`  frame ${String(i).padStart(2, '0')}   ${d.toFixed(2)}`);
   }
-  const label = await page.evaluate(
-    () => document.querySelector('[data-goto][aria-current="true"]')?.getAttribute('aria-label')
-  );
-  console.log(`  peak difference ${peak.toFixed(2)}  ·  now: ${label}`);
-  if (peak < 3) { fail++; console.log('  FAIL — frames barely changed; the transition did not run'); }
-  else console.log('  PASS — the scene visibly changed');
+  console.log(`  peak difference ${peak.toFixed(2)}`);
+  if (peak < 1) { fail++; console.log('  FAIL — the scene is not moving'); }
+  else console.log('  PASS — the scene is animating');
   await page.close();
 }
 
-// ---------- 2. reduced motion ------------------------------------------------
-{
+// ---------- 2. reduced motion freezes every scene ----------------------------
+for (const [route, sel, name] of [
+  ['/', '.hero__field .field', 'flame (home)'],
+  ['/portfolio', '.entry__figure .field', 'ridge (portfolio)'],
+]) {
   const page = await browser.newPage();
   await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
   await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-  await page.goto(base + '/', { waitUntil: 'networkidle0' });
-  await new Promise((r) => setTimeout(r, 1200));
+  await page.goto(base + route, { waitUntil: 'networkidle0' });
+  await new Promise((r) => setTimeout(r, 1500));
 
-  const a = resolve(out, 'reduced-a.png');
-  const b = resolve(out, 'reduced-b.png');
-  await page.screenshot({ path: a, clip: { x: 0, y: 0, width: W, height: H } });
-  // Comfortably longer than the 5.4s auto-advance interval: if rotation were
-  // running, the scene would have changed twice by now.
-  await new Promise((r) => setTimeout(r, 12000));
-  await page.screenshot({ path: b, clip: { x: 0, y: 0, width: W, height: H } });
+  const clip = await clipTo(page, sel);
+  const slug = name.split(' ')[0];
+  const a = resolve(out, `frozen-${slug}-a.png`);
+  const b = resolve(out, `frozen-${slug}-b.png`);
+  await page.screenshot({ path: a, clip });
+  await new Promise((r) => setTimeout(r, 6000));
+  await page.screenshot({ path: b, clip });
 
   const d = await diff(a, b);
-  const state = await page.evaluate(() => {
-    const dots = [...document.querySelectorAll('[data-goto]')];
-    return {
-      current: document.querySelector('[data-goto][aria-current="true"]')?.textContent?.trim(),
-      // Derived, not hardcoded: the dot labels are zero-based and the count of
-      // scenes changes. Asserting against a literal made this fail on a
-      // renumbering while the behaviour was correct.
-      first: dots[0]?.textContent?.trim(),
-      total: dots.length,
-      pauseHidden: document.querySelector('[data-pause]')?.hasAttribute('hidden') ?? null,
-      live: document.querySelector('[data-live]')?.getAttribute('aria-live'),
-    };
-  });
-
   console.log('');
-  console.log('REDUCED MOTION  (12s apart, auto-advance interval is 5.4s)');
+  console.log(`REDUCED MOTION — ${name}  (6s apart)`);
   console.log('-'.repeat(58));
-  console.log(`  frame difference   ${d.toFixed(3)}`);
-  console.log(`  active scene       ${state.current} (first of ${state.total})`);
-  console.log(`  pause control      ${state.pauseHidden ? 'hidden' : 'VISIBLE'}`);
-  console.log(`  aria-live          ${state.live}`);
-  const ok = d < 0.5 && state.current === state.first && state.pauseHidden === true;
-  if (!ok) { fail++; console.log('  FAIL — the hero did not freeze'); }
-  else console.log('  PASS — frozen, no advance, pause control withdrawn');
+  console.log(`  frame difference   ${d.toFixed(4)}`);
+  if (d > 0.01) { fail++; console.log('  FAIL — the scene did not freeze'); }
+  else console.log('  PASS — pixel-identical, the scene is frozen');
   await page.close();
 }
 
 await browser.close();
 console.log('');
-console.log(fail === 0 ? 'PASS' : `${fail} check(s) failed`);
+console.log(fail === 0 ? 'SCENES PASS' : `${fail} scene check(s) failed.`);
 process.exit(fail === 0 ? 0 : 1);

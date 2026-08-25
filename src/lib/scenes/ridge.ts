@@ -8,7 +8,7 @@
  * the finding.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GLOW } from '../field/prims';
+import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GOLD } from '../field/prims';
 
 interface Bar { x: number; base: number; h: number; phase: number; locked: boolean }
 
@@ -18,7 +18,9 @@ let cx = 0, cy = 0, span = 0;
 export const ridge: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
-    cy = c.h * 0.46;
+    // 0.52 rather than 0.46: this scene was composed for a wide hero and now
+    // lives in a square panel, where the old value left the bottom third empty.
+    cy = c.h * 0.52;
     span = Math.min(c.w * 0.86, c.h * 1.9, 760);
     const n = Math.max(48, Math.min(120, Math.round(span / 7)));
     // The bar heights are the flame's own upper silhouette, column by column.
@@ -69,10 +71,15 @@ export const ridge: Scene = {
 
     // The line that never moves. Drawn dead flat, at a fixed height, with no
     // time term anywhere in it.
-    const flat = c.h * 0.40;
+    //
+    // The only gold in any scene on the site. This is the administratively-set
+    // price — the single measured value the whole scene exists to show — and
+    // the palette reserves gold for exactly that. Everything around it stays
+    // cyan so this reads as the finding rather than as decoration.
+    const flat = c.h * 0.46;
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = `rgba(${GLOW}, ${0.5 * e})`;
+    ctx.strokeStyle = `rgba(${GOLD}, ${0.72 * e})`;
     ctx.lineWidth = 1;
     ctx.setLineDash([1, 5]);
     ctx.beginPath();

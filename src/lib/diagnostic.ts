@@ -13,7 +13,7 @@ type Answer = 'yes' | 'partly' | 'no';
 const WEIGHT: Record<Answer, number> = { yes: 1, partly: 0.5, no: 0 };
 
 export function initDiagnostic(root: HTMLElement): void {
-  const canvas = root.querySelector<HTMLCanvasElement>('[data-field]');
+  const canvas = root.querySelector<HTMLCanvasElement>('[data-diag-field]');
   const groups = Array.from(root.querySelectorAll<HTMLElement>('[data-question]'));
   const scoreEl = root.querySelector<HTMLElement>('[data-score]');
   const verdictEl = root.querySelector<HTMLElement>('[data-verdict]');

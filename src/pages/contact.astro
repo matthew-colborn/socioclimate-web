@@ -2,21 +2,53 @@
 import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Diagnostic from '../components/Diagnostic.astro';
-import '../styles/stage.css';
+import Field from '../components/Field.astro';
+import '../styles/diagnostic.css';
 
 const d = (await getEntry('pages', 'contact'))!.data;
 ---
 <BaseLayout title={d.title} description={d.description}>
   <header class="ch wrap">
-    <p class="eyebrow">Data moat diagnostic</p>
-    <h1>{d.heading}</h1>
-    <p class="ch__lede">{d.standfirst}</p>
+    <div class="ch__copy">
+      <p class="eyebrow"><span class="ch__n">{d.section}</span> Contact</p>
+      <h1>{d.heading}</h1>
+      <p class="ch__lede">{d.standfirst}</p>
+    </div>
+    {/* Two complete copies of the mark parting to open a threshold. It is the
+        invitation scene, and this is the page the invitation is on. The field
+        behind the questions below is a different thing doing a different job —
+        it is ambient and it responds to the score. */}
+    <div class="ch__field"><Field scene="opening" variant="panel" /></div>
   </header>
+
   <Diagnostic />
 </BaseLayout>
 
+<script>
+  import { mountFields } from '../lib/field/mount';
+  mountFields();
+</script>
+
 <style>
-  .ch { padding-bottom: var(--s-5); }
-  .ch h1 { font-size: clamp(2.2rem, 6vw, 4rem); max-width: 14ch; }
-  .ch__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 48ch; }
+  .ch {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-bottom: var(--s-6);
+  }
+  .ch__n { color: var(--gold); margin-right: 0.5em; }
+  .ch__field { justify-self: center; width: 100%; max-width: 20rem; }
+  .ch__field :global(.field) {
+    border: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border-radius: var(--radius);
+    background: var(--void);
+  }
+  .ch h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); max-width: 14ch; }
+  .ch__lede { color: var(--ink-2); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 44ch; }
+
+  @media (max-width: 60rem) {
+    .ch { grid-template-columns: 1fr; }
+    .ch__field { max-width: 16rem; justify-self: start; }
+  }
 </style>

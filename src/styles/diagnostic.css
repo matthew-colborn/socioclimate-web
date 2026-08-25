@@ -1,0 +1,96 @@
+/* The data-moat diagnostic.
+ *
+ * These rules used to live in stage.css alongside the hero carousel. The
+ * carousel is gone; the diagnostic is not, so they moved here rather than
+ * leaving the only styled form on the site depending on a file named after a
+ * component that no longer exists.
+ */
+
+/* --- Diagnostic ----------------------------------------------------------- */
+
+.diag { position: relative; padding-block: var(--s-7) var(--s-8); isolation: isolate; }
+/* Sticky, not absolute. The section is thousands of pixels tall, so an
+   absolutely positioned field centres itself far below the fold and is never
+   seen. Sticking it to the viewport — with a negative margin so it occupies no
+   layout space — keeps the field behind the questions the whole way down,
+   which is the point: it has to be visibly responding while you answer. */
+.diag__field {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  margin-bottom: -100svh;
+  z-index: -1;
+  pointer-events: none;
+}
+.diag__field canvas { width: 100%; height: 100%; }
+.diag__inner { position: relative; }
+
+.diag__list { list-style: none; margin: 0 0 var(--s-6); padding: 0; max-width: 46rem; }
+.q { border-top: 1px solid color-mix(in srgb, var(--line-faint) 45%, transparent); padding: var(--s-4) 0; }
+.q fieldset { border: 0; margin: 0; padding: 0; }
+.q__legend { display: flex; gap: 0.9rem; align-items: baseline; padding: 0; }
+.q__n {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+.q__text { font-family: var(--font-display); font-size: var(--step-1); font-weight: 350; line-height: 1.25; }
+.q__help { color: var(--ink-2); font-size: 0.88rem; margin: var(--s-2) 0 var(--s-3) 2.2rem; max-width: 54ch; }
+.q__opts { display: flex; gap: var(--s-2); margin-left: 2.2rem; flex-wrap: wrap; }
+
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.opt span {
+  display: inline-block;
+  padding: 0.45em 1.1em;
+  border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  transition: color 160ms var(--ease), border-color 160ms var(--ease), background 160ms var(--ease);
+}
+.opt input:hover + span { color: var(--ink); }
+.opt input:focus-visible + span { outline: 2px solid var(--cyan-bright); outline-offset: 2px; }
+.opt input:checked + span {
+  color: var(--ground);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.diag__result {
+  border-left: 2px solid var(--cyan);
+  padding: var(--s-4) 0 var(--s-4) var(--s-4);
+  margin-bottom: var(--s-7);
+  max-width: 52rem;
+}
+.diag__score { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.14em; color: var(--cyan); margin-bottom: var(--s-2); }
+.diag__verdict { font-size: var(--step-2); margin-bottom: var(--s-3); }
+.diag__reason { color: var(--ink-2); max-width: 60ch; margin: 0; }
+
+.diag__send { max-width: 34rem; }
+.diag__sendh { font-size: var(--step-1); margin-bottom: var(--s-2); }
+.diag__sendp { color: var(--ink-2); font-size: 0.9rem; margin-bottom: var(--s-4); }
+.fld { display: block; margin-bottom: var(--s-3); }
+.fld span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 0.4em;
+}
+.fld input, .fld textarea {
+  width: 100%;
+  background: color-mix(in srgb, var(--cyan) 3%, var(--void));
+  border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  border-radius: 2px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.65em 0.8em;
+}
+.fld input:focus-visible, .fld textarea:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 1px; }
+.diag__status { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink-2); margin: var(--s-3) 0 0; min-height: 1.2em; }
+.diag__alt { font-size: 0.82rem; color: var(--ink-2); margin-top: var(--s-2); }

@@ -6,9 +6,20 @@
 import type { SceneCtx } from './engine';
 import { FLAME_PATH } from '../flame';
 
-export const CYAN = '0, 216, 231';
-export const GLOW = '153, 255, 255';
-export const TEAL = '0, 97, 132';
+/**
+ * Scene colour. Cyan is the schematic accent from tokens.css (#3FBFB5) and it
+ * is the only colour the scenes paint with, because in this palette cyan is
+ * structural and repeats freely.
+ *
+ * GOLD is the exception and it is used exactly once in the whole rotation — the
+ * administrative price line in the ridge scene, which is the single measured
+ * value that scene exists to show. Adding a second gold element anywhere spends
+ * the accent and it stops meaning anything. Don't.
+ */
+export const CYAN = '63, 191, 181';   /* --cyan       #3FBFB5 */
+export const GLOW = '143, 237, 227';  /* --cyan-glow  #8FEDE3 */
+export const TEAL = '31, 110, 104';   /* deep schematic, for receding linework */
+export const GOLD = '233, 185, 73';   /* --gold       #E9B949 */
 
 /**
  * Additive glow point. `s` is diameter in CSS px, `a` is 0..1.

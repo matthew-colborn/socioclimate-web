@@ -9,9 +9,10 @@ import { opening } from './opening';
 export type SceneId = 'flame' | 'ridge' | 'traces' | 'converge' | 'lattice' | 'opening';
 
 /**
- * Statement, then proof, then invitation. Every object here is the same traced
- * flame contour under a different transformation, which is why the loop coming
- * back to `flame` reads as reassembly rather than as a carousel wrapping.
+ * Every object here is the same traced flame contour under a different
+ * transformation. That is why the set reads as one system rather than as six
+ * illustrations: the mark on the home page, and four readings of it across the
+ * portfolio, plus the threshold on the contact page.
  */
 export const SCENES: Record<SceneId, Scene> = {
   flame,

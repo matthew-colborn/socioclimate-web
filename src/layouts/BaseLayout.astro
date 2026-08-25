@@ -21,7 +21,9 @@ const {
 
 const canonical = new URL(Astro.url.pathname.replace(/(.)\/$/, '$1'), SITE.origin).href;
 const ogImage = new URL('/og/socioclimate-og.png', SITE.origin).href;
-const fullTitle = title === SITE.name ? `${SITE.name} — ${SITE.tagline}` : `${title} — ${SITE.name}`;
+// The compressed line, not the tagline: the full customer-facing sentence runs
+// to 85 characters and a search result truncates it mid-clause.
+const fullTitle = title === SITE.name ? `${SITE.name} — ${SITE.compressed}` : `${title} — ${SITE.name}`;
 
 const orgLd = {
   '@context': 'https://schema.org',
@@ -33,7 +35,9 @@ const orgLd = {
   email: SITE.email,
   slogan: SITE.tagline,
   description:
-    'SocioClimate finds markets whose prices nobody publishes, assembles the record, and owns it.',
+    'SocioClimate is a data-leverage company. We partner with service businesses, ' +
+    'find the valuable data already inside them, build the system that captures and ' +
+    'makes sense of it, and point it at revenue.',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'San Diego',
@@ -51,15 +55,15 @@ const orgLd = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
-    <link rel="preload" href="/fonts/outfit-var-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin />
     {preloadImage && (
       <link rel="preload" href={preloadImage} as="image" type="image/webp" fetchpriority="high" />
     )}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#020A21" />
+    <meta name="theme-color" content="#0B1220" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />

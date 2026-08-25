@@ -1,7 +1,7 @@
 /**
  * The 2D canvas runtime every scene shares.
  *
- * Deliberately not WebGL. All four scenes are 2D compositions — a ridge, routed
+ * Deliberately not WebGL. Every scene is a 2D composition — a ridge, routed
  * traces, converging particles, interlocking lattices — so a GL context buys
  * nothing and costs context-loss handling, shader compilation and a second
  * fallback implementation. Canvas is the only path, which means the reduced-
@@ -53,9 +53,11 @@ function makeDab(size: number): HTMLCanvasElement {
   const g = c.getContext('2d')!;
   const r = size / 2;
   const grad = g.createRadialGradient(r, r, 0, r, r, r);
-  grad.addColorStop(0, 'rgba(153,255,255,1)');
-  grad.addColorStop(0.25, 'rgba(0,216,231,0.55)');
-  grad.addColorStop(1, 'rgba(0,216,231,0)');
+  // Kept in sync with CYAN/GLOW in prims.ts by hand — this runs before any
+  // stylesheet is parsed, so it cannot read the custom properties.
+  grad.addColorStop(0, 'rgba(143,237,227,1)');
+  grad.addColorStop(0.25, 'rgba(63,191,181,0.55)');
+  grad.addColorStop(1, 'rgba(63,191,181,0)');
   g.fillStyle = grad;
   g.fillRect(0, 0, size, size);
   return c;
@@ -79,7 +81,8 @@ export class Engine {
   private canvas: HTMLCanvasElement;
   private io?: IntersectionObserver;
   private visible = true;
-  /** Entrance progress, driven by the carousel when a scene becomes active. */
+  private seed: number;
+  /** Entrance progress, ramped by mountFields as the scene draws itself in. */
   intro = 1;
 
   constructor(o: EngineOptions) {
@@ -87,6 +90,7 @@ export class Engine {
     this.scene = o.scene;
     this.still = o.still;
     const ctx = o.canvas.getContext('2d', { alpha: true })!;
+    this.seed = o.seed;
     this.c = { ctx, w: 0, h: 0, rng: seeded(o.seed), dab: makeDab(64) };
     this.resize();
 
@@ -106,6 +110,12 @@ export class Engine {
   }
 
   resize(): void {
+    // Reseed before re-initialising. `init` draws from `rng`, so without this
+    // the second call continues the sequence where the first one stopped and
+    // the scene composes differently — every resize would silently produce a
+    // different arrangement, and the poster, captured at the initial state,
+    // would never match the canvas again.
+    this.c.rng = seeded(this.seed);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const r = this.canvas.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width));

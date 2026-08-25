@@ -1,33 +1,61 @@
 /* ---------------------------------------------------------------------------
-   SocioClimate design tokens.
+   SocioClimate design tokens — blueprint-operator.
 
-   Colour is sampled from the two brand lockups in brand/. Dark is the default
-   and only theme: the brand does not exist on white and there is no light mode
-   to fall back to. Do not add one.
+   Dark is the default and only theme: the brand does not exist on white and
+   there is no light mode to fall back to. Do not add one.
 
-   Cyan is data, not decoration. It marks the flame, links, and the single most
-   important value in any chart. Three cyan elements above the fold is the cap.
+   Two accents with different jobs, and keeping them apart is the whole system:
+
+     GOLD is spent. It marks the one thing on a screen that matters most — the
+     call to action, the current page, a single measured value. If a screen has
+     three gold elements it has none, because nothing stands out any more.
+
+     CYAN is schematic. Linework, the mark, the generative scenes, secondary
+     data. It is structural rather than emphatic and it can repeat freely.
+
+   Hex values come from the brand doc rather than from products/porchlight-os,
+   which uses a neighbouring but different palette (its accent is periwinkle,
+   not cyan). The two are siblings, not the same file.
    --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: dark;
 
-  /* --- Brand ------------------------------------------------------------- */
-  --ink:          #020A21;  /* page background; the horizontal lockup's navy */
-  --ink-deep:     #000615;  /* sections that need to recede */
-  --ink-black:    #000000;  /* the stacked lockup's field; full-bleed only */
-  --cyan:         #00D8E7;  /* primary: links, the mark, key data marks */
-  --cyan-bright:  #2AE2EA;  /* hover, active, focus ring */
-  --cyan-glow:    #99FFFF;  /* glow layers and brightest gradient stop only */
-  --teal-deep:    #006184;  /* secondary data series, borders, muted rules */
-  --teal-shadow:  #00506B;  /* chart gridlines, dividers */
-  --paper:        #FFFFFF;  /* primary text on ink */
-  --paper-dim:    #A8B6C8;  /* secondary text */
+  /* --- Grounds ----------------------------------------------------------- */
+  --ground:     #0B1220;  /* the page */
+  --panel:      #111B2E;  /* bordered cards and raised surfaces */
+  --raised:     #16223A;  /* a panel under the cursor */
+  --void:       #0A0F1C;  /* the darkest surfaces; full-bleed fields */
+
+  /* --- Accents ----------------------------------------------------------- */
+  --gold:       #E9B949;  /* primary accent. Spent, never scattered. */
+  --gold-deep:  #C9A227;  /* pressed, and the darker half of a gold rule */
+  --cyan:       #3FBFB5;  /* schematic linework, the mark, secondary data */
+  --cyan-bright:#5FD8CD;  /* hover and focus on a cyan element */
+  --cyan-glow:  #8FEDE3;  /* glow layers and the brightest gradient stop only */
+
+  /* --- State ------------------------------------------------------------- */
+  --ok:         #37C978;
+  --attn:       #F2637E;
+  --info:       #4F8DF7;
+
+  /* --- Text -------------------------------------------------------------- */
+  --ink:        #EAF1FF;  /* primary */
+  --ink-2:      #8CA0C6;  /* secondary, labels, captions */
+
+  /* --- Lines ------------------------------------------------------------- */
+  /* Solid colours rather than pre-mixed alphas, because call sites mix them
+     down with color-mix() to different strengths. */
+  --line:       #24334D;
+  --line-faint: #1A2740;
 
   /* --- Type -------------------------------------------------------------- */
-  --font-display: 'Outfit Variable', 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  /* Inter for interface and body, IBM Plex Mono for data, numerals and any
+     measured value. No third face: --font-display is Inter set large and light,
+     which is a setting rather than a family. */
   --font-body:    'Inter Variable', 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-mono:    ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, monospace;
+  --font-display: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, monospace;
 
   --step--1: clamp(0.82rem, 0.79rem + 0.15vw, 0.90rem);
   --step-0:  clamp(1.00rem, 0.96rem + 0.20vw, 1.10rem);
@@ -53,18 +81,29 @@
   --gutter: clamp(1.25rem, 5vw, 3rem);
   --wide: 76rem;
 
-  /* --- Lines and surfaces ------------------------------------------------ */
-  --rule: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
-  --rule-faint: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
-  --surface: color-mix(in srgb, var(--cyan) 3.5%, var(--ink-deep));
+  /* --- Surfaces and lines ------------------------------------------------ */
+  --rule: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+  --rule-faint: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+  --surface: var(--panel);
   --radius: 2px;
+
+  /* The blueprint grid. Deliberately near the threshold of visibility — it is
+     paper texture, not a graphic. Applied by .grid-field in base.css. */
+  --grid-line: color-mix(in srgb, var(--cyan) 5%, transparent);
+  --grid-step: 32px;
 
   /* Glow is earned. The mark glows, one hero element may glow, nothing else. */
   --glow-mark:
-    drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 70%, transparent))
-    drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent))
-    drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 25%, transparent));
+    drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 65%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 45%, transparent))
+    drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 20%, transparent));
 
+  /* --- Motion ------------------------------------------------------------ */
+  /* Self-drawing, 150-300ms. Anything slower reads as an animation rather than
+     as the interface responding. */
+  --dur-1: 160ms;
+  --dur-2: 240ms;
+  --dur-3: 300ms;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -80,12 +119,25 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Plex Mono has no variable build, so the two weights that are actually used
+   ship as static faces and nothing else is loaded. */
 @font-face {
-  font-family: 'Outfit Variable';
+  font-family: 'IBM Plex Mono';
   font-style: normal;
   font-display: swap;
-  font-weight: 100 900;
-  src: url('/fonts/outfit-var-latin.woff2') format('woff2');
+  font-weight: 400;
+  src: url('/fonts/plex-mono-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('/fonts/plex-mono-500-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;

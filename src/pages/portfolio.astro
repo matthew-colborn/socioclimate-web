@@ -1,72 +1,76 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Field from '../components/Field.astro';
 import { clientName, type ClientKey } from '../config/site';
 
-const intro = await getEntry('pages', 'portfolio');
-if (!intro) throw new Error('Missing src/content/pages/portfolio.mdx');
-const { Content: Intro } = await render(intro);
-const d = intro.data;
+const page = await getEntry('pages', 'portfolio');
+if (!page) throw new Error('Missing src/content/pages/portfolio.mdx');
+const { Content: Intro } = await render(page);
+const d = page.data;
 
-const entries = (await getCollection('portfolio'))
-  .filter((e) => e.data.kind === 'work')
-  .sort((a, b) => a.data.order - b.data.order);
-const rendered = await Promise.all(
-  entries.map(async (e) => ({
-    id: e.id,
-    data: e.data,
-    display: clientName(e.data.clientKey as ClientKey, { cap: true }) ?? e.data.name,
-    Body: (await render(e)).Content,
-  }))
+const entries = await Promise.all(
+  (await getCollection('portfolio'))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (e) => ({
+      id: e.id,
+      data: e.data,
+      display: clientName(e.data.clientKey as ClientKey, { cap: true }) ?? e.data.name,
+      Body: (await render(e)).Content,
+    }))
 );
 ---
 <BaseLayout title={d.title} description={d.description}>
-  <header class="ph wrap">
+  <header class="page-head wrap">
+    <p class="eyebrow"><span class="page-head__n">{d.section}</span> Portfolio</p>
     <h1>{d.heading}</h1>
-    <p class="ph__lede">{d.standfirst}</p>
+    <p class="page-head__lede">{d.standfirst}</p>
   </header>
 
-  <section class="moat wrap" aria-labelledby="moat-h">
-    <p class="eyebrow" id="moat-h">The thesis</p>
-    <div class="moat__body"><Intro /></div>
+  <section class="intro wrap">
+    <div class="prose"><Intro /></div>
   </section>
 
   <div class="wrap">
-    <header class="work-head">
-      <p class="eyebrow">The work</p>
-      <p class="work-head__p">
-        Stage labels are accurate rather than flattering. One is live, one is in
-        staging, one is being built, and one is an operating partnership. Where a
-        real number exists it is on the page; where it does not, the space is
-        left out rather than filled.
-      </p>
-    </header>
-    {rendered.map((e) => (
+    {entries.map((e) => (
       <article class="entry" id={e.id}>
-        <p class="entry__meta">
-          <span class="entry__stage">{e.data.stage}</span>
-        </p>
-        <h2 class="entry__name">{e.display}</h2>
+        <div class="entry__top">
+          <div class="entry__figure"><Field scene={e.data.scene} variant="panel" /></div>
+          <div class="entry__head">
+            <p class="entry__meta"><span class="entry__stage">{e.data.stage}</span></p>
+            <h2 class="entry__name">{e.display}</h2>
+            <p class="entry__headline">{e.data.headline}</p>
+          </div>
+        </div>
 
         <dl class="entry__facts">
-          {e.data.what && <div><dt>What it is</dt><dd>{e.data.what}</dd></div>}
-          {e.data.who && <div><dt>Who it is for</dt><dd>{e.data.who}</dd></div>}
-          {e.data.built && <div><dt>What we built</dt><dd>{e.data.built}</dd></div>}
+          <div>
+            <dt>The business</dt>
+            <dd>{e.data.business}</dd>
+          </div>
+          <div>
+            <dt>The leverage found</dt>
+            <dd>{e.data.leverage}</dd>
+          </div>
+          <div>
+            <dt>What it produced</dt>
+            <dd>{e.data.produced}</dd>
+          </div>
         </dl>
 
         {e.data.readouts.length > 0 && (
-        <ul class="entry__readouts">
-          {e.data.readouts.map((r) => (
-            <li class:list={['ero', r.pending && 'ero--pending']}>
-              <span class="ero__label">{r.label}</span>
-              <span class="ero__value">{r.value}</span>
-              {r.note && <span class="ero__note">{r.note}</span>}
-            </li>
-          ))}
-        </ul>
+          <ul class="entry__readouts">
+            {e.data.readouts.map((r) => (
+              <li class:list={['readout', r.pending && 'readout--pending']}>
+                <span class="readout__label">{r.label}</span>
+                <span class="readout__value">{r.value}</span>
+                {r.note && <span class="readout__note">{r.note}</span>}
+              </li>
+            ))}
+          </ul>
         )}
 
-        <div class="entry__body"><e.Body /></div>
+        <div class="entry__body prose"><e.Body /></div>
       </article>
     ))}
   </div>
@@ -80,69 +84,76 @@ const rendered = await Promise.all(
 </BaseLayout>
 
 <style>
-  .ph { padding-bottom: var(--s-6); }
-  .ph h1 { font-size: clamp(2.2rem, 5.5vw, 3.6rem); max-width: 18ch; }
-  .ph__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 52ch; }
-  /* The thesis section. Prose typography lives here rather than in base.css:
-     it is the only long-form reading surface left on the site. */
-  .moat { padding-bottom: var(--s-7); }
-  .moat__body { max-width: 64ch; color: var(--paper-dim); }
-  .moat__body :global(h2) {
-    font-size: clamp(1.35rem, 2.6vw, 1.9rem);
-    font-weight: 300;
-    color: var(--paper);
-    margin: var(--s-6) 0 var(--s-3);
-    padding-top: var(--s-4);
-    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 45%, transparent);
-    max-width: 26ch;
-  }
-  .moat__body :global(h2:first-child) { margin-top: 0; padding-top: 0; border-top: 0; }
-  .moat__body :global(p) { margin-bottom: var(--s-3); }
-  .moat__body :global(strong) { color: var(--paper); font-weight: 500; }
-  .moat__body :global(ol) { padding-left: 1.3em; margin: 0 0 var(--s-3); }
-  .moat__body :global(li) { margin-bottom: var(--s-3); }
-  .moat__body :global(li::marker) { color: var(--cyan); font-family: var(--font-mono); font-size: 0.85em; }
-
-  .work-head {
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
-    padding-top: var(--s-5);
-    margin-bottom: var(--s-6);
-  }
-  .work-head__p { color: var(--paper-dim); max-width: 60ch; font-size: 0.95rem; margin: 0; }
+  .page-head__n { color: var(--gold); margin-right: 0.5em; }
+  .intro { padding-bottom: var(--s-7); }
 
   .entry {
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     padding-top: var(--s-5);
     margin-bottom: var(--s-8);
   }
+  /* The scene sits beside the name rather than above it. Every object here is
+     derived from the flame contour and is therefore tall and narrow; given a
+     full-width band it ends up as a small bright thing marooned in the middle
+     of a dark one. A square panel beside the text suits the shape and lets the
+     name and the mark introduce the entry together. */
+  .entry__top {
+    display: grid;
+    grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+    gap: var(--s-5);
+    align-items: center;
+    margin-bottom: var(--s-5);
+  }
+  .entry__figure :global(.field) {
+    border: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border-radius: var(--radius);
+    background: var(--void);
+  }
+  @media (max-width: 52rem) {
+    .entry__top { grid-template-columns: 1fr; gap: var(--s-4); }
+    .entry__figure { max-width: 20rem; }
+  }
+
+  .entry__head { margin-bottom: 0; }
   .entry__meta { margin: 0 0 var(--s-3); }
   .entry__stage {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
+    font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--cyan);
-    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cyan) 40%, transparent);
     border-radius: 999px;
-    padding: 0.2em 0.7em;
+    padding: 0.24em 0.75em;
   }
-  .entry__name { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: var(--s-5); }
+  .entry__name { font-size: clamp(1.7rem, 3.8vw, 2.5rem); margin-bottom: var(--s-2); }
+  .entry__headline {
+    font-size: var(--step-1);
+    font-weight: 300;
+    color: var(--ink-2);
+    margin: 0;
+    max-width: 40ch;
+  }
 
   .entry__facts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
     gap: var(--s-4);
     margin: 0 0 var(--s-5);
+    padding-top: var(--s-4);
+    border-top: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
   }
   .entry__facts dt {
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
+    font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--paper-dim);
-    margin-bottom: 0.5em;
+    color: var(--ink-2);
+    margin-bottom: 0.6em;
   }
-  .entry__facts dd { margin: 0; font-size: 0.95rem; color: var(--paper); }
+  .entry__facts dd { margin: 0; font-size: 0.92rem; color: var(--ink); line-height: 1.55; }
 
   .entry__readouts {
     display: flex;
@@ -151,33 +162,21 @@ const rendered = await Promise.all(
     list-style: none;
     margin: 0 0 var(--s-5);
     padding: var(--s-4) 0;
-    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
   }
-  .ero { display: flex; flex-direction: column; gap: 0.3em; }
-  .ero__label {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: var(--paper-dim);
-  }
-  .ero__value { font-family: var(--font-display); font-size: var(--step-2); font-weight: 400; }
-  .ero__note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--paper-dim); }
-  .ero--pending {
-    border: 1px dashed color-mix(in srgb, var(--paper-dim) 35%, transparent);
-    border-radius: 2px;
-    padding: 0.6em 0.8em;
-  }
-  .ero--pending .ero__value { color: var(--paper-dim); letter-spacing: 0.18em; opacity: 0.55; }
 
-  .entry__body { max-width: 62ch; color: var(--paper-dim); }
-  .entry__body :global(p) { margin-bottom: var(--s-3); }
+  .entry__body { max-width: 62ch; }
 
   .tail {
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
-    padding-block: var(--s-7) var(--s-8);
+    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    padding-block: clamp(3rem, 8vh, 5rem) var(--s-8);
   }
   .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 18ch; }
-  .tail__p { color: var(--paper-dim); margin: var(--s-3) 0 var(--s-5); }
+  .tail__p { color: var(--ink-2); margin: var(--s-3) 0 var(--s-5); }
 </style>
+
+<script>
+  import { mountFields } from '../lib/field/mount';
+  mountFields();
+</script>

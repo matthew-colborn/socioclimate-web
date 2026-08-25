@@ -1,0 +1,70 @@
+---
+/**
+ * One scene, mounted where it means something.
+ *
+ * The canvas is decorative and aria-hidden: everything it says is said in text
+ * beside it. The poster underneath is what actually paints first, so the scene
+ * is composed on screen before any script runs and gains motion afterwards.
+ */
+import type { SceneId } from '../lib/scenes/registry';
+
+interface Props {
+  scene: SceneId;
+  /** Above the fold. Loads the poster eagerly and at high priority. */
+  priority?: boolean;
+  /**
+   * Every object here is derived from the flame contour, which is tall and
+   * narrow. A wide letterbox strands it in the middle of a dark band, so both
+   * variants are close to square and the page puts them in a column beside the
+   * text rather than above it.
+   */
+  variant?: 'hero' | 'panel';
+}
+const { scene, priority = false, variant = 'hero' } = Astro.props;
+---
+<div class:list={['field', `field--${variant}`]}>
+  <img
+    class="field__poster"
+    src={`/scenes/${scene}.webp`}
+    alt=""
+    aria-hidden="true"
+    width="1440"
+    height="900"
+    fetchpriority={priority ? 'high' : undefined}
+    loading={priority ? 'eager' : 'lazy'}
+    decoding="async"
+  />
+  <canvas class="field__canvas" data-field={scene} aria-hidden="true"></canvas>
+</div>
+
+<style>
+  .field {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .field--hero  { aspect-ratio: 4 / 5; }
+  .field--panel { aspect-ratio: 1 / 1; }
+
+  .field__poster,
+  .field__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .field__poster {
+    object-fit: cover;
+    /* The poster is a blurred 560x350 still. It is scaffolding for first paint
+       and the canvas replaces it, so it fades rather than being swapped. */
+    transition: opacity var(--dur-3) var(--ease);
+  }
+  .field.is-live .field__poster { opacity: 0; }
+  .field__canvas { z-index: 1; }
+
+  /* Without script the poster is all there is, so it must not be hidden. */
+  @media (prefers-reduced-motion: reduce) {
+    .field__poster { transition: none; }
+  }
+</style>

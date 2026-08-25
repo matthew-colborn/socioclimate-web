@@ -2,9 +2,8 @@
  * Scene 00 — what SocioClimate does. The front door.
  *
  * The mark itself, drawn from the traced contour rather than shown as an image.
- * Every other scene in the rotation is a transformation of these same points,
- * so the loop returning here reads as the thing reassembling rather than as a
- * carousel wrapping around.
+ * Every other scene on the site is a transformation of these same points, so
+ * this is the one that states the shape the others are readings of.
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameShape, resample, CYAN, GLOW } from '../field/prims';

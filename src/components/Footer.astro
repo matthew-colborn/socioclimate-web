@@ -7,13 +7,14 @@ const year = 2026;
   <div class="wrap site-foot__inner">
     <div>
       <Wordmark size="md" />
-      <p class="site-foot__say">Most shops build you software. We build you an asset.</p>
+      <p class="site-foot__say">{SITE.mission}</p>
     </div>
     <nav aria-label="Footer">
       <h2 class="site-foot__h">Site</h2>
       <ul>
-        <li><a href="/">Home</a></li>
-        {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+        {NAV.map((i) => (
+          <li><a href={i.href}><span class="site-foot__n" aria-hidden="true">{i.n}</span>{i.label}</a></li>
+        ))}
       </ul>
     </nav>
     <div>
@@ -26,6 +27,19 @@ const year = 2026;
   </div>
   <div class="wrap site-foot__legal">
     <p>© {year} {SITE.legalName}. San Diego, California.</p>
-    <p>We build the operating layer, and stay involved in running it.</p>
+    <p>{SITE.compressed}</p>
   </div>
 </footer>
+
+<style>
+  /* The footer number sits with the label rather than in its own column: at
+     this size a second column would be alignment for its own sake. */
+  .site-foot__n {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    /* Full --ink-2: mixing it toward transparent drops it under AA, and the
+       token-pair contrast check cannot see a color-mix. */
+    color: var(--ink-2);
+    margin-right: 0.6em;
+  }
+</style>

@@ -6,36 +6,33 @@ import { glob } from 'astro/loaders';
  * copy; the MDX body is the precise portfolio copy. Same file, so the two never
  * drift apart, and the difference in voice stays deliberate.
  */
+/**
+ * The proof. Four entries, each answering the same three questions: what the
+ * business was, what data leverage was found in it, and what that produced.
+ *
+ * The entries carry one register, not two: the precise one. The scene stays
+ * per-entry, because each is a transformation of the same traced flame contour
+ * and belongs to the entry it introduces.
+ */
 const portfolio = defineCollection({
   loader: glob({ base: './src/content/portfolio', pattern: '**/*.mdx' }),
   schema: z.object({
     order: z.number(),
-    /**
-     * 'statement' opens the rotation and 'invitation' closes it; only 'work'
-     * entries appear on /portfolio. One collection so the hero order and the
-     * portfolio order cannot drift apart.
-     */
-    kind: z.enum(['statement', 'work', 'invitation']).default('work'),
     /** Public name. For a client who has not agreed, the anonymised label. */
     name: z.string(),
     /** Resolves through src/config/site.ts CLIENTS when the real name is gated. */
     clientKey: z.enum(['none', 'branshe']).default('none'),
     scene: z.enum(['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening']),
+    /** Honest rather than flattering: Building, In staging, Live, Operating. */
     stage: z.string(),
-    /** Hero, bottom-left. Short, evocative, no citations. */
+    /** One line under the name. What the entry is about. */
     headline: z.string(),
-    /** Hero, bottom-right. Two lines at most. */
-    line: z.string(),
-    /** Portfolio page, precise register. Work entries only. */
-    what: z.string().optional(),
-    who: z.string().optional(),
-    built: z.string().optional(),
-    /**
-     * The single call to action. An href of '#scene-N' is intercepted by the
-     * carousel and advances the rotation instead of navigating.
-     */
-    ctaLabel: z.string().default('See the work'),
-    ctaHref: z.string().default('/portfolio'),
+    /** What business it was. */
+    business: z.string(),
+    /** What data leverage was found in it. */
+    leverage: z.string(),
+    /** What it produced. */
+    produced: z.string(),
     readouts: z
       .array(
         z.object({
@@ -51,6 +48,25 @@ const portfolio = defineCollection({
   }),
 });
 
+/**
+ * The four moves: find, capture, understand, point at revenue. One file each
+ * rather than an array in frontmatter, because each carries a body of prose and
+ * the ordering has to be as explicit as the portfolio's.
+ */
+const process = defineCollection({
+  loader: glob({ base: './src/content/process', pattern: '**/*.mdx' }),
+  schema: z.object({
+    order: z.number(),
+    /** Rendered in mono beside the name. Zero-padded to match the nav. */
+    step: z.string(),
+    name: z.string(),
+    /** One sentence. The move itself, stated plainly. */
+    line: z.string(),
+    /** What the business has at the end of this move that it did not before. */
+    result: z.string(),
+  }),
+});
+
 const pages = defineCollection({
   loader: glob({ base: './src/content/pages', pattern: '**/*.mdx' }),
   schema: z.object({
@@ -58,6 +74,12 @@ const pages = defineCollection({
     description: z.string(),
     heading: z.string(),
     standfirst: z.string(),
+    /** The section number, e.g. '01'. Rendered in mono above the heading. */
+    section: z.string().optional(),
+    /** What delivery actually includes. Home page only. */
+    lines: z
+      .array(z.object({ label: z.string(), note: z.string() }))
+      .optional(),
   }),
 });
 
@@ -78,4 +100,4 @@ const diagnostic = defineCollection({
   }),
 });
 
-export const collections = { portfolio, pages, diagnostic };
+export const collections = { portfolio, process, pages, diagnostic };

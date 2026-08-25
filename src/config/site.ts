@@ -6,16 +6,28 @@ export const SITE = {
   name: 'SocioClimate',
   domain: 'socioclimate.io',
   origin: 'https://socioclimate.io',
-  tagline: 'The data moat company.',
+  /** Customer-facing. What we do for the business reading the page. */
+  tagline: 'We find the valuable data inside your business and point it at revenue.',
+  /** Asset-side. What SocioClimate accumulates across every partnership. */
+  mission: 'Building and compounding data moats.',
+  /** The compressed form, for places with one line of room. */
+  compressed: 'Dormant data in, decisions and revenue out.',
   email: 'matthew@socioclimate.io',
   legalName: 'SocioClimate',
 } as const;
 
 export const MAILTO = `mailto:${SITE.email}`;
 
+/**
+ * Numbered because the site is a sequence rather than a set of destinations:
+ * what we do, then how, then the proof, then the way in. The numbers are part
+ * of the label and are rendered in mono beside it.
+ */
 export const NAV = [
-  { href: '/portfolio', label: 'Portfolio' },
-  { href: '/contact', label: 'Contact' },
+  { n: '00', href: '/', label: 'Home' },
+  { n: '01', href: '/what-we-do', label: 'What we do' },
+  { n: '02', href: '/portfolio', label: 'Portfolio' },
+  { n: '03', href: '/contact', label: 'Contact' },
 ] as const;
 
 /**

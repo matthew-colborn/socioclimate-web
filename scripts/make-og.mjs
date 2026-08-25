@@ -1,79 +1,110 @@
-// Builds the Open Graph card and the touch icon from the stacked lockup, on
-// --ink-black. Run with `npm run og`. The output is committed under public/ so
-// the build itself stays free of image processing.
+// Builds the Open Graph card and the touch icon. Run with `npm run og`. The
+// output is committed under public/ so the build itself stays free of image
+// processing.
+//
+// This used to crop two rectangles out of brand/logo-stacked.jpeg and paste
+// them onto a field. That worked only while the field was pure black, because
+// the crops carry the JPEG's own black background with them — on the current
+// --void ground they showed as two black boxes, and they were still the old
+// bright cyan besides.
+//
+// So the card is now rendered from the design system itself: the traced flame
+// contour, the real wordmark in the real self-hosted face, on the real tokens.
+// It cannot drift from the site's palette because it reads the same values.
+import puppeteer from 'puppeteer-core';
 import sharp from 'sharp';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const STACKED = resolve(root, 'brand/logo-stacked.jpeg');
-
-const INK_BLACK = { r: 0, g: 0, b: 0, alpha: 1 };
-const W = 1200;
-const H = 630;
-
-// Regions measured off brand/logo-stacked.jpeg (784 x 1168).
-const FLAME = { left: 196, top: 96, width: 392, height: 760 };
-const WORD = { left: 100, top: 892, width: 584, height: 96 };
-
+const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 mkdirSync(resolve(root, 'public/og'), { recursive: true });
 
-const flame = await sharp(STACKED)
-  .extract(FLAME)
-  .resize({ height: 430 })
-  .toBuffer();
-const flameMeta = await sharp(flame).metadata();
+// Read the palette out of tokens.css rather than repeating it here.
+const css = readFileSync(resolve(root, 'src/styles/tokens.css'), 'utf8');
+const T = {};
+for (const m of css.matchAll(/^\s*(--[a-z0-9-]+):\s*(#[0-9A-Fa-f]{6});/gm)) T[m[1]] = m[2];
 
-const word = await sharp(STACKED)
-  .extract(WORD)
-  .resize({ width: 560 })
-  .toBuffer();
-const wordMeta = await sharp(word).metadata();
+// Straight out of the favicon, so the card and the tab icon are the same
+// contour by construction rather than by somebody remembering to update both.
+const FLAME_D = /\sd="([^"]+)"/.exec(readFileSync(resolve(root, 'public/favicon.svg'), 'utf8'))[1];
+const INTER = readFileSync(resolve(root, 'public/fonts/inter-var-latin.woff2')).toString('base64');
 
-const FLAME_X = 150;
-const FLAME_Y = Math.round((H - flameMeta.height) / 2) - 18;
-const WORD_X = FLAME_X + flameMeta.width + 92;
-const WORD_Y = Math.round((H - wordMeta.height) / 2) - 34;
+const card = (w, h, body) => `<!doctype html><html><head><meta charset="utf-8"><style>
+  @font-face {
+    font-family: 'Inter Variable'; font-style: normal; font-weight: 100 900;
+    src: url(data:font/woff2;base64,${INTER}) format('woff2');
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: ${w}px; height: ${h}px; }
+  body {
+    background: ${T['--void']};
+    font-family: 'Inter Variable', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .flame { filter:
+    drop-shadow(0 0 3px ${T['--cyan-glow']}aa)
+    drop-shadow(0 0 18px ${T['--cyan']}88)
+    drop-shadow(0 0 52px ${T['--cyan']}44); }
+  .flame path { fill: ${T['--cyan']}38; stroke: ${T['--cyan']}; stroke-width: 7; stroke-linejoin: round; }
+</style></head><body>${body}</body></html>`;
 
-// A single cyan hairline under the wordmark. No text is drawn: librsvg's font
-// resolution is not dependable across machines, and a card that renders
-// differently on the build box than it does here is worse than a plain one.
-const rule = Buffer.from(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
-     <rect x="${WORD_X}" y="${WORD_Y + wordMeta.height + 34}" width="560" height="2" fill="#00D8E7" opacity="0.55"/>
-     <rect x="${WORD_X}" y="${WORD_Y + wordMeta.height + 34}" width="112" height="2" fill="#99FFFF"/>
-   </svg>`
-);
+const flameSvg = (h) =>
+  `<svg class="flame" viewBox="0 0 160 305" height="${h}" xmlns="http://www.w3.org/2000/svg"><path d="${FLAME_D}"/></svg>`;
 
-await sharp({
-  create: { width: W, height: H, channels: 4, background: INK_BLACK },
-})
-  .composite([
-    { input: flame, left: FLAME_X, top: FLAME_Y },
-    { input: word, left: WORD_X, top: WORD_Y },
-    { input: rule, left: 0, top: 0 },
-  ])
-  .png({ compressionLevel: 9, palette: true })
-  .toFile(resolve(root, 'public/og/socioclimate-og.png'));
+const browser = await puppeteer.launch({
+  executablePath: CHROME,
+  headless: 'new',
+  args: ['--hide-scrollbars', '--force-color-profile=srgb'],
+});
 
-// Touch icon: the flame alone, square, on the same field.
-const icon = await sharp(STACKED).extract(FLAME).resize({ height: 150 }).toBuffer();
-const iconMeta = await sharp(icon).metadata();
-await sharp({
-  create: { width: 180, height: 180, channels: 4, background: INK_BLACK },
-})
-  .composite([
-    {
-      input: icon,
-      left: Math.round((180 - iconMeta.width) / 2),
-      top: Math.round((180 - iconMeta.height) / 2),
-    },
-  ])
-  .png({ compressionLevel: 9 })
-  .toFile(resolve(root, 'public/apple-touch-icon.png'));
+// --- The card -------------------------------------------------------------
+{
+  const W = 1200, H = 630;
+  const page = await browser.newPage();
+  await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+  await page.setContent(
+    card(W, H, `
+      <div style="display:flex;align-items:center;gap:76px">
+        ${flameSvg(400)}
+        <div>
+          <div style="font-size:88px;font-weight:500;letter-spacing:-0.028em;line-height:1;white-space:nowrap">
+            <span style="color:${T['--ink']}">Socio</span><span style="color:${T['--cyan']}">Climate</span>
+          </div>
+          <div style="height:2px;width:560px;margin-top:34px;background:${T['--cyan']}8c"></div>
+          <div style="height:2px;width:112px;margin-top:-2px;background:${T['--gold']}"></div>
+          <div style="margin-top:30px;font-size:27px;font-weight:300;color:${T['--ink-2']};letter-spacing:-0.01em">
+            Dormant data in, decisions and revenue out.
+          </div>
+        </div>
+      </div>`),
+    { waitUntil: 'load' }
+  );
+  await page.evaluateHandle('document.fonts.ready');
+  await new Promise((r) => setTimeout(r, 250));
+  const buf = await page.screenshot({ type: 'png' });
+  await sharp(buf).png({ compressionLevel: 9 }).toFile(resolve(root, 'public/og/socioclimate-og.png'));
+  await page.close();
+}
+
+// --- The touch icon: the flame alone, square, on the same field -----------
+{
+  const page = await browser.newPage();
+  await page.setViewport({ width: 180, height: 180, deviceScaleFactor: 1 });
+  await page.setContent(card(180, 180, flameSvg(132)), { waitUntil: 'load' });
+  await new Promise((r) => setTimeout(r, 200));
+  const buf = await page.screenshot({ type: 'png' });
+  await sharp(buf).png({ compressionLevel: 9 }).toFile(resolve(root, 'public/apple-touch-icon.png'));
+  await page.close();
+}
+
+await browser.close();
 
 for (const f of ['public/og/socioclimate-og.png', 'public/apple-touch-icon.png']) {
-  const m = await sharp(resolve(root, f)).metadata();
-  console.log(`${f.padEnd(34)} ${m.width}x${m.height}  ${(m.size / 1024).toFixed(1)} KB`);
+  const p = resolve(root, f);
+  const m = await sharp(p).metadata();
+  const kb = (readFileSync(p).length / 1024).toFixed(1);
+  console.log(`${f.padEnd(34)} ${m.width}x${m.height}  ${kb} KB`);
 }

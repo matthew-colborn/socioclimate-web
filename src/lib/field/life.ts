@@ -82,6 +82,12 @@ export const viewer = {
   idle: 0,
   /** Touch devices have no pointer, so scroll velocity stands in for it. */
   scroll: 0,
+  /**
+   * Cached scroll offset. The wave stream is coupled to this, and reading
+   * window.scrollY inside a frame loop is a layout read per frame per canvas —
+   * cheap individually, and exactly the kind of thing that turns into thrash.
+   */
+  scrollY: 0,
   reduced: false,
 };
 
@@ -99,6 +105,7 @@ export function decayViewer(now: number, dt: number): void {
     viewer.strength = 0;
     viewer.idle = 0;
     viewer.scroll = 0;
+    viewer.scrollY = 0;
     return;
   }
   viewer.strength = Math.max(0, viewer.strength - dt * 0.55);
@@ -113,6 +120,7 @@ export function wireViewer(reduced: boolean): void {
   if (reduced || wired) return;
   wired = true;
   lastMove = performance.now();
+  viewer.scrollY = window.scrollY;
 
   window.addEventListener(
     'pointermove',
@@ -142,6 +150,7 @@ export function wireViewer(reduced: boolean): void {
       const dt = Math.max(16, now - lastScrollT);
       // Normalised so a brisk flick lands near 1 and a nudge stays small.
       viewer.scroll = Math.min(1, Math.abs(dy / dt) / 2.5);
+      viewer.scrollY = window.scrollY;
       lastScrollY = window.scrollY;
       lastScrollT = now;
       lastMove = now;

@@ -1,66 +1,56 @@
 /**
- * Contact — a threshold rather than an object.
+ * Contact — a gateway. A way through rather than an object to look at.
  *
  * The flame used to sit here, and a mark loses its weight when it appears twice
  * on one page. It belongs at the top; this needed to be something else.
  *
- * I took the suggestion rather than proposing an alternative, because it was
- * the right one: brand/references/ref-1 is a lit doorway standing in a
- * landscape, and a way through is exactly what a contact section is. An object
- * asks to be looked at; an opening asks to be walked into.
+ * The first attempt at this was a tall aperture with two curved, mirrored
+ * sides, and it read as anatomy rather than architecture — a fair call, and an
+ * obvious one once seen. Symmetry plus a vertical slit plus a soft interior
+ * glow will always land there. The fix is to make it unmistakably built: a
+ * straight-sided opening with a lintel across the top, standing on a ground
+ * plane, with the light falling out of it and along the floor. That is what a
+ * portal is in brand/references/ref-1, and a lintel is the single element that
+ * makes the shape read as a doorway.
  *
- * Still derived from the mark. The aperture's two jambs are the flame's own
- * silhouette read as a vertical profile and mirrored, so the opening is
- * literally the shape of the flame held apart — the sides carry its
- * curvature rather than being drawn as a plain rectangle. Points drift toward
- * the gap and accelerate as they pass through, which is the only motion in it.
+ * Still derived from the mark: the light inside the opening is shaped by the
+ * flame's own profile, and the glow pooling on the floor carries the ridge's
+ * silhouette. The structure is architecture; the light in it is the flame.
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameProfile, pull, CYAN, GLOW, TEAL } from '../field/prims';
 import { drift, breath } from '../field/life';
 
-const ROWS = 46;
-const MOTES = 34;
+const MOTES = 30;
+const BEAM = 40;
 
 interface Mote { t0: number; sp: number; off: number; side: number }
 
-let jamb: number[] = [];
+let lightProf: number[] = [];
 let motes: Mote[] = [];
-let cx = 0, cy = 0, hgt = 0, half = 0, sill = 0;
+let cx = 0, floorY = 0, apW = 0, apH = 0, jambT = 0;
 
 export const threshold: Scene = {
   init(c: SceneCtx) {
     cx = c.w / 2;
-    cy = c.h * 0.46;
-    hgt = Math.min(c.h * 0.66, c.w * 1.0, 340);
-    sill = cy + hgt * 0.5;
-    half = hgt * 0.26;
+    const unit = Math.min(c.h * 0.62, c.w * 0.78, 320);
+    apH = unit;
+    // Wider than a slit and clearly rectangular: a doorway, roughly 1 : 1.7.
+    apW = unit * 0.58;
+    jambT = unit * 0.085;
+    floorY = c.h * 0.5 + apH * 0.5;
 
-    // The flame's silhouette, read top-to-bottom, becomes the inner edge of
-    // each jamb — so the opening widens and narrows the way the mark does.
-    const raw = flameProfile(ROWS);
+    const raw = flameProfile(BEAM);
     let lo = Infinity, hi = -Infinity;
     for (const v of raw) { if (v < lo) lo = v; if (v > hi) hi = v; }
-    // Smoothed hard. Raw column noise on a jamb reads as a jagged glitch, not
-    // as a doorway — the mark should give the opening its taper, not its
-    // texture.
-    const pass = (a: number[]): number[] =>
-      a.map((_, i) => (a[Math.max(0, i - 1)] + a[i] * 2 + a[Math.min(a.length - 1, i + 1)]) / 4);
-    let n = raw.map((v) => (v - lo) / ((hi - lo) || 1));
-    for (let k = 0; k < 6; k++) n = pass(n);
-    // A gentle taper: widest around two thirds up, closing toward the lintel.
-    jamb = n.map((v, i) => {
-      const u = i / (ROWS - 1);
-      const taper = Math.sin(Math.min(1, u * 1.06) * Math.PI * 0.82 + 0.28);
-      return 0.55 + 0.45 * v * taper;
-    });
+    lightProf = raw.map((v) => 0.3 + 0.7 * ((v - lo) / ((hi - lo) || 1)));
 
     motes = [];
     for (let i = 0; i < MOTES; i++) {
       motes.push({
         t0: c.rng() * 6,
-        sp: 0.16 + c.rng() * 0.16,
-        off: (c.rng() - 0.5) * hgt * 0.9,
+        sp: 0.14 + c.rng() * 0.14,
+        off: c.rng(),
         side: c.rng() < 0.5 ? -1 : 1,
       });
     }
@@ -69,94 +59,118 @@ export const threshold: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-
-    // Its own period again, slower than the scenes above it.
     const br = breath(t, 7.4, c.phase);
-    const open = 0.86 + br * 0.28;
+    const lit = 0.84 + br * 0.32;
 
-    halo(c, cx, sill - hgt * 0.34, hgt * (0.62 + br * 0.14), e * 0.9);
-    halftone(c, cx, cy, hgt * 0.9, 24, 0.035 * e);
+    const left = cx - apW / 2;
+    const right = cx + apW / 2;
+    const head = floorY - apH;
+
+    halo(c, cx, floorY - apH * 0.45, apH * (0.6 + br * 0.12), e * 0.85);
+    halftone(c, cx, floorY - apH * 0.4, apH * 0.9, 24, 0.03 * e);
 
     ctx.globalCompositeOperation = 'lighter';
 
-    // ---- the light coming through ---------------------------------------
-    // Brightest at the sill and falling away upward, the way ref-1's portal
-    // spills onto the ground in front of it.
-    const gap = ctx.createLinearGradient(0, sill, 0, cy - hgt * 0.5);
-    gap.addColorStop(0, `rgba(${GLOW}, ${0.4 * e * open})`);
-    gap.addColorStop(0.45, `rgba(${CYAN}, ${0.22 * e * open})`);
-    gap.addColorStop(1, `rgba(${CYAN}, 0)`);
+    // ---- the ground ------------------------------------------------------
+    // Lines running to the opening, converging slightly, so the portal is
+    // standing on something and being approached.
     ctx.globalAlpha = 1;
-    ctx.fillStyle = gap;
-    ctx.beginPath();
-    for (let i = 0; i < ROWS; i++) {
-      const v = i / (ROWS - 1);
-      const y = sill - v * hgt;
-      ctx.lineTo(cx - half * jamb[i] * open, y);
-    }
-    for (let i = ROWS - 1; i >= 0; i--) {
-      const v = i / (ROWS - 1);
-      const y = sill - v * hgt;
-      ctx.lineTo(cx + half * jamb[i] * open, y);
-    }
-    ctx.closePath();
-    ctx.fill();
-
-    // ---- the jambs -------------------------------------------------------
-    for (const side of [-1, 1]) {
-      ctx.strokeStyle = `rgba(${CYAN}, ${0.5 * e})`;
-      ctx.lineWidth = 1.3;
+    ctx.lineWidth = 1;
+    for (let k = 1; k <= 5; k++) {
+      const y = floorY + k * apH * 0.055;
+      const spread = 1 + k * 0.16;
+      ctx.strokeStyle = `rgba(${TEAL}, ${(0.34 - k * 0.05) * e})`;
       ctx.beginPath();
-      for (let i = 0; i < ROWS; i++) {
-        const v = i / (ROWS - 1);
-        const y = sill - v * hgt;
-        const x = cx + side * half * jamb[i] * open;
-        if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
-      }
+      ctx.moveTo(cx - apW * spread * 1.1, y);
+      ctx.lineTo(cx + apW * spread * 1.1, y);
       ctx.stroke();
-
-      // The outer wall, receding — it gives the opening something to be an
-      // opening in, without drawing a box around it.
-      const wall = ctx.createLinearGradient(cx + side * half, 0, cx + side * hgt * 0.62, 0);
-      wall.addColorStop(0, `rgba(${TEAL}, ${0.34 * e})`);
-      wall.addColorStop(1, `rgba(${TEAL}, 0)`);
-      ctx.strokeStyle = wall;
-      ctx.lineWidth = 1;
-      for (let k = 1; k <= 3; k++) {
-        ctx.beginPath();
-        for (let i = 0; i < ROWS; i += 2) {
-          const v = i / (ROWS - 1);
-          const y = sill - v * hgt;
-          const x = cx + side * (half * jamb[i] * open + k * hgt * 0.075);
-          if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
-        }
-        ctx.stroke();
-      }
     }
 
-    // ---- the sill --------------------------------------------------------
-    const line = ctx.createLinearGradient(cx - hgt * 0.7, 0, cx + hgt * 0.7, 0);
-    line.addColorStop(0, `rgba(${CYAN}, 0)`);
-    line.addColorStop(0.5, `rgba(${GLOW}, ${0.42 * e})`);
-    line.addColorStop(1, `rgba(${CYAN}, 0)`);
-    ctx.strokeStyle = line;
-    ctx.lineWidth = 1.2;
+    // ---- the light through the opening -----------------------------------
+    // Shaped by the flame's own profile across the width, so what comes
+    // through the door is the mark even though the door is not.
+    for (let i = 0; i < BEAM; i++) {
+      const u = i / (BEAM - 1);
+      const x = left + u * apW;
+      // Overlapped generously: at DPR 3 a 1px overlap still leaves seams, and
+      // a striped doorway reads as a barcode rather than as light.
+      const w = apW / BEAM + 3;
+      const a = lightProf[i] * 0.16 * lit * e;
+      const col = ctx.createLinearGradient(0, head, 0, floorY);
+      col.addColorStop(0, `rgba(${CYAN}, 0)`);
+      col.addColorStop(0.55, `rgba(${CYAN}, ${a})`);
+      col.addColorStop(1, `rgba(${GLOW}, ${a * 1.9})`);
+      ctx.fillStyle = col;
+      ctx.fillRect(x - 1.5, head, w, apH);
+    }
+
+    // Light spilling out across the floor. Radial, not a rectangle — a hard
+    // edged box of light reads as a UI panel sitting in the scene.
+    const spill = ctx.createRadialGradient(cx, floorY, 0, cx, floorY, apW * 1.15);
+    spill.addColorStop(0, `rgba(${GLOW}, ${0.22 * lit * e})`);
+    spill.addColorStop(0.5, `rgba(${CYAN}, ${0.08 * lit * e})`);
+    spill.addColorStop(1, `rgba(${CYAN}, 0)`);
+    ctx.fillStyle = spill;
+    ctx.fillRect(cx - apW * 1.15, floorY, apW * 2.3, apW * 1.15);
+
+    // ---- the structure ---------------------------------------------------
+    // Straight jambs and a lintel that overhangs them. The overhang is what
+    // makes it architecture rather than a gap between two shapes.
+    ctx.strokeStyle = `rgba(${CYAN}, ${0.62 * e})`;
+    ctx.lineWidth = 1.4;
+    for (const x of [left, right]) {
+      ctx.beginPath();
+      ctx.moveTo(x, floorY);
+      ctx.lineTo(x, head);
+      ctx.stroke();
+      // Depth: the jamb has a thickness turned toward the viewer.
+      ctx.strokeStyle = `rgba(${TEAL}, ${0.5 * e})`;
+      ctx.beginPath();
+      ctx.moveTo(x + (x === left ? -jambT : jambT), floorY);
+      ctx.lineTo(x + (x === left ? -jambT : jambT), head - jambT * 0.5);
+      ctx.stroke();
+      ctx.strokeStyle = `rgba(${CYAN}, ${0.62 * e})`;
+    }
+
+    // The lintel, overhanging both jambs.
     ctx.beginPath();
-    ctx.moveTo(cx - hgt * 0.7, sill);
-    ctx.lineTo(cx + hgt * 0.7, sill);
+    ctx.moveTo(left - jambT * 1.5, head);
+    ctx.lineTo(right + jambT * 1.5, head);
     ctx.stroke();
-    dab(c, cx, sill, hgt * 0.7, 0.12 * e * open);
+    ctx.strokeStyle = `rgba(${TEAL}, ${0.5 * e})`;
+    ctx.beginPath();
+    ctx.moveTo(left - jambT * 1.5, head - jambT * 0.5);
+    ctx.lineTo(right + jambT * 1.5, head - jambT * 0.5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(left - jambT * 1.5, head);
+    ctx.lineTo(left - jambT * 1.5, head - jambT * 0.5);
+    ctx.moveTo(right + jambT * 1.5, head);
+    ctx.lineTo(right + jambT * 1.5, head - jambT * 0.5);
+    ctx.stroke();
+
+    // The threshold itself: the brightest line in the scene.
+    const sill = ctx.createLinearGradient(left, 0, right, 0);
+    sill.addColorStop(0, `rgba(${CYAN}, ${0.3 * e})`);
+    sill.addColorStop(0.5, `rgba(${GLOW}, ${0.7 * lit * e})`);
+    sill.addColorStop(1, `rgba(${CYAN}, ${0.3 * e})`);
+    ctx.strokeStyle = sill;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(left, floorY);
+    ctx.lineTo(right, floorY);
+    ctx.stroke();
+    dab(c, cx, floorY, apW * 1.5, 0.1 * lit * e);
 
     // ---- what goes through -----------------------------------------------
     for (const m of motes) {
       const life = ((t + m.t0) * m.sp) % 1;
-      // Accelerating toward the gap, then gone: passing through, not orbiting.
-      const k = life * life;
-      const startX = cx + m.side * hgt * (0.62 + drift(t, 0.05, m.t0) * 0.06);
-      const x = startX + (cx - startX) * k;
-      const y = sill - hgt * 0.12 + m.off * (1 - k) * 0.5 - k * hgt * 0.22;
-      const p = pull(c, x, y, hgt * 0.6, 8);
-      dab(c, x + p.dx, y + p.dy, 3 + k * 2.4 + p.lift * 2, (1 - k) * 0.5 * e * (1 + p.lift));
+      const k = life * life;              // accelerating: passing through
+      const sx = cx + m.side * apW * (1.5 + drift(t, 0.05, m.t0) * 0.2);
+      const x = sx + (cx - sx) * k;
+      const y = floorY - apH * (0.08 + m.off * 0.55) - k * apH * 0.1;
+      const p = pull(c, x, y, apH * 0.55, 8);
+      dab(c, x + p.dx, y + p.dy, 2.8 + k * 2 + p.lift * 2, (1 - k) * 0.45 * e * (1 + p.lift));
     }
 
     ctx.globalCompositeOperation = 'source-over';

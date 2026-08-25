@@ -35,10 +35,10 @@ const d = (await getEntry('pages', 'contact'))!.data;
   .ch__n { color: var(--cyan); margin-right: 0.5em; }
   .ch__field { justify-self: center; width: 100%; max-width: 20rem; }
   .ch__field :global(.field) {
-    border: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
-    border-radius: var(--radius);
-    background: var(--ink-deep);
+    background: none;
+    border: 0;
   }
+  .ch__field :global(.field) { animation-delay: -19s; }
   .ch h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); max-width: 14ch; }
   .ch__lede { color: var(--paper-dim); font-size: var(--step-1); margin: var(--s-4) 0 0; max-width: 44ch; }
 

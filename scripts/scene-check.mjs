@@ -115,42 +115,20 @@ for (const [route, sel, name] of [
   await page.close();
 }
 
-// ---------- 3. text stays legible over the backdrop --------------------------
-// scripts/contrast.mjs compares token pairs and cannot see a canvas, so the
-// backdrop's luminous wash is invisible to it. The wash is what makes the page
-// read as the references rather than as a flat dark rectangle, and turning it
-// up is exactly the change that would quietly break contrast. So it is checked
-// against real composited pixels here, where a server is already running.
+// ---------- 3. text stays legible over whatever is behind it ----------------
+// The graphics lost their dark panels, so nothing guarantees a background
+// behind a label any more: it sits on a moving wave field with additive glow
+// over it. scripts/contrast.mjs compares token pairs and cannot see a canvas at
+// all, and sampling an average would pass a background that fails at its peaks.
+//
+// So this hides the text, screenshots what is actually behind it at several
+// scroll positions, and takes the BRIGHTEST pixel inside each text element's
+// own box — the worst case that text ever has to sit on.
 {
   const page = await browser.newPage();
   await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
   await page.goto(base + '/', { waitUntil: 'networkidle0' });
   await new Promise((r) => setTimeout(r, 2500));
-
-  const bg = await page.evaluate(async () => {
-    document.querySelectorAll('main,header.site-head,footer')
-      .forEach((e) => (e.style.visibility = 'hidden'));
-    await new Promise((r) => requestAnimationFrame(r));
-    const c = document.querySelector('canvas[data-backdrop]');
-    const g = c.getContext('2d');
-    g.getImageData(0, 0, 1, 1);
-    const d = g.getImageData(0, 0, c.width, c.height).data;
-    let best = [0, 0, 0];
-    let bl = -1;
-    for (let i = 0; i < d.length; i += 4 * 29) {
-      const a = d[i + 3] / 255;
-      // composited over the page ground, #020A21
-      const R = d[i] * a + 2 * (1 - a);
-      const G = d[i + 1] * a + 10 * (1 - a);
-      const B = d[i + 2] * a + 33 * (1 - a);
-      const l = 0.2126 * R + 0.7152 * G + 0.0722 * B;
-      if (l > bl) { bl = l; best = [Math.round(R), Math.round(G), Math.round(B)]; }
-    }
-    document.querySelectorAll('main,header.site-head,footer')
-      .forEach((e) => (e.style.visibility = ''));
-    return best;
-  });
-  await page.close();
 
   const lin = (v) => (v / 255 <= 0.04045 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4);
   const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
@@ -159,19 +137,80 @@ for (const [route, sel, name] of [
     return (x + 0.05) / (y + 0.05);
   };
 
-  const pairs = [
-    ['--paper', [255, 255, 255]],
-    ['--paper-dim', [168, 182, 200]],
-    ['--cyan', [0, 216, 231]],
+  const SELECTORS = [
+    '.hero__h', '.hero__line', '.readout__label', '.readout__value',
+    '.entry__facts dd', '.prose p', '.what__p', '.q__text', '.section-h',
   ];
+
+  const worst = new Map();
+
+  for (const y of [0, 1400, 3000, 5200, 7600]) {
+    await page.evaluate((sy) => window.scrollTo(0, sy), y);
+    await new Promise((r) => setTimeout(r, 900));
+
+    // Where the text is, and what colour it is — measured before hiding it.
+    const boxes = await page.evaluate((sels) => {
+      const out = [];
+      for (const sel of sels) {
+        for (const el of document.querySelectorAll(sel)) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > innerHeight || r.width < 8 || r.height < 6) continue;
+          const col = getComputedStyle(el).color.match(/\d+/g).slice(0, 3).map(Number);
+          out.push({ sel, x: Math.max(0, r.x | 0), y: Math.max(0, r.y | 0),
+                     w: Math.min(innerWidth - (r.x | 0), r.width | 0),
+                     h: Math.min(innerHeight - (r.y | 0), r.height | 0), col });
+          break; // one instance per selector per position is enough
+        }
+      }
+      return out;
+    }, SELECTORS);
+    if (!boxes.length) continue;
+
+    // Hide only the text, keep every canvas painting.
+    await page.evaluate(() => {
+      document.querySelectorAll('main, header.site-head, footer').forEach((e) => {
+        e.querySelectorAll('*').forEach((n) => {
+          if (!n.querySelector('canvas') && n.tagName !== 'CANVAS') n.style.color = 'transparent';
+        });
+      });
+    });
+    await new Promise((r) => setTimeout(r, 400));
+    const shot = await page.screenshot({ type: 'png' });
+    await page.evaluate(() => {
+      document.querySelectorAll('main, header.site-head, footer').forEach((e) => {
+        e.querySelectorAll('*').forEach((n) => (n.style.color = ''));
+      });
+    });
+
+    const img = sharp(shot);
+    for (const b of boxes) {
+      if (b.w < 4 || b.h < 4) continue;
+      const { data, info } = await img
+        .clone()
+        .extract({ left: b.x, top: b.y, width: b.w, height: b.h })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      let best = [0, 0, 0];
+      let bl = -1;
+      for (let i = 0; i < data.length; i += info.channels * 7) {
+        const px = [data[i], data[i + 1], data[i + 2]];
+        const l = lum(px);
+        if (l > bl) { bl = l; best = px; }
+      }
+      const r = ratio(b.col, best);
+      const prev = worst.get(b.sel);
+      if (!prev || r < prev.r) worst.set(b.sel, { r, bg: best });
+    }
+  }
+  await page.close();
+
   console.log('');
-  console.log(`TEXT OVER THE BACKDROP  (brightest pixel rgb(${bg.join(',')}))`);
-  console.log('-'.repeat(58));
-  for (const [name, fg] of pairs) {
-    const r = ratio(fg, bg);
+  console.log('TEXT OVER THE FIELD  (brightest pixel inside each text box, 5 scroll positions)');
+  console.log('-'.repeat(72));
+  for (const [sel, { r, bg }] of worst) {
     const ok = r >= 4.5;
     if (!ok) fail++;
-    console.log(`  ${name.padEnd(12)} ${r.toFixed(2)}:1   ${ok ? 'PASS' : 'FAIL (needs 4.5)'}`);
+    console.log(`  ${sel.padEnd(20)} ${r.toFixed(2)}:1  over rgb(${bg.join(',')})  ${ok ? 'PASS' : 'FAIL (needs 4.5)'}`);
   }
 }
 

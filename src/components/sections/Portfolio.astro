@@ -100,9 +100,10 @@ const entries = await Promise.all(
     margin-bottom: var(--s-5);
   }
   .entry__figure :global(.field) {
-    border: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
-    border-radius: var(--radius);
-    background: var(--ink-deep);
+    /* No panel, no border, no fill. The graphic sits directly on the stream so
+       its light mixes with the field behind it instead of covering it. */
+    background: none;
+    border: 0;
   }
   @media (max-width: 52rem) {
     .entry__top { grid-template-columns: 1fr; gap: var(--s-4); }

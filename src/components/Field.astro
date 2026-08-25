@@ -66,7 +66,32 @@ const { scene, priority = false, variant = 'hero' } = Astro.props;
     transition: opacity var(--dur-3) var(--ease);
   }
   .field.is-live .field__poster { opacity: 0; }
-  .field__canvas { z-index: 1; }
+  .field__canvas {
+    z-index: 1;
+    /* Additive, so the form's light adds to the stream behind it rather than
+       sitting on top of it. `screen` rather than `plus-lighter`: on a dark
+       ground the two are visually all but identical for glow, and screen has
+       no support caveats. */
+    mix-blend-mode: screen;
+  }
+  .field__poster { mix-blend-mode: screen; }
+
+  /* Bounded drift. The icon inhabits its area rather than being parked in it —
+     but the box is generous and real, so it can never wander into another
+     section, off screen, or across the reading column.
+     Transform only. Anything that reflowed here would be a CLS regression, and
+     a floating element is exactly where that happens.
+     Periods are multiples of the stream's 11s breath, so the icons move on the
+     field's rhythm rather than on one of their own. */
+  .field { animation: field-drift 44s var(--ease-soft) infinite; }
+  .field--panel { animation-duration: 33s; }
+  @keyframes field-drift {
+    0%   { transform: translate3d(0, 0, 0); }
+    25%  { transform: translate3d(9px, -7px, 0); }
+    50%  { transform: translate3d(-6px, -11px, 0); }
+    75%  { transform: translate3d(-10px, 5px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
 
   /* Without script the poster is all there is, so it must not be hidden. */
   @media (prefers-reduced-motion: reduce) {

@@ -48,25 +48,6 @@ const portfolio = defineCollection({
   }),
 });
 
-/**
- * The four moves: find, capture, understand, point at revenue. One file each
- * rather than an array in frontmatter, because each carries a body of prose and
- * the ordering has to be as explicit as the portfolio's.
- */
-const process = defineCollection({
-  loader: glob({ base: './src/content/process', pattern: '**/*.mdx' }),
-  schema: z.object({
-    order: z.number(),
-    /** Rendered in mono beside the name. Zero-padded to match the nav. */
-    step: z.string(),
-    name: z.string(),
-    /** One sentence. The move itself, stated plainly. */
-    line: z.string(),
-    /** What the business has at the end of this move that it did not before. */
-    result: z.string(),
-  }),
-});
-
 const pages = defineCollection({
   loader: glob({ base: './src/content/pages', pattern: '**/*.mdx' }),
   schema: z.object({
@@ -121,4 +102,4 @@ const diagnostic = defineCollection({
   }),
 });
 
-export const collections = { portfolio, process, pages, diagnostic };
+export const collections = { portfolio, pages, diagnostic };

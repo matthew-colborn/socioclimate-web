@@ -87,6 +87,11 @@ const orgLd = {
   </head>
 
   <body>
+    {/* The wave surface from beneath the flame, behind the whole page. Fixed
+        and aria-hidden: it is ground, not content, and it never affects
+        layout, so it cannot move anything or contribute to CLS. */}
+    <canvas class="backdrop" data-backdrop aria-hidden="true"></canvas>
+
     <a class="skip" href="#main">Skip to content</a>
     <Header />
     <main id="main" class={bleed ? '' : 'page'}>
@@ -95,7 +100,9 @@ const orgLd = {
     <Footer />
     <script>
       import { initReveal } from '../lib/reveal';
+      import { initBackdrop } from '../lib/field/backdrop';
       initReveal();
+      initBackdrop();
       document.addEventListener('astro:page-load', initReveal);
     </script>
   </body>

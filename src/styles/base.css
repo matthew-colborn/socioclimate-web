@@ -407,6 +407,20 @@ img, canvas, svg { display: block; max-width: 100%; }
 /* The section headings that used to be page h1s. */
 .section-h { font-size: clamp(2.1rem, 5.2vw, 3.5rem); max-width: 20ch; }
 
+/* --- The backdrop --------------------------------------------------------- */
+/* Fixed, so it never scrolls with content and never participates in layout —
+   which is also why it cannot contribute to CLS. Behind everything, and
+   untouchable: it is ground, not an element. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

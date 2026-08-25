@@ -15,6 +15,21 @@
  */
 const SECTIONS = ['top', '01-what-we-do', '02-portfolio', '03-contact'];
 
+/**
+ * The four process steps used to be their own anchors and were shared as deep
+ * links. The section is one paragraph now, so those ids no longer exist —
+ * rather than let a shared link land nowhere, they resolve to the section that
+ * replaced them.
+ */
+const RETIRED: Record<string, string> = {
+  '01-find': '01-what-we-do',
+  '02-capture': '01-what-we-do',
+  '03-understand': '01-what-we-do',
+  '04-revenue': '01-what-we-do',
+};
+
+const resolve = (id: string): string => RETIRED[id] ?? id;
+
 let wired = false;
 
 export function initNav(): void {
@@ -26,7 +41,8 @@ export function initNav(): void {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /** Scroll to a section and move focus into it. */
-  const go = (id: string): void => {
+  const go = (rawId: string): void => {
+    const id = resolve(rawId);
     const el = document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
@@ -41,7 +57,7 @@ export function initNav(): void {
     document.addEventListener('click', (e) => {
       const a = (e.target as HTMLElement)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
       if (!a) return;
-      const id = a.getAttribute('href')!.slice(1);
+      const id = resolve(a.getAttribute('href')!.slice(1));
       if (!document.getElementById(id)) return;
       e.preventDefault();
       // Keep the URL honest so the link is copyable and Back works.
@@ -50,9 +66,17 @@ export function initNav(): void {
     });
 
     window.addEventListener('popstate', () => {
-      const id = location.hash.slice(1);
+      const id = resolve(location.hash.slice(1));
       if (id && document.getElementById(id)) go(id);
     });
+
+    // A cold load onto a retired anchor: the browser cannot scroll to an id
+    // that is gone, so it is corrected here on arrival.
+    const landed = location.hash.slice(1);
+    if (landed && RETIRED[landed]) {
+      history.replaceState(null, '', `#${RETIRED[landed]}`);
+      go(landed);
+    }
   }
 
   // ---- which section am I in ------------------------------------------

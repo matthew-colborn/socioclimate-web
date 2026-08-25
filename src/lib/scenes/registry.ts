@@ -6,10 +6,11 @@ import { converge } from './converge';
 import { lattice } from './lattice';
 import { opening } from './opening';
 import { process } from './process';
+import { waves } from './waves';
 
 export type SceneId =
   | 'flame' | 'ridge' | 'traces' | 'converge' | 'lattice' | 'opening'
-  | 'process';
+  | 'process' | 'waves';
 
 /**
  * Every object here is the same traced flame contour under a different
@@ -25,6 +26,7 @@ export const SCENES: Record<SceneId, Scene> = {
   lattice,
   opening,
   process,
+  waves,
 };
 
 /** Fixed per scene so a poster frame and the first animated frame agree. */
@@ -36,4 +38,5 @@ export const SEEDS: Record<SceneId, number> = {
   lattice: 54029,
   opening: 60627,
   process: 81140,
+  waves: 46201,
 };

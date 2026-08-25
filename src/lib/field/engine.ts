@@ -112,6 +112,8 @@ export interface EngineOptions {
   seed: number;
   /** When true the scene renders exactly one frame at t=0 and never animates. */
   still: boolean;
+  /** Frames per second. Defaults to FPS_CAP; the background runs slower. */
+  fps?: number;
 }
 
 export class Engine {
@@ -125,6 +127,7 @@ export class Engine {
   private visible = true;
   private seed: number;
   private lastFrame = 0;
+  private minFrameMs = MIN_FRAME_MS;
   private rect: DOMRect | null = null;
   /**
    * Set by the governor in mount.ts. While true this engine will not run no
@@ -140,6 +143,7 @@ export class Engine {
     this.canvas = o.canvas;
     this.scene = o.scene;
     this.still = o.still;
+    this.minFrameMs = o.fps ? 1000 / o.fps - 1 : MIN_FRAME_MS;
     const ctx = o.canvas.getContext('2d', { alpha: true })!;
     this.seed = o.seed;
     this.c = {
@@ -253,7 +257,7 @@ export class Engine {
 
     // Frame cap. Ambient drift does not need 60fps and the cap roughly halves
     // the idle cost; the RAF chain still runs so the browser can throttle it.
-    if (now - this.lastFrame < MIN_FRAME_MS) return;
+    if (now - this.lastFrame < this.minFrameMs) return;
     const dt = this.lastFrame ? (now - this.lastFrame) / 1000 : 0;
     this.lastFrame = now;
 

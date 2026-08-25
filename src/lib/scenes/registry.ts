@@ -5,11 +5,11 @@ import { traces_scene } from './traces';
 import { converge } from './converge';
 import { lattice } from './lattice';
 import { opening } from './opening';
-import { find, capture, understand, revenue } from './moves';
+import { process } from './process';
 
 export type SceneId =
   | 'flame' | 'ridge' | 'traces' | 'converge' | 'lattice' | 'opening'
-  | 'find' | 'capture' | 'understand' | 'revenue';
+  | 'process';
 
 /**
  * Every object here is the same traced flame contour under a different
@@ -24,10 +24,7 @@ export const SCENES: Record<SceneId, Scene> = {
   converge,
   lattice,
   opening,
-  find,
-  capture,
-  understand,
-  revenue,
+  process,
 };
 
 /** Fixed per scene so a poster frame and the first animated frame agree. */
@@ -38,8 +35,5 @@ export const SEEDS: Record<SceneId, number> = {
   converge: 33871,
   lattice: 54029,
   opening: 60627,
-  find: 81140,
-  capture: 90233,
-  understand: 11987,
-  revenue: 24506,
+  process: 81140,
 };

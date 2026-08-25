@@ -4,7 +4,7 @@ import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
 
 const base = (process.argv[2] || 'http://localhost:4332').replace(/\/$/, '');
-const PATHS = ['/', '/portfolio', '/contact'];
+const PATHS = ['/', '/what-we-do', '/portfolio', '/contact'];
 const CATEGORIES = ['performance', 'accessibility', 'best-practices', 'seo'];
 
 const chrome = await chromeLauncher.launch({

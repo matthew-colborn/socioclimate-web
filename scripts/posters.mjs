@@ -26,10 +26,7 @@ mkdirSync(out, { recursive: true });
 
 const ROUTES = ['/', '/what-we-do', '/portfolio', '/contact'];
 // Every scene in the registry must be reachable from one of those routes.
-const EXPECTED = [
-  'flame', 'ridge', 'traces', 'converge', 'lattice', 'opening',
-  'find', 'capture', 'understand', 'revenue',
-];
+const EXPECTED = ['flame', 'ridge', 'traces', 'converge', 'lattice', 'opening', 'process'];
 
 const W = 1440;
 const H = 900;

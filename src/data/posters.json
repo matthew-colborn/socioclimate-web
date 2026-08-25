@@ -1,12 +1,9 @@
 {
-  "capture": "/scenes/capture.48a47e62.webp",
   "converge": "/scenes/converge.ce26e3ad.webp",
-  "find": "/scenes/find.61a42423.webp",
   "flame": "/scenes/flame.e8e7b2e6.webp",
   "lattice": "/scenes/lattice.65261505.webp",
   "opening": "/scenes/opening.13bfaa45.webp",
-  "revenue": "/scenes/revenue.895e011b.webp",
+  "process": "/scenes/process.f3385c58.webp",
   "ridge": "/scenes/ridge.db0e7507.webp",
-  "traces": "/scenes/traces.a003c605.webp",
-  "understand": "/scenes/understand.ab6691be.webp"
+  "traces": "/scenes/traces.a003c605.webp"
 }

@@ -64,8 +64,6 @@ const process = defineCollection({
     line: z.string(),
     /** What the business has at the end of this move that it did not before. */
     result: z.string(),
-    /** Its generative treatment. One system, four readings. */
-    scene: z.enum(['find', 'capture', 'understand', 'revenue']),
   }),
 });
 

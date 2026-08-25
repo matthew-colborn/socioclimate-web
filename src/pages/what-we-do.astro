@@ -21,22 +21,30 @@ const moves = await Promise.all(
     <p class="page-head__lede">{d.standfirst}</p>
   </header>
 
-  <div class="wrap">
-    {moves.map((m) => (
-      <article class="move" data-reveal id={m.id}>
-        <div class="move__figure"><Field scene={m.data.scene} variant="panel" /></div>
-        <div class="move__head">
-          <span class="move__n" aria-hidden="true">{m.data.step}</span>
-          <h2 class="move__name">{m.data.name}</h2>
-        </div>
-        <p class="move__line">{m.data.line}</p>
-        <div class="move__body prose"><m.Body /></div>
-        <p class="move__result">
-          <span class="move__result-label">What you have at the end</span>
-          <span>{m.data.result}</span>
-        </p>
-      </article>
-    ))}
+  {/* One canvas for the whole section. It sticks while the four moves scroll
+      past it, so the same particle system carries all four steps rather than
+      four separate graphics sitting beside four separate headings. */}
+  <div class="wrap process" data-process>
+    <div class="process__stage">
+      <div class="process__figure"><Field scene="process" variant="panel" /></div>
+    </div>
+
+    <div class="process__steps">
+      {moves.map((m) => (
+        <article class="move" data-reveal data-step={m.data.step} id={m.id} tabindex="-1">
+          <div class="move__head">
+            <span class="move__n" aria-hidden="true">{m.data.step}</span>
+            <h2 class="move__name">{m.data.name}</h2>
+          </div>
+          <p class="move__line">{m.data.line}</p>
+          <div class="move__body prose"><m.Body /></div>
+          <p class="move__result">
+            <span class="move__result-label">What you have at the end</span>
+            <span>{m.data.result}</span>
+          </p>
+        </article>
+      ))}
+    </div>
   </div>
 
   <section class="wrap closing" data-reveal aria-labelledby="closing-h">
@@ -58,32 +66,44 @@ const moves = await Promise.all(
   .move {
     border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
     padding-top: var(--s-5);
-    margin-bottom: var(--s-7);
-    /* Anchored from the home page, so the heading must not land under the
-       fixed-position header. */
-    scroll-margin-top: 6rem;
+    /* Tall enough that each step owns the viewport as it passes, which is what
+       lets scroll position drive the state cleanly. */
+    margin-bottom: clamp(var(--s-7), 22vh, 12rem);
   }
-  /* The scene sits beside the move rather than above it, the same arrangement
-     the portfolio entries use, so the two pages read as one system. */
-  .move {
+  /* --- The process section -------------------------------------------------
+     Two columns: one sticky canvas on the left, the four moves scrolling past
+     on the right. The canvas is the only moving thing in this viewport, which
+     is the whole reason it is one canvas and not four. */
+  .process {
     display: grid;
-    grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
-    gap: var(--s-5);
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
     align-items: start;
   }
-  .move__figure {
-    grid-row: 1 / span 4;
+  .process__stage {
     position: sticky;
-    top: 7rem;
+    top: 8rem;
   }
-  .move__figure :global(.field) {
+  .process__figure :global(.field) {
     border: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
     border-radius: var(--radius);
     background: var(--ink-deep);
   }
+  .process__steps { min-width: 0; }
+
+  /* Every step is reachable and readable with no motion at all, so the anchor
+     target gets scroll-margin and a focus ring rather than any reveal gating. */
+  .move { scroll-margin-top: 7rem; }
+  .move:focus { outline: none; }
+  .move:focus-visible { outline: 2px solid var(--cyan-bright); outline-offset: 6px; }
+
   @media (max-width: 60rem) {
-    .move { grid-template-columns: 1fr; }
-    .move__figure { grid-row: auto; position: static; max-width: 17rem; }
+    .process { grid-template-columns: 1fr; }
+    /* On a phone the canvas sits under the header and stays there while the
+       steps pass, which keeps the one-graphic reading without stealing the
+       whole screen. */
+    .process__stage { top: 4.5rem; margin-bottom: var(--s-5); }
+    .process__figure { max-width: 15rem; margin-inline: auto; }
   }
 
   .move__head { display: flex; align-items: baseline; gap: var(--s-3); margin-bottom: var(--s-3); }
@@ -141,5 +161,7 @@ const moves = await Promise.all(
 
 <script>
   import { mountFields } from '../lib/field/mount';
+  import { initProcess } from '../lib/process-controller';
   mountFields();
+  initProcess();
 </script>

@@ -8,8 +8,8 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--ground);
-  color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--font-body);
   font-size: var(--step-0);
   line-height: 1.6;
@@ -56,14 +56,14 @@ img, canvas, svg { display: block; max-width: 100%; }
 }
 
 .measure { max-width: 62ch; }
-.dim { color: var(--ink-2); }
+.dim { color: var(--paper-dim); }
 
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--paper-dim);
   margin: 0 0 var(--s-3);
 }
 
@@ -81,7 +81,7 @@ img, canvas, svg { display: block; max-width: 100%; }
   left: var(--gutter);
   top: -4rem;
   z-index: 100;
-  background: var(--void);
+  background: var(--ink-deep);
   border: 1px solid var(--cyan);
   padding: 0.6em 1em;
   border-radius: 2px;
@@ -92,33 +92,35 @@ img, canvas, svg { display: block; max-width: 100%; }
 /* --- The one accent control ---------------------------------------------- */
 /* Exactly one call-to-action per view. If a second one appears, one of them is
    wrong.
-   This is where the gold gets spent. Gold appears on a page here, on the
-   current nav item, and on at most one measured value — nowhere else. Cyan
-   stays structural: links, linework, the mark, the scenes.
-   Outlined at rest and filling on hover, because a solid gold pill at full
-   saturation is louder than anything a page about restraint should contain. */
+   Cyan, like everything else that matters — there is no second accent hue on
+   this site. Presence comes from the filled treatment and the weight, not from
+   a different colour: outlined at rest so it does not shout over the focal
+   object, filling solid on hover and focus. brand/references/ref-2 does the
+   same thing, and its primary action is the only filled element on the page. */
 .cta {
   display: inline-flex;
   align-items: center;
   gap: 0.6em;
   padding: 0.82em 1.6em;
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 450;
+  font-size: 1rem;
+  /* Heavier than body. With no second hue available, weight and the fill are
+     the only levers the call to action has. */
+  font-weight: 500;
   letter-spacing: 0.01em;
   text-decoration: none;
-  color: var(--gold);
-  background: color-mix(in srgb, var(--gold) 7%, transparent);
-  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  color: var(--cyan);
+  background: color-mix(in srgb, var(--cyan) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cyan) 55%, transparent);
   border-radius: 999px;
   transition: color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease),
               background var(--dur-2) var(--ease);
 }
 .cta:hover,
 .cta:focus-visible {
-  color: var(--ground);
-  background: var(--gold);
-  border-color: var(--gold);
+  color: var(--ink);
+  background: var(--cyan);
+  border-color: var(--cyan);
 }
 .cta__arrow { transition: transform var(--dur-2) var(--ease); }
 .cta:hover .cta__arrow { transform: translate(3px, -3px); }
@@ -147,7 +149,7 @@ img, canvas, svg { display: block; max-width: 100%; }
   font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 400;
-  color: var(--ink-2);
+  color: var(--paper-dim);
   text-decoration: none;
   transition: color var(--dur-1) var(--ease);
 }
@@ -157,18 +159,18 @@ img, canvas, svg { display: block; max-width: 100%; }
   font-family: var(--font-mono);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
-  /* Full --ink-2, not a mix down to transparent. Fading a token toward the
+  /* Full --paper-dim, not a mix down to transparent. Fading a token toward the
      background is invisible to scripts/contrast.mjs, which compares raw token
-     pairs — 70% of --ink-2 over --ground is 3.97:1 and fails AA for text this
+     pairs — 70% of --paper-dim over --ink is 3.97:1 and fails AA for text this
      size. The number is kept subordinate to its label by size and weight,
      which cost nothing in contrast. */
-  color: var(--ink-2);
+  color: var(--paper-dim);
   transition: color var(--dur-1) var(--ease);
 }
-.site-head__nav a:hover { color: var(--ink); }
-/* The second of the three places gold is allowed: where you are now. */
-.site-head__nav a[aria-current='page'] { color: var(--ink); }
-.site-head__nav a[aria-current='page'] .n { color: var(--gold); }
+.site-head__nav a:hover { color: var(--paper); }
+/* Where you are now — one of the few things cyan is spent on. */
+.site-head__nav a[aria-current='page'] { color: var(--paper); }
+.site-head__nav a[aria-current='page'] .n { color: var(--cyan); }
 
 /* All four items with their numbers do not fit beside the full lockup on a
    375px screen — "What we do" wraps onto three lines and the header collapses.
@@ -191,9 +193,9 @@ img, canvas, svg { display: block; max-width: 100%; }
    the argument: the sentence the whole site is built on, the routes, and the
    two ways to start. */
 .site-foot {
-  border-top: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--teal-deep) 45%, transparent);
   padding-block: var(--s-6) var(--s-5);
-  background: var(--void);
+  background: var(--ink-deep);
 }
 .site-foot__inner {
   display: grid;
@@ -206,7 +208,7 @@ img, canvas, svg { display: block; max-width: 100%; }
   font-size: clamp(1.05rem, 2vw, 1.5rem);
   font-weight: 300;
   line-height: 1.25;
-  color: var(--ink);
+  color: var(--paper);
   max-width: 24ch;
   margin: var(--s-3) 0 0;
 }
@@ -215,7 +217,7 @@ img, canvas, svg { display: block; max-width: 100%; }
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--paper-dim);
   margin: 0 0 var(--s-2);
   font-weight: 400;
 }
@@ -230,9 +232,9 @@ img, canvas, svg { display: block; max-width: 100%; }
   gap: var(--s-2);
   margin-top: var(--s-6);
   padding-top: var(--s-3);
-  border-top: 1px solid color-mix(in srgb, var(--line-faint) 40%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
 }
-.site-foot__legal p { margin: 0; font-size: 0.76rem; color: var(--ink-2); }
+.site-foot__legal p { margin: 0; font-size: 0.76rem; color: var(--paper-dim); }
 @media (max-width: 52rem) {
   .site-foot__inner { grid-template-columns: 1fr; gap: var(--s-4); }
 }
@@ -244,7 +246,7 @@ img, canvas, svg { display: block; max-width: 100%; }
 .page-head { padding-bottom: var(--s-6); }
 .page-head h1 { font-size: clamp(2.1rem, 5.2vw, 3.5rem); max-width: 20ch; }
 .page-head__lede {
-  color: var(--ink-2);
+  color: var(--paper-dim);
   font-size: var(--step-1);
   margin: var(--s-4) 0 0;
   max-width: 54ch;
@@ -252,23 +254,24 @@ img, canvas, svg { display: block; max-width: 100%; }
 
 /* --- Long-form ------------------------------------------------------------ */
 /* The prose system the research site had, reduced to what two pages need. */
-.prose { max-width: 64ch; color: var(--ink-2); }
+.prose { max-width: 64ch; color: var(--paper-dim); }
 .prose > h2 {
   font-size: clamp(1.3rem, 2.5vw, 1.85rem);
   font-weight: 300;
-  color: var(--ink);
+  color: var(--paper);
   margin: var(--s-6) 0 var(--s-3);
   padding-top: var(--s-4);
-  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
   max-width: 28ch;
 }
 .prose > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .prose p { margin-bottom: var(--s-3); }
-.prose strong { color: var(--ink); font-weight: 500; }
+.prose strong { color: var(--paper); font-weight: 500; }
 .prose ol,
 .prose ul { padding-left: 1.3em; margin: 0 0 var(--s-3); }
 .prose li { margin-bottom: var(--s-3); }
-/* Cyan, not gold. List markers repeat, and gold that repeats is not an accent. */
+/* List markers are structural rather than emphatic, so they take the muted
+   cyan weighting rather than full strength. */
 .prose li::marker {
   color: var(--cyan);
   font-family: var(--font-mono);
@@ -279,8 +282,8 @@ img, canvas, svg { display: block; max-width: 100%; }
 /* Bordered, and they lift under the cursor. The lift is 2px and 240ms: enough
    to answer the pointer, not enough to be an effect. */
 .panel {
-  background: var(--panel);
-  border: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 85%, transparent);
   border-radius: var(--radius);
   padding: var(--s-4);
   transition: background var(--dur-2) var(--ease),
@@ -288,7 +291,7 @@ img, canvas, svg { display: block; max-width: 100%; }
               transform var(--dur-2) var(--ease);
 }
 .panel:hover {
-  background: var(--raised);
+  background: var(--surface);
   border-color: color-mix(in srgb, var(--cyan) 34%, transparent);
   transform: translateY(-2px);
 }
@@ -313,22 +316,22 @@ img, canvas, svg { display: block; max-width: 100%; }
   font-weight: 500;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--paper-dim);
 }
 .readout__value {
   font-family: var(--font-mono);
   font-size: var(--step-2);
   font-weight: 400;
-  color: var(--ink);
+  color: var(--paper);
   letter-spacing: -0.01em;
 }
-.readout__note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--ink-2); }
+.readout__note { font-family: var(--font-mono); font-size: 0.68rem; color: var(--paper-dim); }
 .readout--pending {
-  border: 1px dashed color-mix(in srgb, var(--ink-2) 35%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--paper-dim) 35%, transparent);
   border-radius: var(--radius);
   padding: 0.6em 0.8em;
 }
-.readout--pending .readout__value { color: var(--ink-2); letter-spacing: 0.18em; opacity: 0.55; }
+.readout--pending .readout__value { color: var(--paper-dim); letter-spacing: 0.18em; opacity: 0.55; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

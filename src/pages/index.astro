@@ -193,10 +193,10 @@ const beats = d.beats ?? [];
     font-size: 0.72rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink-2);
+    color: var(--paper-dim);
     margin: 0 0 var(--s-4);
   }
-  .hero__n { color: var(--gold); }
+  .hero__n { color: var(--cyan); }
   .hero__h {
     font-size: clamp(1.9rem, 4.2vw, 3.2rem);
     font-weight: 250;
@@ -205,7 +205,7 @@ const beats = d.beats ?? [];
   }
   .hero__line {
     font-size: clamp(0.95rem, 1.5vw, 1.08rem);
-    color: var(--ink-2);
+    color: var(--paper-dim);
     margin: var(--s-4) 0 0;
     max-width: 46ch;
   }
@@ -217,14 +217,14 @@ const beats = d.beats ?? [];
     list-style: none;
     margin: var(--s-5) 0 0;
     padding: var(--s-3) 0 0;
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
   }
   /* Not .readout__value: these are short qualitative claims rather than
      measurements, so they are set in the body face. Mono here would dress an
      assertion up as a reading. */
   .beat__value {
     font-size: 0.98rem;
-    color: var(--ink);
+    color: var(--paper);
     line-height: 1.3;
     max-width: 18ch;
   }
@@ -247,13 +247,13 @@ const beats = d.beats ?? [];
     font-size: 0.68rem;
     letter-spacing: 0.13em;
     text-transform: uppercase;
-    color: var(--ink-2);
+    color: var(--paper-dim);
     cursor: pointer;
     transition: color var(--dur-1) var(--ease);
   }
   .beat-ctl__pause { display: inline-flex; align-items: center; gap: 0.5em; }
   .beat-ctl__pause:hover,
-  .beat-ctl__dots button:hover { color: var(--ink); }
+  .beat-ctl__dots button:hover { color: var(--paper); }
   .beat-ctl__glyph {
     width: 7px; height: 9px;
     border-left: 2px solid currentColor;
@@ -267,9 +267,9 @@ const beats = d.beats ?? [];
     border-left: 8px solid currentColor;
   }
   .beat-ctl__dots { display: flex; gap: var(--s-3); list-style: none; margin: 0; padding: 0; }
-  .beat-ctl__dots button[aria-current='true'] { color: var(--gold); }
+  .beat-ctl__dots button[aria-current='true'] { color: var(--cyan); }
   .beat-ctl__dots button[aria-current='true'] span {
-    border-bottom: 1px solid var(--gold);
+    border-bottom: 1px solid var(--cyan);
     padding-bottom: 2px;
   }
 
@@ -303,7 +303,7 @@ const beats = d.beats ?? [];
     max-width: 24ch;
     margin-bottom: var(--s-4);
   }
-  .band__p { color: var(--ink-2); max-width: 60ch; margin-bottom: var(--s-5); }
+  .band__p { color: var(--paper-dim); max-width: 60ch; margin-bottom: var(--s-5); }
 
   /* --- The four moves ------------------------------------------------------ */
   .moves {
@@ -331,9 +331,9 @@ const beats = d.beats ?? [];
   .move__name {
     font-size: 1.05rem;
     font-weight: 400;
-    color: var(--ink);
+    color: var(--paper);
   }
-  .move__line { font-size: 0.88rem; color: var(--ink-2); line-height: 1.5; }
+  .move__line { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.5; }
 
   /* --- Delivery lines ------------------------------------------------------ */
   .lines {
@@ -343,7 +343,7 @@ const beats = d.beats ?? [];
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: var(--s-4) var(--s-5);
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
     padding-top: var(--s-4);
   }
   .line { display: flex; flex-direction: column; gap: 0.35em; }
@@ -353,17 +353,17 @@ const beats = d.beats ?? [];
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--paper);
   }
-  .line__note { font-size: 0.85rem; color: var(--ink-2); line-height: 1.5; }
+  .line__note { font-size: 0.85rem; color: var(--paper-dim); line-height: 1.5; }
 
   /* --- Tail ---------------------------------------------------------------- */
   .tail {
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
     padding-block: clamp(3rem, 8vh, 5rem) var(--s-8);
   }
   .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 20ch; }
-  .tail__p { color: var(--ink-2); max-width: 56ch; margin: var(--s-4) 0 var(--s-5); }
+  .tail__p { color: var(--paper-dim); max-width: 56ch; margin: var(--s-4) 0 var(--s-5); }
 </style>
 
 <script>

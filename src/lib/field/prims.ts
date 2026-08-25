@@ -7,19 +7,18 @@ import type { SceneCtx } from './engine';
 import { FLAME_PATH } from '../flame';
 
 /**
- * Scene colour. Cyan is the schematic accent from tokens.css (#3FBFB5) and it
- * is the only colour the scenes paint with, because in this palette cyan is
- * structural and repeats freely.
+ * Scene colour. There is one hue and no exceptions.
  *
- * GOLD is the exception and it is used exactly once in the whole rotation — the
- * administrative price line in the ridge scene, which is the single measured
- * value that scene exists to show. Adding a second gold element anywhere spends
- * the accent and it stops meaning anything. Don't.
+ * A gold stroke was tried on the ridge's administrative price line, on the
+ * argument that the single most important value on a screen earns its own
+ * colour. It does not: it earned a brighter cyan. brand/references/ref-2
+ * carries a whole composition on one hue, and the moment a second one appears
+ * the page stops looking like the references and starts looking like a
+ * dashboard. If a mark needs to stand out, reach for GLOW, size or alpha.
  */
-export const CYAN = '63, 191, 181';   /* --cyan       #3FBFB5 */
-export const GLOW = '143, 237, 227';  /* --cyan-glow  #8FEDE3 */
-export const TEAL = '31, 110, 104';   /* deep schematic, for receding linework */
-export const GOLD = '233, 185, 73';   /* --gold       #E9B949 */
+export const CYAN = '0, 216, 231';    /* --cyan       #00D8E7 */
+export const GLOW = '153, 255, 255';  /* --cyan-glow  #99FFFF */
+export const TEAL = '0, 97, 132';     /* --teal-deep  #006184 */
 
 /**
  * Additive glow point. `s` is diameter in CSS px, `a` is 0..1.

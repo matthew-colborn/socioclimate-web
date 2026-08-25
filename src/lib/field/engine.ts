@@ -55,9 +55,9 @@ function makeDab(size: number): HTMLCanvasElement {
   const grad = g.createRadialGradient(r, r, 0, r, r, r);
   // Kept in sync with CYAN/GLOW in prims.ts by hand — this runs before any
   // stylesheet is parsed, so it cannot read the custom properties.
-  grad.addColorStop(0, 'rgba(143,237,227,1)');
-  grad.addColorStop(0.25, 'rgba(63,191,181,0.55)');
-  grad.addColorStop(1, 'rgba(63,191,181,0)');
+  grad.addColorStop(0, 'rgba(153,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(0,216,231,0.55)');
+  grad.addColorStop(1, 'rgba(0,216,231,0)');
   g.fillStyle = grad;
   g.fillRect(0, 0, size, size);
   return c;

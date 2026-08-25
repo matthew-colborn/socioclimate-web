@@ -1,60 +1,43 @@
 /* ---------------------------------------------------------------------------
-   SocioClimate design tokens — blueprint-operator.
+   SocioClimate design tokens.
 
-   Dark is the default and only theme: the brand does not exist on white and
-   there is no light mode to fall back to. Do not add one.
+   Colour is sampled from the two brand lockups in brand/. Dark is the default
+   and only theme: the brand does not exist on white and there is no light mode
+   to fall back to. Do not add one.
 
-   Two accents with different jobs, and keeping them apart is the whole system:
+   Cyan is data, not decoration. It marks the flame, links, and the single most
+   important value on any screen. Three cyan elements above the fold is the cap.
 
-     GOLD is spent. It marks the one thing on a screen that matters most — the
-     call to action, the current page, a single measured value. If a screen has
-     three gold elements it has none, because nothing stands out any more.
-
-     CYAN is schematic. Linework, the mark, the generative scenes, secondary
-     data. It is structural rather than emphatic and it can repeat freely.
-
-   Hex values come from the brand doc rather than from products/porchlight-os,
-   which uses a neighbouring but different palette (its accent is periwinkle,
-   not cyan). The two are siblings, not the same file.
+   There is no second accent hue, and adding one is the change to argue hardest
+   against. brand/references/ref-2 carries an entire composition on cyan alone —
+   even its primary call to action takes presence from a filled treatment rather
+   than from a different colour. A gold accent was tried here and removed: it
+   made the page read like an operator dashboard rather than the cinematic
+   references, which is precisely backwards.
    --------------------------------------------------------------------------- */
 
 :root {
   color-scheme: dark;
 
-  /* --- Grounds ----------------------------------------------------------- */
-  --ground:     #0B1220;  /* the page */
-  --panel:      #111B2E;  /* bordered cards and raised surfaces */
-  --raised:     #16223A;  /* a panel under the cursor */
-  --void:       #0A0F1C;  /* the darkest surfaces; full-bleed fields */
-
-  /* --- Accents ----------------------------------------------------------- */
-  --gold:       #E9B949;  /* primary accent. Spent, never scattered. */
-  --gold-deep:  #C9A227;  /* pressed, and the darker half of a gold rule */
-  --cyan:       #3FBFB5;  /* schematic linework, the mark, secondary data */
-  --cyan-bright:#5FD8CD;  /* hover and focus on a cyan element */
-  --cyan-glow:  #8FEDE3;  /* glow layers and the brightest gradient stop only */
-
-  /* --- State ------------------------------------------------------------- */
-  --ok:         #37C978;
-  --attn:       #F2637E;
-  --info:       #4F8DF7;
-
-  /* --- Text -------------------------------------------------------------- */
-  --ink:        #EAF1FF;  /* primary */
-  --ink-2:      #8CA0C6;  /* secondary, labels, captions */
-
-  /* --- Lines ------------------------------------------------------------- */
-  /* Solid colours rather than pre-mixed alphas, because call sites mix them
-     down with color-mix() to different strengths. */
-  --line:       #24334D;
-  --line-faint: #1A2740;
+  /* --- Brand ------------------------------------------------------------- */
+  --ink:          #020A21;  /* page background; the horizontal lockup's navy */
+  --ink-deep:     #000615;  /* sections that need to recede */
+  --ink-black:    #000000;  /* the stacked lockup's field; full-bleed only */
+  --cyan:         #00D8E7;  /* primary: links, the mark, key data marks */
+  --cyan-bright:  #2AE2EA;  /* hover, active, focus ring */
+  --cyan-glow:    #99FFFF;  /* glow layers and brightest gradient stop only */
+  --teal-deep:    #006184;  /* secondary data series, borders, muted rules */
+  --teal-shadow:  #00506B;  /* chart gridlines, dividers */
+  --paper:        #FFFFFF;  /* primary text on ink */
+  --paper-dim:    #A8B6C8;  /* secondary text */
 
   /* --- Type -------------------------------------------------------------- */
-  /* Inter for interface and body, IBM Plex Mono for data, numerals and any
-     measured value. No third face: --font-display is Inter set large and light,
-     which is a setting rather than a family. */
+  /* Outfit for display, Inter for body. Outfit set large and light is what
+     makes a headline read as editorial rather than as interface — setting
+     headlines in the body face was tried and it flattened the whole page.
+     IBM Plex Mono carries anything measured. */
+  --font-display: 'Outfit Variable', 'Outfit', 'Segoe UI', system-ui, sans-serif;
   --font-body:    'Inter Variable', 'Inter', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono:    'IBM Plex Mono', ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, monospace;
 
   --step--1: clamp(0.82rem, 0.79rem + 0.15vw, 0.90rem);
@@ -81,10 +64,10 @@
   --gutter: clamp(1.25rem, 5vw, 3rem);
   --wide: 76rem;
 
-  /* --- Surfaces and lines ------------------------------------------------ */
-  --rule: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
-  --rule-faint: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
-  --surface: var(--panel);
+  /* --- Lines and surfaces ------------------------------------------------ */
+  --rule: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+  --rule-faint: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+  --surface: color-mix(in srgb, var(--cyan) 3.5%, var(--ink-deep));
   --radius: 2px;
 
   /* The blueprint grid. Deliberately near the threshold of visibility — it is
@@ -94,13 +77,11 @@
 
   /* Glow is earned. The mark glows, one hero element may glow, nothing else. */
   --glow-mark:
-    drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 65%, transparent))
-    drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 45%, transparent))
-    drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 20%, transparent));
+    drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 70%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent))
+    drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 25%, transparent));
 
   /* --- Motion ------------------------------------------------------------ */
-  /* Self-drawing, 150-300ms. Anything slower reads as an animation rather than
-     as the interface responding. */
   --dur-1: 160ms;
   --dur-2: 240ms;
   --dur-3: 300ms;
@@ -114,6 +95,17 @@
   font-display: swap;
   font-weight: 100 900;
   src: url('/fonts/inter-var-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Outfit Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/outfit-var-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;

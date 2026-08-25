@@ -33,38 +33,30 @@ const ratio = (a, b) => {
 //       'ui'    — non-text UI component or meaningful graphic, AA needs 3:1
 //       'deco'  — purely decorative, no requirement (still reported)
 const PAIRS = [
-  ['--ink', '--ground', 'body', 'Body text on the page background'],
-  ['--ink', '--panel', 'body', 'Body text on a panel'],
-  ['--ink', '--raised', 'body', 'Body text on a hovered panel'],
-  ['--ink', '--void', 'body', 'Body text on the darkest field'],
-  ['--ink-2', '--ground', 'body', 'Secondary text, labels, captions'],
-  ['--ink-2', '--panel', 'body', 'Panel captions and readout labels'],
-  ['--ink-2', '--void', 'body', 'Footer legal line'],
+  ['--paper', '--ink', 'body', 'Body text on the page background'],
+  ['--paper', '--ink-deep', 'body', 'Body text on the receded field'],
+  ['--paper', '--ink-black', 'body', 'Body text on the black field'],
+  ['--paper-dim', '--ink', 'body', 'Secondary text, hero supporting copy'],
+  ['--paper-dim', '--ink-deep', 'body', 'Readout labels and notes'],
+  ['--paper-dim', '--ink-black', 'body', 'Secondary text on the black field'],
 
-  // Cyan is structural: links, linework, the mark, question numbers.
-  ['--cyan', '--ground', 'body', 'Links, stage chips, question numbers'],
-  ['--cyan', '--panel', 'body', 'Links and step numbers on a panel'],
-  ['--cyan', '--void', 'body', 'Links on the darkest field'],
-  ['--cyan-bright', '--ground', 'ui', 'Focus ring'],
-  ['--cyan-bright', '--void', 'ui', 'Focus ring on the darkest field'],
-  ['--cyan-glow', '--void', 'ui', 'Brightest points in the generative field'],
-  ['--cyan', '--void', 'ui', 'Generative field marks'],
+  // Cyan is the only accent. Links, the mark, the current nav item, the call
+  // to action and the single most important value on a screen — nothing else.
+  ['--cyan', '--ink', 'body', 'Links, stage chips, section and beat numbers'],
+  ['--cyan', '--ink-deep', 'body', 'Links on the receded field'],
+  ['--cyan', '--ink-black', 'body', 'Links on the black field'],
+  ['--ink', '--cyan', 'body', 'CTA label on a filled cyan pill (hover)'],
+  ['--ink', '--cyan-bright', 'body', 'CTA label on the brightest fill'],
+  ['--cyan-bright', '--ink', 'ui', 'Focus ring'],
+  ['--cyan-bright', '--ink-black', 'ui', 'Focus ring on the black field'],
+  ['--cyan-glow', '--ink-black', 'ui', 'Brightest points in the generative field'],
+  ['--cyan-glow', '--ink', 'ui', 'The ridge administrative price line'],
+  ['--cyan', '--ink-black', 'ui', 'Generative field marks on black'],
 
-  // Gold is spent: the CTA, the current nav item, one measured value.
-  ['--gold', '--ground', 'body', 'CTA label at rest, current nav number'],
-  ['--gold', '--void', 'body', 'CTA label on the darkest field'],
-  ['--ground', '--gold', 'body', 'CTA label on a filled gold pill (hover)'],
-  ['--gold', '--panel', 'body', 'Gold on a panel'],
-  ['--gold-deep', '--ground', 'ui', 'Pressed state and the darker half of a gold rule'],
-
-  // State colours. Reported so a future use is checked before it ships.
-  ['--ok', '--ground', 'body', 'Positive state'],
-  ['--attn', '--ground', 'body', 'Attention state'],
-  ['--info', '--ground', 'body', 'Informational state'],
-
-  ['--line', '--ground', 'deco', 'Rules, borders, input outlines'],
-  ['--line-faint', '--ground', 'deco', 'Section dividers'],
-  ['--line', '--void', 'deco', 'Rules on the darkest field'],
+  ['--teal-deep', '--ink', 'deco', 'Rules, borders, input outlines'],
+  ['--teal-deep', '--ink-black', 'deco', 'Routed trace lines'],
+  ['--teal-shadow', '--ink-black', 'deco', 'Section dividers'],
+  ['--teal-shadow', '--ink', 'deco', 'Section dividers on the page ground'],
 ];
 
 // Fail on the token name rather than on `undefined.slice(1)` twenty frames in.
@@ -104,7 +96,7 @@ console.log(
     : `${fails} pair(s) below WCAG AA.`
 );
 
-// --line and --line-faint sit below 3:1 on every background here. They are
+// --teal-deep and --teal-shadow sit below 3:1 on every background here. They are
 // legitimate for rules, borders and gridlines and illegitimate for anything a
 // reader has to read, so the rule is enforced rather than remembered.
 const walk = (dir, out = []) => {
@@ -128,7 +120,7 @@ if (offenders.length) {
   console.log('Text painted with a sub-3:1 token:');
   offenders.forEach((o) => console.log('  ' + o));
 } else {
-  console.log('No text is painted with --line or --line-faint.');
+  console.log('No text is painted with --teal-deep or --teal-shadow.');
 }
 
 process.exit(fails === 0 && offenders.length === 0 ? 0 : 1);

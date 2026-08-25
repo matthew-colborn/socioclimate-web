@@ -8,7 +8,7 @@
  * the finding.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GOLD } from '../field/prims';
+import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GLOW } from '../field/prims';
 
 interface Bar { x: number; base: number; h: number; phase: number; locked: boolean }
 
@@ -72,14 +72,13 @@ export const ridge: Scene = {
     // The line that never moves. Drawn dead flat, at a fixed height, with no
     // time term anywhere in it.
     //
-    // The only gold in any scene on the site. This is the administratively-set
-    // price — the single measured value the whole scene exists to show — and
-    // the palette reserves gold for exactly that. Everything around it stays
-    // cyan so this reads as the finding rather than as decoration.
+    // This is the administratively-set price, the single measured value the
+    // whole scene exists to show, so it is drawn at full glow brightness while
+    // the bars around it sit at a third of that. Brightness, not a second hue.
     const flat = c.h * 0.46;
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = `rgba(${GOLD}, ${0.72 * e})`;
+    ctx.strokeStyle = `rgba(${GLOW}, ${0.62 * e})`;
     ctx.lineWidth = 1;
     ctx.setLineDash([1, 5]);
     ctx.beginPath();

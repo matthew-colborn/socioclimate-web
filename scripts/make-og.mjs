@@ -39,7 +39,7 @@ const card = (w, h, body) => `<!doctype html><html><head><meta charset="utf-8"><
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: ${w}px; height: ${h}px; }
   body {
-    background: ${T['--void']};
+    background: ${T['--ink-black']};
     font-family: 'Inter Variable', sans-serif;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
@@ -71,11 +71,11 @@ const browser = await puppeteer.launch({
         ${flameSvg(400)}
         <div>
           <div style="font-size:88px;font-weight:500;letter-spacing:-0.028em;line-height:1;white-space:nowrap">
-            <span style="color:${T['--ink']}">Socio</span><span style="color:${T['--cyan']}">Climate</span>
+            <span style="color:${T['--paper']}">Socio</span><span style="color:${T['--cyan']}">Climate</span>
           </div>
           <div style="height:2px;width:560px;margin-top:34px;background:${T['--cyan']}8c"></div>
-          <div style="height:2px;width:112px;margin-top:-2px;background:${T['--gold']}"></div>
-          <div style="margin-top:30px;font-size:27px;font-weight:300;color:${T['--ink-2']};letter-spacing:-0.01em">
+          <div style="height:2px;width:112px;margin-top:-2px;background:${T['--cyan-glow']}"></div>
+          <div style="margin-top:30px;font-size:27px;font-weight:300;color:${T['--paper-dim']};letter-spacing:-0.01em">
             Dormant data in, decisions and revenue out.
           </div>
         </div>

@@ -84,11 +84,11 @@ const entries = await Promise.all(
 </BaseLayout>
 
 <style>
-  .page-head__n { color: var(--gold); margin-right: 0.5em; }
+  .page-head__n { color: var(--cyan); margin-right: 0.5em; }
   .intro { padding-bottom: var(--s-7); }
 
   .entry {
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
     padding-top: var(--s-5);
     margin-bottom: var(--s-8);
   }
@@ -105,9 +105,9 @@ const entries = await Promise.all(
     margin-bottom: var(--s-5);
   }
   .entry__figure :global(.field) {
-    border: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
     border-radius: var(--radius);
-    background: var(--void);
+    background: var(--ink-deep);
   }
   @media (max-width: 52rem) {
     .entry__top { grid-template-columns: 1fr; gap: var(--s-4); }
@@ -131,7 +131,7 @@ const entries = await Promise.all(
   .entry__headline {
     font-size: var(--step-1);
     font-weight: 300;
-    color: var(--ink-2);
+    color: var(--paper-dim);
     margin: 0;
     max-width: 40ch;
   }
@@ -142,7 +142,7 @@ const entries = await Promise.all(
     gap: var(--s-4);
     margin: 0 0 var(--s-5);
     padding-top: var(--s-4);
-    border-top: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
   }
   .entry__facts dt {
     font-family: var(--font-mono);
@@ -150,10 +150,10 @@ const entries = await Promise.all(
     font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--ink-2);
+    color: var(--paper-dim);
     margin-bottom: 0.6em;
   }
-  .entry__facts dd { margin: 0; font-size: 0.92rem; color: var(--ink); line-height: 1.55; }
+  .entry__facts dd { margin: 0; font-size: 0.92rem; color: var(--paper); line-height: 1.55; }
 
   .entry__readouts {
     display: flex;
@@ -162,18 +162,18 @@ const entries = await Promise.all(
     list-style: none;
     margin: 0 0 var(--s-5);
     padding: var(--s-4) 0;
-    border-top: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--line-faint) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--teal-shadow) 80%, transparent);
   }
 
   .entry__body { max-width: 62ch; }
 
   .tail {
-    border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
     padding-block: clamp(3rem, 8vh, 5rem) var(--s-8);
   }
   .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 18ch; }
-  .tail__p { color: var(--ink-2); margin: var(--s-3) 0 var(--s-5); }
+  .tail__p { color: var(--paper-dim); margin: var(--s-3) 0 var(--s-5); }
 </style>
 
 <script>

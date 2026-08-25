@@ -83,6 +83,18 @@ for (const route of ROUTES) {
       .webp({ quality: 52, effort: 6, smartSubsample: true })
       .toBuffer();
 
+    // A real poster is a blurred glow field and lands between 20 and 60 KB. A
+    // fraction of that is a uniform image, which means the canvas was blank —
+    // it has happened once already, when a CSS class name was mangled and the
+    // panels collapsed to zero height. Blank posters must fail the run rather
+    // than be published looking like files.
+    if (webp.length < 5000) {
+      console.error(`
+FAIL  ${id} rendered blank (${webp.length} bytes).`);
+      console.error('The canvas painted nothing — check its size and that the scene mounted.');
+      process.exit(1);
+    }
+
     const hash = createHash('sha256').update(webp).digest('hex').slice(0, 8);
     const name = `${id}.${hash}.webp`;
 

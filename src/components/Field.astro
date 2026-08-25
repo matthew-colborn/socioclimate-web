@@ -7,6 +7,10 @@
  * is composed on screen before any script runs and gains motion afterwards.
  */
 import type { SceneId } from '../lib/scenes/registry';
+// Content-hashed filenames, written by scripts/posters.mjs. /scenes/** is served
+// immutable for a year, so the hash is what makes a redrawn poster reach anyone
+// who has already visited.
+import POSTERS from '../data/posters.json';
 
 interface Props {
   scene: SceneId;
@@ -25,7 +29,7 @@ const { scene, priority = false, variant = 'hero' } = Astro.props;
 <div class:list={['field', `field--${variant}`]}>
   <img
     class="field__poster"
-    src={`/scenes/${scene}.webp`}
+    src={POSTERS[scene]}
     alt=""
     aria-hidden="true"
     width="1440"

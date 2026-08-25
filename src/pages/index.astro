@@ -3,6 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Field from '../components/Field.astro';
 import { SITE } from '../config/site';
+import POSTERS from '../data/posters.json';
 
 const page = await getEntry('pages', 'home');
 if (!page) throw new Error('Missing src/content/pages/home.mdx');
@@ -16,7 +17,7 @@ const moves = (await getCollection('process')).sort((a, b) => a.data.order - b.d
   description={d.description}
   organization={true}
   bleed={true}
-  preloadImage="/scenes/flame.webp"
+  preloadImage={POSTERS.flame}
 >
   <section class="hero wrap">
     <div class="hero__copy">

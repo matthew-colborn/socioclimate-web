@@ -14,7 +14,8 @@
 // that into a failure rather than a stale file nobody notices.
 import puppeteer from 'puppeteer-core';
 import sharp from 'sharp';
-import { mkdirSync, statSync } from 'node:fs';
+import { mkdirSync, statSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,6 +46,7 @@ await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
 await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
 
 const seen = [];
+const manifest = {};
 
 for (const route of ROUTES) {
   await page.goto(base + route, { waitUntil: 'networkidle0' });
@@ -75,16 +77,27 @@ for (const route of ROUTES) {
     );
 
     const buf = Buffer.from(png.split(',')[1], 'base64');
-    const file = resolve(out, `${id}.webp`);
-    await sharp(buf)
+    const webp = await sharp(buf)
       .resize(OUT_W, OUT_H, { fit: 'cover' })
       .blur(1.1)
       .webp({ quality: 52, effort: 6, smartSubsample: true })
-      .toFile(file);
+      .toBuffer();
+
+    const hash = createHash('sha256').update(webp).digest('hex').slice(0, 8);
+    const name = `${id}.${hash}.webp`;
+
+    // Drop any earlier hash for this scene so public/ does not accumulate.
+    for (const f of readdirSync(out)) {
+      if (f.startsWith(`${id}.`) && f.endsWith('.webp') && f !== name) unlinkSync(resolve(out, f));
+    }
+
+    const file = resolve(out, name);
+    writeFileSync(file, webp);
+    manifest[id] = `/scenes/${name}`;
     const meta = await sharp(file).metadata();
     console.log(
       `${id.padEnd(10)} ${route.padEnd(11)} ${meta.width}x${meta.height}  ` +
-        `${(statSync(file).size / 1024).toFixed(1)} KB`
+        `${(statSync(file).size / 1024).toFixed(1)} KB  ${name}`
     );
     seen.push(id);
   }
@@ -99,5 +112,9 @@ if (missing.length) {
   process.exit(1);
 }
 
+// Sorted so the manifest is stable across runs and the build stays reproducible.
+const sorted = Object.fromEntries(Object.keys(manifest).sort().map((k) => [k, manifest[k]]));
+writeFileSync(resolve(root, 'src/data/posters.json'), JSON.stringify(sorted, null, 2) + String.fromCharCode(10));
+
 console.log(`\n${seen.length}/${EXPECTED.length} scenes captured.`);
-console.log('Rebuild so public/scenes/ is copied into dist/.');
+console.log('src/data/posters.json written. Rebuild so public/scenes/ is copied into dist/.');

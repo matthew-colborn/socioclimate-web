@@ -198,9 +198,18 @@ const beats = d.beats ?? [];
   }
   .hero__n { color: var(--cyan); }
   .hero__h {
+    /* Explicit, because this is a <p> rather than a heading. The h1/h2/h3 rule
+       in base.css is what normally supplies the display face, and demoting the
+       rotating headline to a paragraph — so the page has one stable h1 — quietly
+       dropped it into the body face. This is the largest text on the site; it
+       has to be Outfit. */
+    font-family: var(--font-display);
     font-size: clamp(1.9rem, 4.2vw, 3.2rem);
     font-weight: 250;
     letter-spacing: -0.025em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0;
     max-width: 18ch;
   }
   .hero__line {

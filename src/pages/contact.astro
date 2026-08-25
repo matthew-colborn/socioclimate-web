@@ -26,7 +26,13 @@ const d = (await getEntry('pages', 'contact'))!.data;
 
 <script>
   import { mountFields } from '../lib/field/mount';
-  mountFields();
+  // Re-run after every view transition: with ClientRouter the document is
+  // never torn down, so a plain top-level call would only ever fire once.
+  const boot = () => {
+    mountFields();
+  };
+  boot();
+  document.addEventListener('astro:page-load', boot);
 </script>
 
 <style>

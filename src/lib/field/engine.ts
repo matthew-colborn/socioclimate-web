@@ -12,6 +12,8 @@
  * thousand additive particles cheap.
  */
 
+import { viewer, decayViewer } from './life';
+
 export interface SceneCtx {
   ctx: CanvasRenderingContext2D;
   /** CSS pixels, not device pixels — the transform already accounts for DPR. */
@@ -20,6 +22,19 @@ export interface SceneCtx {
   /** Deterministic per scene, so a poster frame matches the first animated frame. */
   rng: () => number;
   dab: HTMLCanvasElement;
+  /**
+   * The viewer, in this canvas's own coordinates. `px`/`py` are -1 when the
+   * pointer is elsewhere or absent. `pstr` is 0..1 and decays, so a parked
+   * cursor stops mattering rather than holding the field deformed. `idle`
+   * climbs once nobody has interacted for a while. All three are 0 / -1 under
+   * prefers-reduced-motion, so a scene that reads them still freezes.
+   */
+  px: number;
+  py: number;
+  pstr: number;
+  idle: number;
+  /** Per-scene phase, so nothing on the page breathes in lockstep. */
+  phase: number;
 }
 
 export interface Scene {
@@ -63,6 +78,34 @@ function makeDab(size: number): HTMLCanvasElement {
   return c;
 }
 
+/**
+ * One time origin for the whole session, set on first use and never reset.
+ *
+ * This is what makes the field continue across a route change. Astro's view
+ * transitions keep the document alive, so a scene mounted on the next page
+ * picks up the clock where the last one left off instead of restarting at
+ * zero — which is the single most mechanical thing a site can do.
+ */
+let ORIGIN = 0;
+
+/**
+ * A per-visit offset into the drift, so no two visits show the same motion.
+ * It is deliberately NOT part of the seed: `init` stays deterministic, the
+ * composition is identical every time, and only the motion differs. It is also
+ * only ever applied to the animated clock — `renderOnce` is always called at
+ * the true zero, so posters and reduced-motion stills are reproducible.
+ */
+let VISIT_PHASE = 0;
+
+export function beginSession(reduced: boolean): void {
+  if (!ORIGIN) ORIGIN = performance.now();
+  if (!reduced && !VISIT_PHASE) VISIT_PHASE = Math.random() * 900;
+}
+
+/** Ambient fields do not need 60fps, and halving the rate halves the power. */
+const FPS_CAP = 30;
+const MIN_FRAME_MS = 1000 / FPS_CAP - 1;
+
 export interface EngineOptions {
   canvas: HTMLCanvasElement;
   scene: Scene;
@@ -75,13 +118,14 @@ export class Engine {
   private c: SceneCtx;
   private scene: Scene;
   private raf = 0;
-  private start = 0;
   private running = false;
   private still: boolean;
   private canvas: HTMLCanvasElement;
   private io?: IntersectionObserver;
   private visible = true;
   private seed: number;
+  private lastFrame = 0;
+  private rect: DOMRect | null = null;
   /**
    * Set by the governor in mount.ts. While true this engine will not run no
    * matter what its own observer sees — otherwise a field the governor has
@@ -98,7 +142,13 @@ export class Engine {
     this.still = o.still;
     const ctx = o.canvas.getContext('2d', { alpha: true })!;
     this.seed = o.seed;
-    this.c = { ctx, w: 0, h: 0, rng: seeded(o.seed), dab: makeDab(64) };
+    this.c = {
+      ctx, w: 0, h: 0, rng: seeded(o.seed), dab: makeDab(64),
+      px: -1, py: -1, pstr: 0, idle: 0,
+      // Derived from the seed so it is stable per scene but different between
+      // scenes: two fields on one page must not breathe together.
+      phase: (o.seed % 997) / 997 * 6.283,
+    };
     this.resize();
 
     // Offscreen scenes must not burn frames. Cheap, and it matters on a page
@@ -132,14 +182,25 @@ export class Engine {
     this.c.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.c.w = w;
     this.c.h = h;
+    this.rect = r;
     this.scene.init(this.c);
     if (this.still || !this.running) this.renderOnce(0);
   }
 
-  /** Draw a single deterministic frame — the poster, and the reduced-motion state. */
+  /**
+   * A single deterministic frame — the poster, and the reduced-motion state.
+   * Always at the true zero with no visit phase and no viewer input, so it is
+   * byte-identical on every machine and every visit.
+   */
   renderOnce(t = 0): void {
+    this.c.px = -1; this.c.py = -1; this.c.pstr = 0; this.c.idle = 0;
     this.c.ctx.clearRect(0, 0, this.c.w, this.c.h);
     this.scene.frame(this.c, t, 1);
+  }
+
+  /** Cheap enough to call on scroll; never called inside the frame loop. */
+  refreshRect(): void {
+    this.rect = this.canvas.getBoundingClientRect();
   }
 
   /** Stop, and stay stopped until play() is called. The governor's off switch. */
@@ -157,7 +218,6 @@ export class Engine {
       return;
     }
     this.running = true;
-    this.start = performance.now();
     if (this.visible) this.startLoop();
   }
 
@@ -189,7 +249,34 @@ export class Engine {
 
   private tick = (): void => {
     this.raf = requestAnimationFrame(this.tick);
-    const t = (performance.now() - this.start) / 1000;
+    const now = performance.now();
+
+    // Frame cap. Ambient drift does not need 60fps and the cap roughly halves
+    // the idle cost; the RAF chain still runs so the browser can throttle it.
+    if (now - this.lastFrame < MIN_FRAME_MS) return;
+    const dt = this.lastFrame ? (now - this.lastFrame) / 1000 : 0;
+    this.lastFrame = now;
+
+    decayViewer(now, dt);
+
+    // The pointer, translated into this canvas's own space. Recomputing the
+    // rect every frame would be a layout read per frame per canvas, so it is
+    // refreshed on resize and scroll instead.
+    if (viewer.strength > 0.002 && viewer.x >= 0 && this.rect) {
+      this.c.px = viewer.x - this.rect.left;
+      this.c.py = viewer.y - this.rect.top;
+      this.c.pstr = viewer.strength;
+    } else {
+      this.c.px = -1;
+      this.c.py = -1;
+      this.c.pstr = 0;
+    }
+    // On touch there is no pointer, so scroll velocity is the equivalent input.
+    if (this.c.pstr === 0 && viewer.scroll > 0.01) this.c.pstr = viewer.scroll * 0.6;
+    this.c.idle = viewer.idle;
+
+    // One clock for the session, so a route change does not restart the field.
+    const t = (now - ORIGIN) / 1000 + VISIT_PHASE;
     this.c.ctx.clearRect(0, 0, this.c.w, this.c.h);
     this.scene.frame(this.c, t, this.intro);
   };

@@ -20,8 +20,9 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import {
-  dab, halo, halftone, ease, flameShape, flameProfile, resample, CYAN, GLOW, TEAL,
+  dab, halo, halftone, ease, flameShape, flameProfile, resample, pull, CYAN, GLOW, TEAL,
 } from '../field/prims';
+import { drift, breath } from '../field/life';
 
 interface Spark { i: number; t0: number; sp: number; drift: number }
 
@@ -88,17 +89,21 @@ export const flame: Scene = {
     const { ctx } = c;
     const e = ease(intro);
 
-    halo(c, cx, cy, H * 0.85, e);
+    // A real breath: quick draw, long release, and a period that wanders, so
+    // successive breaths are not the same length. 5.2s here; the other scenes
+    // use different periods so the page is not one machine ticking.
+    const br = breath(t, 5.2, c.phase);
+
+    halo(c, cx, cy, H * (0.80 + br * 0.10), e);
     halftone(c, cx, cy, H * 0.95, 23, 0.045 * e);
 
     // ---- the morph parameter --------------------------------------------
-    // Two periods whose ratio is irrational, so the pair never returns to the
-    // same phase together and the cycle has no point you could call the start.
-    // Periods of roughly 15 and 17 seconds. Slower than this and the field
-    // looks static to anyone who does not linger; faster and it fidgets.
-    const a = 0.5 + 0.5 * Math.sin(t * 0.42);
-    const b = 0.5 + 0.5 * Math.sin(t * 0.2617 * Math.SQRT2 + 1.7);
-    const m = dwell(0.62 * a + 0.38 * b);
+    // Layered drift rather than a sine. Three incommensurate frequencies means
+    // the morph has no period at all, so there is no moment a visitor can catch
+    // it starting over. Idle widens the excursion: the field gets restless when
+    // nobody is watching rather than settling.
+    const wander = 1 + c.idle * 0.35;
+    const m = dwell(0.5 + 0.5 * drift(t, 0.42, c.phase) * wander);
 
     ctx.globalCompositeOperation = 'lighter';
 
@@ -156,8 +161,14 @@ export const flame: Scene = {
         const persp = 1 - d * 0.42;
         const wave = Math.sin(u * 10.2 - t * 1.15 + d * 2.1);
         const yW = base - d * ridgeH * 0.62 + wave * ridgeH * 0.2 * (0.35 + 0.65 * d);
-        const x = colX[i] + (cx + (colX[i] - cx) * persp - colX[i]) * m;
-        const y = yR + (yW - yR) * m;
+        let x = colX[i] + (cx + (colX[i] - cx) * persp - colX[i]) * m;
+        let y = yR + (yW - yR) * m;
+
+        // The field notices the pointer. Points lift toward it and brighten,
+        // enough to register as atmosphere and not enough to look like a toy.
+        const p = pull(c, x, y, ridgeH * 1.7, 15);
+        x += p.dx;
+        y += p.dy - p.lift * 5;
 
         // A bar is brightest at its tip; a wave is brightest at its crests.
         // The bar term is squared in d so the base row fades out entirely —
@@ -166,9 +177,10 @@ export const flame: Scene = {
         const aR = 0.62 * d * d;
         const aW = 0.1 + 0.34 * (wave * 0.5 + 0.5);
         const alpha = (aR + (aW - aR) * m) * e * (1 - d * 0.3);
-        // A slow shimmer, so the ridge is never completely inert.
-        const sh = 0.86 + 0.14 * Math.sin(t * 1.6 + colJit[i]);
-        dab(c, x, y, 2.6 + d * 1.4, alpha * sh);
+        // Per-column shimmer on its own layered drift, so no two columns pulse
+        // together and the ridge is never completely inert.
+        const sh = 0.86 + 0.14 * drift(t, 1.6, colJit[i]);
+        dab(c, x, y, 2.6 + d * 1.4 + p.lift * 3.4, alpha * sh * (1 + p.lift * 1.9));
       }
     }
 
@@ -176,7 +188,7 @@ export const flame: Scene = {
     dab(c, cx, base + ridgeH * 0.06, span * 0.62, 0.05 * e);
 
     // ---- the flame, above. Continuous, never morphing. -------------------
-    const breathe = 1 + Math.sin(t * 0.42) * 0.018;
+    const breathe = 1 + (br - 0.5) * 0.042;
 
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
@@ -194,7 +206,9 @@ export const flame: Scene = {
 
     ctx.globalCompositeOperation = 'lighter';
 
-    const head = (t * 0.11) % 1;
+    // Not a constant sweep: the head speeds up and eases off, so the light
+    // travelling the contour has weight instead of running at a fixed rate.
+    const head = ((t * 0.11) + drift(t, 0.19, c.phase) * 0.06) % 1;
     for (let i = 0; i < pts.length; i += 2) {
       const u = i / pts.length;
       let dd = Math.abs(u - head);

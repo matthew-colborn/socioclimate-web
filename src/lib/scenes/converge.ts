@@ -9,6 +9,7 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameShape, CYAN, GLOW } from '../field/prims';
+import { breath } from '../field/life';
 
 interface P { a: number; r0: number; r: number; sp: number; sz: number; drift: number }
 
@@ -41,7 +42,9 @@ export const converge: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-    halo(c, cx, cy, R * 1.2, e);
+    // Its own period, so no two scenes on the site breathe together.
+    const br = breath(t, 4.9, c.phase);
+    halo(c, cx, cy, R * (1.12 + br * 0.16), e);
     halftone(c, cx, cy, R * 1.25, 23, 0.045 * e);
 
     ctx.globalCompositeOperation = 'lighter';

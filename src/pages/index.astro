@@ -173,7 +173,7 @@ const beats = d.beats ?? [];
     grid-area: 1 / 1;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(6px);
+    transform: translateY(8px);
     transition: opacity 520ms var(--ease), transform 520ms var(--ease),
                 visibility 0s linear 520ms;
   }
@@ -181,7 +181,9 @@ const beats = d.beats ?? [];
     opacity: 1;
     visibility: visible;
     transform: none;
-    transition: opacity 520ms var(--ease), transform 520ms var(--ease),
+    /* The incoming beat overshoots slightly and settles rather than gliding to
+       a stop. Weight is what stops a crossfade reading as a slideshow. */
+    transition: opacity 520ms var(--ease), transform 620ms var(--ease-out-back),
                 visibility 0s;
   }
 
@@ -378,7 +380,13 @@ const beats = d.beats ?? [];
 <script>
   import { mountFields } from '../lib/field/mount';
   import { initThesis } from '../lib/thesis';
-  mountFields();
-  const hero = document.querySelector<HTMLElement>('[data-thesis]');
-  if (hero) initThesis(hero);
+  // Re-run after every view transition: with ClientRouter the document is
+  // never torn down, so a plain top-level call would only ever fire once.
+  const boot = () => {
+    mountFields();
+    const hero = document.querySelector<HTMLElement>('[data-thesis]');
+    if (hero) initThesis(hero);
+  };
+  boot();
+  document.addEventListener('astro:page-load', boot);
 </script>

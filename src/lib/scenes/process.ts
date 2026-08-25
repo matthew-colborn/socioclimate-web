@@ -18,7 +18,8 @@
  * being frozen on. The controller snaps it to 0 when it takes over.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { dab, halo, halftone, ease, flameProfile, CYAN, GLOW, TEAL } from '../field/prims';
+import { dab, halo, halftone, ease, flameProfile, pull, CYAN, GLOW, TEAL } from '../field/prims';
+import { drift, breath, easeOutBack } from '../field/life';
 
 /** Driven from the page. `cur` is continuous: 0..3, fractional between states. */
 export const state = {
@@ -44,7 +45,12 @@ let lastT = -1;
 
 const lerp = (a: number, b: number, k: number): number => a + (b - a) * k;
 const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
-const smooth = (v: number): number => v * v * (3 - 2 * v);
+/**
+ * Weight. Points overshoot their target slightly and settle back rather than
+ * decelerating into it — a smoothstep is still a machine easing, and the
+ * difference between the two is most of what reads as life.
+ */
+const settle = (v: number): number => (v <= 0 ? 0 : v >= 1 ? 1 : easeOutBack(v));
 
 export const process: Scene = {
   init(c: SceneCtx) {
@@ -149,7 +155,10 @@ export const process: Scene = {
     // Weight of each state, for the structural marks that belong to only one.
     const w = [0, 1, 2, 3].map((k) => Math.max(0, 1 - Math.abs(s - k)));
 
-    halo(c, cxm, cym, span * 0.5, e * 0.65);
+    // 4.6s, deliberately not the home scene's 5.2s: two fields breathing on
+    // the same period read as one machine rather than two living things.
+    const br = breath(t, 4.6, c.phase);
+    halo(c, cxm, cym, span * (0.46 + br * 0.08), e * 0.65);
     halftone(c, cxm, cym, span * 0.55, 24, 0.035 * e);
     ctx.globalCompositeOperation = 'lighter';
 
@@ -206,10 +215,20 @@ export const process: Scene = {
       // Points do not all move at once. During capture the delay follows the
       // sweep's own position, so a point settles as the sweep reaches it.
       const delay = sweeping ? xkey[i] * 0.72 : stagger[i] * 0.34;
-      const k = smooth(clamp01((f - delay) / (1 - delay || 1)));
+      const k = settle(clamp01((f - delay) / (1 - delay || 1)));
 
-      const x = lerp(p0x[i], p1x[i], k);
-      const y = lerp(p0y[i], p1y[i], k);
+      let x = lerp(p0x[i], p1x[i], k);
+      let y = lerp(p0y[i], p1y[i], k);
+
+      // Idle drift: even at rest a point never sits perfectly still, and it
+      // wanders further once nobody has interacted for a while.
+      const rest = 0.35 + c.idle * 0.9;
+      x += drift(t, 0.23, stagger[i] * 6.283) * rest;
+      y += drift(t, 0.19, stagger[i] * 4.1 + 1.3) * rest;
+
+      const p = pull(c, x, y, span * 0.42, 12);
+      x += p.dx;
+      y += p.dy;
 
       // A few points catch light while scattered; everything is legible once
       // ordered; in the aimed state only what is near the vector stays lit.
@@ -224,8 +243,8 @@ export const process: Scene = {
       const alpha =
         w[0] * aScatter + w[1] * aRows + w[2] * aRidge + w[3] * aAim;
 
-      const size = 2.6 + (w[0] * bright[i] + w[3] * near) * 2.2;
-      dab(c, x, y, size, alpha * e);
+      const size = 2.6 + (w[0] * bright[i] + w[3] * near) * 2.2 + p.lift * 3.2;
+      dab(c, x, y, size, alpha * e * (1 + p.lift * 1.7) * (0.94 + br * 0.12));
     }
 
     // The ridge silhouette, once the points have resolved into it.

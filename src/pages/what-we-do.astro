@@ -162,6 +162,12 @@ const moves = await Promise.all(
 <script>
   import { mountFields } from '../lib/field/mount';
   import { initProcess } from '../lib/process-controller';
-  mountFields();
-  initProcess();
+  // Re-run after every view transition: with ClientRouter the document is
+  // never torn down, so a plain top-level call would only ever fire once.
+  const boot = () => {
+    mountFields();
+    initProcess();
+  };
+  boot();
+  document.addEventListener('astro:page-load', boot);
 </script>

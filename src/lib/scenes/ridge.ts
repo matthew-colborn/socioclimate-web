@@ -9,6 +9,7 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, annotate, ease, flameProfile, CYAN, GLOW } from '../field/prims';
+import { breath } from '../field/life';
 
 interface Bar { x: number; base: number; h: number; phase: number; locked: boolean }
 
@@ -44,7 +45,9 @@ export const ridge: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-    halo(c, cx, cy, span * 0.62, e);
+    // Its own period, so no two scenes on the site breathe together.
+    const br = breath(t, 5.9, c.phase);
+    halo(c, cx, cy, span * (0.58 + br * 0.08), e);
     halftone(c, cx, cy, span * 0.66, 23, 0.05 * e);
 
     ctx.globalCompositeOperation = 'lighter';

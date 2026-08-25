@@ -3,6 +3,7 @@ import '../styles/tokens.css';
 import '../styles/base.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
 import { SITE } from '../config/site';
 
 interface Props {
@@ -75,6 +76,12 @@ const orgLd = {
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
 
+    {/* View transitions keep the document alive between routes, which is what
+        lets the field carry on. The engine's clock is a session-wide origin, so
+        a scene mounted on the next page picks up where the last one left off
+        instead of restarting at zero. */}
+    <ClientRouter />
+
     <link rel="sitemap" href="/sitemap-index.xml" />
     {organization && <script is:inline type="application/ld+json" set:html={JSON.stringify(orgLd)} />}
   </head>
@@ -89,6 +96,7 @@ const orgLd = {
     <script>
       import { initReveal } from '../lib/reveal';
       initReveal();
+      document.addEventListener('astro:page-load', initReveal);
     </script>
   </body>
 </html>

@@ -13,7 +13,8 @@
  * slow device shows the composed scene immediately and gains motion late rather
  * than waiting on script for anything visible.
  */
-import { Engine, prefersReducedMotion } from './engine';
+import { Engine, prefersReducedMotion, beginSession } from './engine';
+import { wireViewer } from './life';
 import { SCENES, SEEDS, type SceneId } from '../scenes/registry';
 
 /** The scene draws itself in rather than appearing complete. */
@@ -92,10 +93,29 @@ export function registerField(engine: Engine, el: HTMLElement): void {
 }
 
 export function mountFields(scope: ParentNode = document): void {
+  // With view transitions this runs again on every navigation, so anything
+  // pointing at a canvas the router has already removed has to be stopped and
+  // dropped. Without this the registry accumulates dead engines across a visit
+  // and the governor starts choosing between fields that are no longer there.
+  for (let i = items.length - 1; i >= 0; i--) {
+    if (!items[i].el.isConnected) {
+      items[i].engine.stop();
+      if (active === items[i]) active = null;
+      io?.unobserve(items[i].el);
+      items.splice(i, 1);
+    }
+  }
+
   const canvases = Array.from(scope.querySelectorAll<HTMLCanvasElement>('canvas[data-field]'));
   if (!canvases.length) return;
 
+  // A canvas already under management is left alone, so returning to a route
+  // does not double-mount it.
+  const known = new Set(items.map((it) => it.el));
+
   const reduced = prefersReducedMotion();
+  beginSession(reduced);
+  wireViewer(reduced);
 
   for (const canvas of canvases) {
     const id = canvas.dataset.field as SceneId;
@@ -103,8 +123,10 @@ export function mountFields(scope: ParentNode = document): void {
     // An unknown id is a content error, not a reason to throw on the client.
     if (!scene) continue;
 
-    const engine = new Engine({ canvas, scene, seed: SEEDS[id], still: reduced });
     const el = (canvas.closest('.field') as HTMLElement) ?? canvas;
+    if (known.has(el)) continue;
+
+    const engine = new Engine({ canvas, scene, seed: SEEDS[id], still: reduced });
     if (!reduced) engine.hold();
     items.push({ engine, el, ratio: 0, ramped: false });
 
@@ -123,6 +145,24 @@ export function mountFields(scope: ParentNode = document): void {
     clearTimeout(rt);
     rt = window.setTimeout(() => items.forEach((it) => it.engine.resize()), 150);
   });
+
+  // The pointer has to be translated into each canvas's own space, and that
+  // needs the canvas rect. Reading it per frame would be a layout read per
+  // frame per canvas, so it is refreshed here instead — on scroll, throttled
+  // to one read per frame across all of them.
+  let pending = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        for (const it of items) it.engine.refreshRect();
+      });
+    },
+    { passive: true }
+  );
 
   // Nothing runs while the tab is hidden.
   document.addEventListener('visibilitychange', () => {

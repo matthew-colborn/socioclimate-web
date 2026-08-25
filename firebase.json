@@ -14,7 +14,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; connect-src https://api.web3forms.com; font-src 'self'; style-src 'self'; script-src 'self' 'sha256-4QsxsPQzormU/+6P3Y30arJyIpX6DkeWjn30qSBr1Hc=' 'sha256-RmMLzlNvoQv1/Lmon8sQQiFZNdViknZRtJECubyjtMs='; upgrade-insecure-requests"
+            "value": "default-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; connect-src https://api.web3forms.com; font-src 'self'; style-src 'self'; script-src 'self' 'sha256-4QsxsPQzormU/+6P3Y30arJyIpX6DkeWjn30qSBr1Hc=' 'sha256-TycHl/iJFun2AI/YmU3QvXAOdXiq+Mik7zr6Spvm8rE='; upgrade-insecure-requests"
           },
           {
             "key": "X-Content-Type-Options",

@@ -9,6 +9,7 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameShape, resample, CYAN, GLOW } from '../field/prims';
+import { breath } from '../field/life';
 
 interface Node { x: number; y: number; r: number; a: number }
 
@@ -38,7 +39,9 @@ export const lattice: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-    halo(c, cx, cy, R * 1.9, e);
+    // Its own period, so no two scenes on the site breathe together.
+    const br = breath(t, 5.5, c.phase);
+    halo(c, cx, cy, R * (1.80 + br * 0.20), e);
     halftone(c, cx, cy, R * 1.8, 23, 0.045 * e);
 
     const rotA = t * 0.055;

@@ -13,6 +13,7 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameShape, CYAN, GLOW } from '../field/prims';
+import { breath } from '../field/life';
 
 let pts: Array<[number, number]> = [];
 let cx = 0, cy = 0, H = 0;
@@ -28,13 +29,15 @@ export const opening: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
+    // Its own period, so no two scenes on the site breathe together.
+    const br = breath(t, 4.4, c.phase);
 
     // Breathes open and closed rather than opening once: an invitation that
     // stays open, not a door that has already been used.
     const open = (0.5 + Math.sin(t * 0.32 - Math.PI / 2) * 0.5) ** 1.3;
     const gap = (6 + open * 30) * e;
 
-    halo(c, cx, cy, H * (0.72 + open * 0.32), (0.6 + open * 0.5) * e);
+    halo(c, cx, cy, H * (0.72 + open * 0.32) * (0.95 + br * 0.10), (0.6 + open * 0.5) * e);
     halftone(c, cx, cy, H * 0.95, 23, 0.045 * e);
 
     // The threshold between the two copies: a tapered shaft of light.

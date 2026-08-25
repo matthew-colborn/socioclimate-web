@@ -11,6 +11,7 @@
  */
 import type { Scene, SceneCtx } from '../field/engine';
 import { dab, halo, halftone, ease, flameShape, resample, CYAN, GLOW } from '../field/prims';
+import { breath } from '../field/life';
 
 interface Seg { x1: number; y1: number; x2: number; y2: number; len: number }
 interface Trace { segs: Seg[]; total: number; delay: number; period: number; end: [number, number] }
@@ -67,7 +68,9 @@ export const traces_scene: Scene = {
   frame(c: SceneCtx, t: number, intro: number) {
     const { ctx } = c;
     const e = ease(intro);
-    halo(c, cx, cy, Math.min(c.w * 0.5, 520), e);
+    // Its own period, so no two scenes on the site breathe together.
+    const br = breath(t, 6.1, c.phase);
+    halo(c, cx, cy, Math.min(c.w * 0.5, 520) * (0.94 + br * 0.12), e);
     halftone(c, cx, cy, Math.min(c.w * 0.5, 520), 23, 0.05 * e);
 
     ctx.globalCompositeOperation = 'source-over';

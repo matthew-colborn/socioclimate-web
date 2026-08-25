@@ -172,3 +172,29 @@ export function flameProfile(n: number): number[] {
   }
   return top.map((t) => 1 - t);
 }
+
+/**
+ * The field noticing the viewer.
+ *
+ * Returns a local displacement and a glow lift for a point, falling off with
+ * distance from the pointer. Deliberately small: this should register as
+ * atmosphere, not as a toy that follows the cursor. `c.pstr` is already zero
+ * under prefers-reduced-motion, so every scene that uses this freezes for free.
+ *
+ * `sign` is +1 to draw points toward the pointer and -1 to push them away.
+ */
+export function pull(
+  c: SceneCtx, x: number, y: number, reach: number, amount: number, sign = 1
+): { dx: number; dy: number; lift: number } {
+  if (c.pstr <= 0.002 || c.px < 0) return ZERO_PULL;
+  const vx = c.px - x;
+  const vy = c.py - y;
+  const d = Math.hypot(vx, vy);
+  if (d > reach || d < 0.001) return ZERO_PULL;
+  // Squared falloff, so the reaction is tight around the pointer rather than
+  // a broad wash that makes the whole field wobble.
+  const k = (1 - d / reach) ** 2 * c.pstr;
+  return { dx: (vx / d) * k * amount * sign, dy: (vy / d) * k * amount * sign, lift: k };
+}
+
+const ZERO_PULL = { dx: 0, dy: 0, lift: 0 };

@@ -293,7 +293,11 @@ img, canvas, svg { display: block; max-width: 100%; }
 .panel:hover {
   background: var(--surface);
   border-color: color-mix(in srgb, var(--cyan) 34%, transparent);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  /* Overshoots and settles, so the lift has mass. */
+  transition: background var(--dur-2) var(--ease),
+              border-color var(--dur-2) var(--ease),
+              transform 320ms var(--ease-out-back);
 }
 
 /* --- Blueprint grid ------------------------------------------------------- */
@@ -339,8 +343,8 @@ img, canvas, svg { display: block; max-width: 100%; }
    opacity 0, and the page is blank for the visitor rather than merely static. */
 .reveal-ready [data-reveal] {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 460ms var(--ease), transform 460ms var(--ease);
+  transform: translateY(16px);
+  transition: opacity 460ms var(--ease), transform 560ms var(--ease-out-back);
 }
 .reveal-ready [data-reveal].is-in {
   opacity: 1;
@@ -349,6 +353,36 @@ img, canvas, svg { display: block; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
+
+/* --- Micro-motion ---------------------------------------------------------
+   The things that were frozen: the lockup, the rules, the labels, the step
+   dots. Very small and very slow — if you can consciously watch it move it is
+   too much, so these are 11 to 23 second cycles at a few percent of opacity.
+
+   Opacity and filter only. Nothing here touches a layout property, because
+   micro-motion that moves boxes is a CLS regression wearing a nice coat.
+
+   Every period is a prime-ish number of seconds and every delay differs, so
+   nothing on the page pulses in step with anything else. That synchronisation
+   is exactly what makes a page read as one machine. */
+@keyframes sc-breathe { 50% { opacity: 0.86; } }
+@keyframes sc-breathe-faint { 50% { opacity: 0.55; } }
+
+.wordmark__b { animation: sc-breathe 13s var(--ease-soft) infinite; }
+.site-head__nav .n { animation: sc-breathe-faint 17s var(--ease-soft) infinite; }
+.eyebrow { animation: sc-breathe-faint 19s var(--ease-soft) 1.4s infinite; }
+.readout__label { animation: sc-breathe-faint 23s var(--ease-soft) 3.1s infinite; }
+.entry__stage { animation: sc-breathe 11s var(--ease-soft) 0.7s infinite; }
+.beat-ctl__dots button[aria-current='true'] { animation: sc-breathe 7s var(--ease-soft) infinite; }
+.site-foot__n { animation: sc-breathe-faint 21s var(--ease-soft) 2.3s infinite; }
+
+/* Rules and borders. The hairlines are the site's skeleton and they were the
+   most obviously dead thing on it. */
+.entry, .move, .band, .tail, .closing, .lines, .beat__readouts {
+  animation: sc-breathe-faint 29s var(--ease-soft) infinite;
+  animation-name: sc-rule;
+}
+@keyframes sc-rule { 50% { border-color: color-mix(in srgb, var(--teal-deep) 42%, transparent); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

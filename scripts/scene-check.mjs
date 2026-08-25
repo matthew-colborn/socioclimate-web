@@ -115,6 +115,66 @@ for (const [route, sel, name] of [
   await page.close();
 }
 
+// ---------- 3. text stays legible over the backdrop --------------------------
+// scripts/contrast.mjs compares token pairs and cannot see a canvas, so the
+// backdrop's luminous wash is invisible to it. The wash is what makes the page
+// read as the references rather than as a flat dark rectangle, and turning it
+// up is exactly the change that would quietly break contrast. So it is checked
+// against real composited pixels here, where a server is already running.
+{
+  const page = await browser.newPage();
+  await page.setViewport({ width: W, height: H, deviceScaleFactor: 1 });
+  await page.goto(base + '/', { waitUntil: 'networkidle0' });
+  await new Promise((r) => setTimeout(r, 2500));
+
+  const bg = await page.evaluate(async () => {
+    document.querySelectorAll('main,header.site-head,footer')
+      .forEach((e) => (e.style.visibility = 'hidden'));
+    await new Promise((r) => requestAnimationFrame(r));
+    const c = document.querySelector('canvas[data-backdrop]');
+    const g = c.getContext('2d');
+    g.getImageData(0, 0, 1, 1);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let best = [0, 0, 0];
+    let bl = -1;
+    for (let i = 0; i < d.length; i += 4 * 29) {
+      const a = d[i + 3] / 255;
+      // composited over the page ground, #020A21
+      const R = d[i] * a + 2 * (1 - a);
+      const G = d[i + 1] * a + 10 * (1 - a);
+      const B = d[i + 2] * a + 33 * (1 - a);
+      const l = 0.2126 * R + 0.7152 * G + 0.0722 * B;
+      if (l > bl) { bl = l; best = [Math.round(R), Math.round(G), Math.round(B)]; }
+    }
+    document.querySelectorAll('main,header.site-head,footer')
+      .forEach((e) => (e.style.visibility = ''));
+    return best;
+  });
+  await page.close();
+
+  const lin = (v) => (v / 255 <= 0.04045 ? v / 255 / 12.92 : ((v / 255 + 0.055) / 1.055) ** 2.4);
+  const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  const ratio = (a, b) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+    return (x + 0.05) / (y + 0.05);
+  };
+
+  const pairs = [
+    ['--paper', [255, 255, 255]],
+    ['--paper-dim', [168, 182, 200]],
+    ['--cyan', [0, 216, 231]],
+  ];
+  console.log('');
+  console.log(`TEXT OVER THE BACKDROP  (brightest pixel rgb(${bg.join(',')}))`);
+  console.log('-'.repeat(58));
+  for (const [name, fg] of pairs) {
+    const r = ratio(fg, bg);
+    const ok = r >= 4.5;
+    if (!ok) fail++;
+    console.log(`  ${name.padEnd(12)} ${r.toFixed(2)}:1   ${ok ? 'PASS' : 'FAIL (needs 4.5)'}`);
+  }
+}
+
 await browser.close();
 console.log('');
 console.log(fail === 0 ? 'SCENES PASS' : `${fail} scene check(s) failed.`);

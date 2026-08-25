@@ -28,6 +28,14 @@
   --cyan-glow:    #99FFFF;  /* glow layers and brightest gradient stop only */
   --teal-deep:    #006184;  /* secondary data series, borders, muted rules */
   --teal-shadow:  #00506B;  /* chart gridlines, dividers */
+  /* Atmosphere only, never text and never a border. The references are not
+     flat near-black — ref-2 is a luminous blue field that lightens toward its
+     focal object — and this is the blue that lift is made of. It is painted by
+     the backdrop canvas, kept dim enough that white and --paper-dim still
+     clear AA over the brightest point of it. */
+  --blue-lift:    #1E6FA8;
+  --blue-deep:    #062038;
+
   --paper:        #FFFFFF;  /* primary text on ink */
   --paper-dim:    #A8B6C8;  /* secondary text */
 

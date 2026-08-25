@@ -76,12 +76,6 @@ const entries = await Promise.all(
     ))}
   </div>
 
-  <section class="tail wrap" data-reveal>
-    <p class="eyebrow">Next</p>
-    <h2 class="tail__h">Find out whether you have one.</h2>
-    <p class="tail__p">Five questions, scored as you answer, nothing gated.</p>
-    <a class="cta" href="#03-contact">Run the diagnostic<span class="cta__arrow" aria-hidden="true">↗</span></a>
-  </section>
 </section>
 
 <style>
@@ -169,10 +163,4 @@ const entries = await Promise.all(
 
   .entry__body { max-width: 62ch; }
 
-  .tail {
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
-    padding-block: clamp(3rem, 8vh, 5rem) var(--s-8);
-  }
-  .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 18ch; }
-  .tail__p { color: var(--paper-dim); margin: var(--s-3) 0 var(--s-5); }
 </style>

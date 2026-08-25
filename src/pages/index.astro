@@ -5,7 +5,6 @@ import Field from '../components/Field.astro';
 import WhatWeDo from '../components/sections/WhatWeDo.astro';
 import Portfolio from '../components/sections/Portfolio.astro';
 import Contact from '../components/sections/Contact.astro';
-import { SITE } from '../config/site';
 import POSTERS from '../data/posters.json';
 
 const page = await getEntry('pages', 'home');
@@ -124,16 +123,6 @@ const beats = d.beats ?? [];
     </ul>
   </section>
 
-  <section class="tail wrap" data-reveal>
-    <p class="eyebrow">Next</p>
-    <h2 class="tail__h">{SITE.mission}</h2>
-    <p class="tail__p">
-      Every partnership builds another record that nobody else holds and that is
-      worth more the longer it runs. The portfolio is what that has produced so
-      far, labelled honestly.
-    </p>
-    <a class="cta" href="#02-portfolio">See the work<span class="cta__arrow" aria-hidden="true">↗</span></a>
-  </section>
 
   <WhatWeDo />
   <Portfolio />
@@ -360,12 +349,6 @@ const beats = d.beats ?? [];
   .line__note { font-size: 0.85rem; color: var(--paper-dim); line-height: 1.5; }
 
   /* --- Tail ---------------------------------------------------------------- */
-  .tail {
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
-    padding-block: clamp(3rem, 8vh, 5rem) var(--s-8);
-  }
-  .tail__h { font-size: clamp(1.8rem, 4vw, 2.6rem); max-width: 20ch; }
-  .tail__p { color: var(--paper-dim); max-width: 56ch; margin: var(--s-4) 0 var(--s-5); }
 </style>
 
 <script>

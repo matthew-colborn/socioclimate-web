@@ -15,7 +15,7 @@
  * directly. If you can find it without looking for it, it is turned up too far.
  */
 import type { Scene, SceneCtx } from '../field/engine';
-import { flameProfile, CYAN } from '../field/prims';
+import { flameProfile, CYAN, GLOW } from '../field/prims';
 import { drift, breath } from '../field/life';
 
 const ROWS = 10;
@@ -63,6 +63,34 @@ export const waves: Scene = {
     const spanY = H * 0.82;
 
     ctx.globalCompositeOperation = 'lighter';
+
+    // ---- atmosphere ------------------------------------------------------
+    // The references are not flat near-black. ref-2 is a luminous blue field
+    // that lightens toward whatever it is holding, and that lift is most of
+    // why it reads as depth rather than as a dark page. This is that: a wide
+    // wash centred a little above the horizon, drifting so it never sits
+    // still, kept dim enough that text over it still clears AA.
+    const gx = W * (0.5 + drift(t, 0.045, 2.2) * 0.06);
+    const gy = H * (0.58 + drift(t, 0.037, 5.1) * 0.05);
+    const gr = Math.max(W, H) * (0.78 + br * 0.1);
+    const wash = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+    wash.addColorStop(0, `rgba(30, 111, 168, ${0.30 + br * 0.05})`);
+    wash.addColorStop(0.42, 'rgba(22, 78, 126, 0.15)');
+    wash.addColorStop(1, 'rgba(6, 32, 56, 0)');
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = wash;
+    ctx.fillRect(0, 0, W, H);
+
+    // A horizon: the line the wave field recedes to. Thin, wide, and the
+    // brightest thing in the backdrop, which is what gives it a far distance.
+    const hy = base - spanY * 0.78;
+    const hor = ctx.createLinearGradient(0, 0, W, 0);
+    hor.addColorStop(0, `rgba(${CYAN}, 0)`);
+    hor.addColorStop(0.5, `rgba(${GLOW}, ${0.055 + br * 0.02})`);
+    hor.addColorStop(1, `rgba(${CYAN}, 0)`);
+    ctx.fillStyle = hor;
+    ctx.fillRect(0, hy - 1, W, 2);
+
     ctx.lineWidth = 1;
 
     for (let r = 0; r < ROWS; r++) {
@@ -73,7 +101,7 @@ export const waves: Scene = {
       const rowY = base - d * spanY;
       // Fades with depth so the top of the page is quieter than the bottom,
       // which keeps the heaviest text areas the cleanest.
-      const a = (0.062 - d * 0.042) * (0.8 + br * 0.4);
+      const a = (0.10 - d * 0.062) * (0.8 + br * 0.4);
       if (a <= 0.002) continue;
 
       ctx.strokeStyle = `rgba(${CYAN}, ${a})`;

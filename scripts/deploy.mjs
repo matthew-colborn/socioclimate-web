@@ -55,8 +55,13 @@ const call = async (url, init = {}) => {
 };
 
 // --- hosting config, translated out of firebase.json ----------------------
-// firebase.json uses {source, headers:[{key,value}]}; the API wants
-// {glob, headers:{key:value}}. Everything else carries over unchanged.
+// firebase.json uses the CLI's schema and the REST API wants its own, for both
+// headers and redirects:
+//   headers    {source, headers:[{key,value}]}  ->  {glob, headers:{key:value}}
+//   redirects  {source, destination, type}      ->  {glob, location, statusCode}
+// Passing redirects through untranslated is silently accepted by firebase.json
+// and rejected by the API with "Unknown name source", which is how this was
+// caught - on the deploy, not in review.
 const fb = JSON.parse(readFileSync(resolve(root, 'firebase.json'), 'utf8')).hosting;
 const config = {};
 if (fb.cleanUrls !== undefined) config.cleanUrls = fb.cleanUrls;
@@ -64,7 +69,13 @@ if (fb.cleanUrls !== undefined) config.cleanUrls = fb.cleanUrls;
 if (fb.trailingSlash !== undefined) {
   config.trailingSlashBehavior = fb.trailingSlash ? 'ADD' : 'REMOVE';
 }
-if (fb.redirects) config.redirects = fb.redirects;
+if (fb.redirects) {
+  config.redirects = fb.redirects.map((r) => ({
+    glob: r.source,
+    location: r.destination,
+    statusCode: r.type ?? 301,
+  }));
+}
 if (fb.rewrites) config.rewrites = fb.rewrites;
 if (fb.headers) {
   config.headers = fb.headers.map((h) => ({
@@ -99,7 +110,11 @@ console.log(`site      ${site}`);
 console.log(`project   ${project}`);
 console.log(`files     ${entries.length} (${(bytes / 1024).toFixed(1)} KB gzipped)`);
 console.log(`config    cleanUrls=${config.cleanUrls} trailingSlash=${config.trailingSlashBehavior} ` +
-            `headerRules=${config.headers?.length ?? 0} rewrites=${config.rewrites?.length ?? 0}`);
+            `headerRules=${config.headers?.length ?? 0} redirects=${config.redirects?.length ?? 0} ` +
+            `rewrites=${config.rewrites?.length ?? 0}`);
+for (const r of config.redirects ?? []) {
+  console.log(`redirect  ${r.glob} -> ${r.location} (${r.statusCode})`);
+}
 if (config.rewrites?.length) {
   console.error('\nrefusing to deploy: firebase.json has rewrites. This is a static ' +
                 'multi-page site and a catch-all rewrite would turn every 404 into a 200.');

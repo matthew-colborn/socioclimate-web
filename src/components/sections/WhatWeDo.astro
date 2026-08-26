@@ -62,11 +62,12 @@ const d = page.data;
 
   @media (max-width: 60rem) {
     .process { grid-template-columns: 1fr; }
-    /* On a phone the canvas sits under the header and stays there while the
-       steps pass, which keeps the one-graphic reading without stealing the
-       whole screen. */
-    .process__stage { top: 4.5rem; margin-bottom: var(--s-5); }
-    .process__figure { max-width: 15rem; margin-inline: auto; }
+    /* Not sticky on a phone. In one column a sticky figure stays put while the
+       paragraph scrolls under it, so the graphic ends up sitting behind body
+       text — which is most of why the mobile page read as cluttered. It gets
+       its own band above the copy instead, with room on both sides of it. */
+    .process__stage { position: static; margin-bottom: var(--s-7); }
+    .process__figure { max-width: 13rem; margin-inline: auto; }
   }
 
   .move__name { font-size: clamp(1.5rem, 3.4vw, 2.2rem); }

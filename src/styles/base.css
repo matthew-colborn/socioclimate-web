@@ -421,6 +421,47 @@ img, canvas, svg { display: block; max-width: 100%; }
   display: block;
 }
 
+/* --- Phones ---------------------------------------------------------------
+   The desktop page reads open because a 68ch measure inside a 76rem page
+   leaves a lot of empty around it. A phone has no room to spare sideways, so
+   the same openness has to come from the two levers that are left: smaller
+   type and more vertical air.
+
+   Type first. The clamps were tuned so that a phone got nearly the desktop
+   size in a third of the width, which is what made every block a wall. Pulling
+   the body down a step shortens each line and lets the gaps do their work.
+
+   Nothing here changes desktop: every rule is inside the query. */
+@media (max-width: 52rem) {
+  :root {
+    --step--1: 0.78rem;
+    --step-0:  0.94rem;
+    --step-1:  1.06rem;
+    --step-2:  1.3rem;
+
+    /* Wider side margins. 20px of gutter against 16px type is what edge-to-edge
+       crowding feels like. */
+    --gutter: 1.6rem;
+
+    /* And more room between things than the desktop needs, not less. */
+    --s-6: 2.6rem;
+    --s-7: 4rem;
+    --s-8: 5.5rem;
+  }
+
+  body { line-height: 1.62; }
+
+  /* Long-form gets a little more leading and a lot more space between
+     paragraphs — the single biggest thing that makes a narrow column breathe. */
+  .prose p { margin-bottom: var(--s-4); }
+  .prose > h2 { margin-top: var(--s-7); }
+
+  /* Sections need clear air between them or they run together as one column. */
+  .band { padding-block: var(--s-7); }
+  .page-head { padding-bottom: var(--s-6); }
+  .site-section { margin-top: var(--s-7); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

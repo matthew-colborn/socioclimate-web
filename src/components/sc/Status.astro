@@ -1,0 +1,6 @@
+---
+import { STATUS_LABEL, statusClass, type Status } from '../../lib/copy';
+interface Props { status: Status }
+const { status } = Astro.props;
+---
+<span class:list={['sc-status', statusClass(status)]}>{STATUS_LABEL[status]}</span>

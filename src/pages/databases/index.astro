@@ -1,0 +1,59 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/sc/Hero.astro';
+import Motif from '../../components/Motif.astro';
+import SectionHead from '../../components/sc/SectionHead.astro';
+import Register from '../../components/sc/Register.astro';
+import Ridge from '../../components/sc/Ridge.astro';
+import { getCollection } from 'astro:content';
+
+const codes = (await getCollection('instances')).map((e) => e.data.code).sort();
+
+const d = (await getEntry('pages', 'databases'))!.data;
+const sec = (k: string) => {
+  const s = d.sections.find((x) => x.key === k);
+  if (!s) throw new Error(`databases.mdx is missing the "${k}" section`);
+  return s;
+};
+const [register, method, close] = ['register', 'method', 'close'].map(sec);
+---
+<BaseLayout title={d.title} description={d.description}>
+  <Hero
+    eyebrow={d.eyebrow}
+    heading={d.heading}
+    lead={d.lead}
+    aside={d.aside}
+    abyss={true}
+    sparkle={true}
+    corners={{ tl: d.eyebrow, tr: `${codes[0]} to ${codes[codes.length - 1]}` }}
+  />
+
+  <section class="sc-section" aria-labelledby="register-h">
+    <div class="wrap">
+      <SectionHead label={register.label} title={register.title} id="register-h" />
+      <Register table={true} headers={register.items.map((i) => i.title)} />
+    </div>
+  </section>
+
+  <Ridge />
+
+  <section class="sc-section" aria-labelledby="method-h">
+    <div class="wrap">
+      <SectionHead label={method.label} title={method.title} id="method-h" />
+      <div class="sc-weave-wrap" aria-hidden="true" data-reveal><Motif name="weave" /></div>
+      <ol class="sc-steps" data-reveal-stagger>
+        {method.items.map((it) => (
+          <li><h3 class="sc-h4">{it.title}</h3>{it.body && <p>{it.body}</p>}</li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sc-section sc-close" aria-labelledby="close-h">
+    <div class="wrap">
+      <SectionHead title={close.title} id="close-h" />
+      <a class="cta" href="/contact?topic=databases">{close.link}<span class="cta__arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,66 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sc/Hero.astro';
+import Motif from '../components/Motif.astro';
+import SectionHead from '../components/sc/SectionHead.astro';
+import Ridge from '../components/sc/Ridge.astro';
+import { lit } from '../lib/copy';
+
+const d = (await getEntry('pages', 'access'))!.data;
+const sec = (k: string) => {
+  const s = d.sections.find((x) => x.key === k);
+  if (!s) throw new Error(`access.mdx is missing the "${k}" section`);
+  return s;
+};
+const [includes, why, limits, close] = ['includes', 'why', 'limits', 'close'].map(sec);
+---
+<BaseLayout title={d.title} description={d.description}>
+  <Hero eyebrow={d.eyebrow} heading={d.heading} lead={d.lead} primary={d.primary} secondary={d.secondary}>
+    <div class="sc-observe" slot="visual">
+      <Motif name="lens" />
+    </div>
+  </Hero>
+
+  <Ridge />
+
+  <section class="sc-section" aria-labelledby="includes-h">
+    <div class="wrap">
+      <SectionHead label={includes.label} title={includes.title} id="includes-h" />
+      <div class="sc-liquid-grid" data-reveal-stagger data-caustic>
+        {includes.items.map((it) => (
+          <div class="sc-liquid">
+            {it.chip && <span class="sc-chip">{it.chip}</span>}
+            <span class="n">{it.n}</span>
+            <h3 class="sc-h4">{it.title}</h3>
+            {it.body && <p>{it.body}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="sc-section" aria-labelledby="why-h">
+    <div class="wrap">
+      <SectionHead label={why.label} title={why.title} lead={why.lead} id="why-h" />
+      <div class="sc-weave-wrap" aria-hidden="true" data-reveal><Motif name="weave" /></div>
+    </div>
+  </section>
+
+  <Ridge flip />
+
+  <section class="sc-section" aria-labelledby="limits-h">
+    <div class="wrap">
+      <SectionHead label={limits.label} title={limits.title} id="limits-h">
+        {limits.lead && <p class="sc-disclosure" set:html={lit(limits.lead)} />}
+      </SectionHead>
+    </div>
+  </section>
+
+  <section class="sc-section sc-close" aria-labelledby="close-h">
+    <div class="wrap">
+      <SectionHead title={close.title} lead={close.lead} id="close-h" />
+      <a class="sc-btn sc-btn--secondary" href={d.primary!.href}>{close.link}<span class="arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,28 +1,16 @@
 ---
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { NAV } from '../config/site';
+import SectionHead from '../components/sc/SectionHead.astro';
+
+const d = (await getEntry('pages', 'contact'))!.data;
+const nf = d.sections.find((s) => s.key === 'notfound')!;
 ---
-<BaseLayout title="Not found" description="That page does not exist on socioclimate.io.">
-  <section class="nf wrap">
-    <p class="eyebrow">404</p>
-    <h1>Nothing is recorded at this address.</h1>
-    <p class="nf__p">Which is the whole problem, elsewhere. Here it just means the link is wrong.</p>
-    <ul class="nf__list">
-      <li><a href="/">Home</a></li>
-      {NAV.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
-    </ul>
+<BaseLayout title="Not found · SocioClimate" description={nf.lead!}>
+  <section class="sc-section sc-hero sc-hero--short">
+    <div class="wrap">
+      <SectionHead as="h1" label="404" title={nf.title} lead={nf.lead} />
+      <a class="cta" href="/databases">{nf.link}<span class="cta__arrow" aria-hidden="true">↗</span></a>
+    </div>
   </section>
 </BaseLayout>
-
-<style>
-  .nf { padding-block: clamp(3rem, 10vh, 6rem) var(--s-8); }
-  .nf h1 { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 20ch; }
-  .nf__p { color: var(--paper-dim); font-size: var(--step-1); margin-top: var(--s-4); }
-  .nf__list {
-    list-style: none; padding: 0; margin: var(--s-6) 0 0;
-    display: flex; flex-wrap: wrap; gap: var(--s-4);
-    font-family: var(--font-mono); font-size: 0.78rem;
-    text-transform: uppercase; letter-spacing: 0.12em;
-  }
-  .nf__list a { text-decoration: none; }
-</style>

@@ -53,6 +53,12 @@ const PAIRS = [
   ['--cyan-glow', '--ink', 'ui', 'The ridge administrative price line'],
   ['--cyan', '--ink-black', 'ui', 'Generative field marks on black'],
 
+  // Deep Water rebrand: the de-emphasised mono tier (IDs, sources, coordinates).
+  ['--paper-mute', '--ink', 'body', 'Mono IDs, figure sources, corner metadata'],
+  ['--paper-mute', '--ink-deep', 'body', 'Muted mono on the receded field'],
+  ['--paper-mute', '--blue-deep', 'body', 'Muted mono at the top of the depth gradient'],
+  ['--paper-dim', '--blue-deep', 'body', 'Body text at the top of the depth gradient'],
+
   ['--teal-deep', '--ink', 'deco', 'Rules, borders, input outlines'],
   ['--teal-deep', '--ink-black', 'deco', 'Routed trace lines'],
   ['--teal-shadow', '--ink-black', 'deco', 'Section dividers'],

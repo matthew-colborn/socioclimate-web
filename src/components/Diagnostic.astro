@@ -5,6 +5,8 @@ import { FORM, SITE } from '../config/site';
 const entry = await getEntry('diagnostic', 'diagnostic');
 if (!entry) throw new Error('Missing src/content/diagnostic.mdx');
 const qs = entry.data.questions;
+interface Props { topics?: { value: string; label: string }[]; topicLabel?: string }
+const { topics = [], topicLabel = 'Topic' } = Astro.props;
 const options = [
   { value: 'yes', label: 'Yes' },
   { value: 'partly', label: 'Partly' },
@@ -76,8 +78,8 @@ const options = [
       <div class="diag__send">
         <h2 class="diag__sendh">Want the conversation?</h2>
         <p class="diag__sendp">
-          Optional. The result above is yours either way — it is not held back
-          behind this. If you send it, your answers come with it, so the reply is
+          Optional. The result above is yours either way, and nothing is held
+          back behind this. If you send it, your answers come with it, so the reply is
           about your situation rather than a template. No categories to pick
           from: say what you want and we will tell you plainly whether it is
           something we do.
@@ -90,6 +92,14 @@ const options = [
           <span>Email</span>
           <input type="email" name="email" autocomplete="email" required />
         </label>
+        {topics.length > 0 && (
+          <label class="fld sc-topic">
+            <span>{topicLabel}</span>
+            <select name="topic" data-topic>
+              {topics.map((t) => <option value={t.value}>{t.label}</option>)}
+            </select>
+          </label>
+        )}
         <label class="fld">
           <span>In your own words</span>
           <textarea name="message" rows="5" required></textarea>
@@ -107,6 +117,10 @@ const options = [
 
 <script>
   import { initDiagnostic } from '../lib/diagnostic';
-  const root = document.querySelector<HTMLElement>('[data-diagnostic]');
-  if (root) initDiagnostic(root);
+  // On astro:page-load rather than at module run: with view transitions a
+  // module script runs once per session, and /contact can be visited twice.
+  document.addEventListener('astro:page-load', () => {
+    const root = document.querySelector<HTMLElement>('[data-diagnostic]');
+    if (root && !root.dataset.ready) { root.dataset.ready = '1'; initDiagnostic(root); }
+  });
 </script>

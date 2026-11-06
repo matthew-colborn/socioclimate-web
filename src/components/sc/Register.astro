@@ -1,0 +1,59 @@
+---
+/**
+ * The register: glass archive tiles, and on /databases the full table under
+ * them. Rendered from src/content/instances, so a new file is a new row.
+ * Private instances never show records, counts, addresses or owners: a row
+ * carries only its ID, name, sector and stage.
+ */
+import { getCollection } from 'astro:content';
+import Status from './Status.astro';
+import { effectiveStatus, type Status as S } from '../../lib/copy';
+
+interface Props { table?: boolean; headers?: string[] }
+const { table = false, headers = ['ID', 'Record', 'Sector', 'Geography', 'Stage', 'As of'] } = Astro.props;
+
+const rows = (await getCollection('instances'))
+  .sort((a, b) => a.data.code.localeCompare(b.data.code))
+  .map((e) => ({
+    id: e.id,
+    d: e.data,
+    status: effectiveStatus(e.data.status as S, e.data.asOf),
+    href: e.data.status === 'open' ? null : `/databases/${e.id}`,
+  }));
+---
+<div class="sc-archive" data-reveal-stagger data-caustic>
+  {rows.map((r) => r.href ? (
+    <a class="sc-tile" href={r.href}>
+      <span class="date">{r.d.code} · {r.d.asOf}</span>
+      <span class="name">{r.d.name}</span>
+      <span class="sector">{r.d.sector}</span>
+      <Status status={r.status} />
+    </a>
+  ) : (
+    <div class="sc-tile is-open">
+      <span class="date">{r.d.code} · open</span>
+      <span class="name">{r.d.name}</span>
+      <Status status={r.status} />
+    </div>
+  ))}
+</div>
+
+{table && (
+  <table class="sc-register" data-reveal>
+    <thead>
+      <tr>{headers.map((h) => <th scope="col">{h}</th>)}</tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr class:list={[r.d.status === 'open' && 'is-open']}>
+          <td class="id" data-label={headers[0]}>{r.d.code}</td>
+          <td class="name" data-label={headers[1]}>{r.href ? <a href={r.href}>{r.d.name}</a> : r.d.name}</td>
+          <td data-label={headers[2]}>{r.d.sector}</td>
+          <td data-label={headers[3]}>{r.d.geography}</td>
+          <td data-label={headers[4]}><Status status={r.status} /></td>
+          <td class="id" data-label={headers[5]}>{r.d.status === 'open' ? '' : r.d.asOf}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}

@@ -1,0 +1,137 @@
+/* ==========================================================================
+   Socioclimate tokens v2.0 (2026-11-05)
+
+   PART A is copied from the live socioclimate.io stylesheet, same names and
+   values. The repo already defines these: do not rename or change them.
+   PART B is the Deep Water layer, new tokens the rebrand adds on top.
+   ========================================================================== */
+
+/* ---------------- PART A · live site (verbatim) ---------------- */
+:root {
+  --ink: #020A21;          /* page ground */
+  --ink-deep: #000615;     /* deepest water, footers, wells */
+  --ink-black: #000000;
+  --cyan: #00D8E7;         /* the signal: links, active nav index, badges, figures in focus */
+  --cyan-bright: #2AE2EA;  /* hover on cyan */
+  --cyan-glow: #99FFFF;    /* highlights inside glowing marks only */
+  --teal-deep: #006184;    /* rules and linework, never text */
+  --teal-shadow: #00506B;  /* faint rules */
+  --blue-lift: #1E6FA8;    /* ridge highlights, never text */
+  --blue-deep: #062038;    /* ridge fill */
+  --paper: #FFFFFF;        /* headings, primary text */
+  --paper-dim: #A8B6C8;    /* body and labels (9.5:1 on ink) */
+
+  --font-display: "Outfit Variable", "Outfit", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", "SF Mono", Menlo, monospace;
+
+  --step--1: clamp(.82rem, .79rem + .15vw, .9rem);
+  --step-0: clamp(1rem, .96rem + .2vw, 1.1rem);
+  --step-1: clamp(1.2rem, 1.12rem + .4vw, 1.42rem);
+  --step-2: clamp(1.45rem, 1.3rem + .75vw, 1.9rem);
+  --step-3: clamp(1.8rem, 1.5rem + 1.5vw, 2.6rem);
+  --step-4: clamp(2.2rem, 1.65rem + 2.75vw, 3.8rem);
+  --measure: 68ch;
+  --leading-prose: 1.65;
+  --leading-tight: 1.12;
+
+  --s-1: .5rem; --s-2: .75rem; --s-3: 1rem; --s-4: 1.5rem;
+  --s-5: 2rem; --s-6: 3rem; --s-7: 4.5rem; --s-8: 7rem;
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --wide: 76rem;
+
+  --rule: 1px solid color-mix(in srgb, var(--teal-deep) 55%, transparent);
+  --rule-faint: 1px solid color-mix(in srgb, var(--teal-shadow) 40%, transparent);
+  --surface: color-mix(in srgb, var(--cyan) 3.5%, var(--ink-deep));
+  --radius: 2px;
+  --grid-line: color-mix(in srgb, var(--cyan) 5%, transparent);
+  --grid-step: 32px;
+  --glow-mark: drop-shadow(0 0 3px color-mix(in srgb, var(--cyan-glow) 70%, transparent))
+               drop-shadow(0 0 14px color-mix(in srgb, var(--cyan) 55%, transparent))
+               drop-shadow(0 0 40px color-mix(in srgb, var(--cyan) 25%, transparent));
+
+  --dur-1: .16s; --dur-2: .24s; --dur-3: .3s;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease-out-back: cubic-bezier(.34, 1.42, .64, 1);
+  --ease-soft: cubic-bezier(.45, 0, .55, 1);
+  --ease-reveal: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* ---------------- PART B · Deep Water layer (new) ----------------
+   No new hues. Everything below is built from Part A colors. */
+:root {
+  /* Depth: lighter water at the top of the page, abyss at the bottom */
+  --depth-gradient: linear-gradient(180deg, var(--blue-deep) 0%, var(--ink) 34%, var(--ink-deep) 100%);
+  --hero-light: radial-gradient(60% 55% at 70% 32%, color-mix(in srgb, var(--cyan) 14%, transparent) 0%, color-mix(in srgb, var(--cyan) 4%, transparent) 45%, transparent 72%);
+
+  /* Glass: frosted water panels with a caustic rim */
+  --glass: color-mix(in srgb, var(--blue-deep) 55%, transparent);
+  --glass-strong: color-mix(in srgb, var(--blue-deep) 82%, transparent);
+  --glass-blur: 14px;
+  --glass-edge: color-mix(in srgb, var(--cyan) 18%, transparent);
+  --caustic: linear-gradient(90deg, transparent, color-mix(in srgb, var(--cyan) 60%, transparent), transparent);
+  --glow-soft: 0 0 24px color-mix(in srgb, var(--cyan) 18%, transparent);
+
+  /* Chart engraving */
+  --contour: color-mix(in srgb, var(--cyan) 16%, transparent);
+  --graticule: color-mix(in srgb, var(--paper-dim) 10%, transparent);
+
+  /* Neo renaissance proportion */
+  --phi: 1.618;
+  --hero-split: 1.618fr 1fr;
+
+  /* Text tier for de-emphasised mono (5.8:1 on ink) */
+  --paper-mute: #7D8DA6;
+
+  /* Status, mapped onto the live palette (the live badge is cyan "Building") */
+  --status-live: var(--cyan);            /* solid dot + sonar ping */
+  --status-building: var(--cyan);        /* hollow pill, as on the live site */
+  --status-staging: var(--paper-dim);
+  --status-private: var(--paper-mute);
+  --status-stale: var(--paper-mute);     /* dashed outline */
+
+  /* Ambient motion, all disabled under reduced motion */
+  --dur-draw: 900ms;
+  --dur-drift: 60s;
+  --dur-orbit: 120s;
+  --dur-sonar: 3.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-1: 0s; --dur-2: 0s; --dur-3: 0s; --dur-draw: 0s; --dur-drift: 0s; --dur-orbit: 0s; --dur-sonar: 0s; }
+}
+
+/* ---------------- PART C · Motion (heavy, like the live site, and further) ----------------
+   The live keyframes (sc-breathe 13s, sc-breathe-faint 17 to 23s, sc-rule 29s,
+   trace-breathe 7s, field-drift 33 to 44s) keep their own durations in the repo. */
+:root {
+  --dur-reveal: 900ms;     /* scroll reveal rise + fade */
+  --rise: 28px;            /* reveal travel */
+  --dur-ignite: 2.4s;      /* flame ignition on first load */
+  --dur-sweep: 6s;         /* sonar sweep inside instrument rings */
+  --dur-shimmer: 9s;       /* light passing across the lit headline word */
+  --dur-current: 60s;      /* default contour flow; motion.js varies per line */
+  --dur-tide: 14s;         /* ridge swell */
+  --dur-page: 650ms;       /* view transition dive */
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-reveal: 0s; --rise: 0px; --dur-ignite: 0s; --dur-sweep: 0s; --dur-shimmer: 0s; --dur-current: 0s; --dur-tide: 0s; --dur-page: 0s; }
+}
+
+/* ---------------- PART D · Luminous Archive (moodboard 2026-11-05) ----------------
+   Liquid glass, light shaped into classical architecture, reflective water.
+   Still no new hues: frost and marble tones are mixes of paper and cyan. */
+:root {
+  --radius-glass: 22px;          /* liquid glass panels only; surfaces stay 2px */
+  --frost: color-mix(in srgb, var(--paper) 14%, transparent);
+  --frost-edge: color-mix(in srgb, var(--paper) 28%, transparent);
+  --marble: color-mix(in srgb, var(--paper) 86%, var(--cyan-glow));   /* pale veined white for type on light moments */
+  --specular: radial-gradient(120% 60% at 18% -10%, color-mix(in srgb, var(--paper) 30%, transparent) 0%, transparent 55%);
+  --glass-liquid: linear-gradient(160deg, color-mix(in srgb, var(--cyan-glow) 14%, transparent) 0%, color-mix(in srgb, var(--blue-lift) 18%, transparent) 45%, color-mix(in srgb, var(--blue-deep) 55%, transparent) 100%);
+  --portal-light: linear-gradient(180deg, var(--paper) 0%, var(--cyan-glow) 18%, color-mix(in srgb, var(--cyan) 70%, transparent) 55%, color-mix(in srgb, var(--cyan) 0%, transparent) 100%);
+  --column-light: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 25%, transparent), color-mix(in srgb, var(--cyan-glow) 70%, transparent) 50%, color-mix(in srgb, var(--cyan) 25%, transparent));
+  --reflect-fade: linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 70%);
+  --dur-weave: 7s;
+  --dur-portal: 8s;
+}
+@media (prefers-reduced-motion: reduce) { :root { --dur-weave: 0s; --dur-portal: 0s; } }

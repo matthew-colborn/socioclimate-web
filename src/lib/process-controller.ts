@@ -15,6 +15,7 @@
  * that a canvas reads.
  */
 import { state } from './scenes/process';
+import { prefersReducedMotion } from './field/engine';
 
 const STEPS = ['01-find', '02-capture', '03-understand', '04-revenue'];
 
@@ -25,7 +26,7 @@ export function initProcess(): void {
   const steps = STEPS.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
   if (steps.length !== STEPS.length) return;
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (prefersReducedMotion()) {
     // The scene stays on the resolved ridge and the anchors still work, which
     // is all this needs to do. Nothing below runs.
     return;

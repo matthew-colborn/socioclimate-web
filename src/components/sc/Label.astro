@@ -1,0 +1,8 @@
+---
+/** The numbered mono label ("03 · Databases"), the live site's eyebrow. */
+import { splitEyebrow } from '../../lib/copy';
+interface Props { text: string; id?: string }
+const { text, id } = Astro.props;
+const { n, rest } = splitEyebrow(text);
+---
+<p class="sc-label eyebrow" id={id}>{n && <span class="n">{n}</span>}{rest}</p>

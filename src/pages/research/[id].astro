@@ -1,0 +1,28 @@
+---
+/** A research page exists only once its entry is set to publish. */
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Label from '../../components/sc/Label.astro';
+import { KIND_LABEL, lit } from '../../lib/copy';
+
+export async function getStaticPaths() {
+  const all = await getCollection('research', (e) => e.data.publish);
+  return all.map((e) => ({ params: { id: e.id }, props: { entry: e } }));
+}
+const { entry } = Astro.props;
+const r = entry.data;
+const { Content } = await render(entry);
+const disclosure = (await getEntry('pages', 'research'))!.data.sections.find((s) => s.key === 'disclosure')!.lead!;
+---
+<BaseLayout title={`${r.title} · SocioClimate`} description={r.abstract ?? r.title}>
+  <article class="sc-section">
+    <div class="wrap sc-prose">
+      <Label text={`${r.code} · ${KIND_LABEL[r.kind]}`} />
+      <h1 class="sc-h1">{r.title}</h1>
+      <p class="sc-disclosure" set:html={lit(disclosure)} />
+      {r.abstract && <div class="sc-liquid"><p>{r.abstract}</p></div>}
+      <div class="prose"><Content /></div>
+      <p class="sc-disclosure" set:html={lit(disclosure)} />
+    </div>
+  </article>
+</BaseLayout>

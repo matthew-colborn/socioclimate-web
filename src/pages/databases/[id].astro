@@ -1,0 +1,102 @@
+---
+/**
+ * One page per database, rendered from its file in src/content/instances.
+ * An `open` slot has no page. A private instance shows its gap, method and use
+ * only: never records, counts, coverage, addresses, owners or a URL, even if
+ * the file carries them.
+ */
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Motif from '../../components/Motif.astro';
+import Abyss from '../../components/sc/Abyss.astro';
+import Label from '../../components/sc/Label.astro';
+import Status from '../../components/sc/Status.astro';
+import CaseBlock from '../../components/sc/CaseBlock.astro';
+import Figures from '../../components/sc/Figures.astro';
+import Ridge from '../../components/sc/Ridge.astro';
+import { STATUS_LABEL, effectiveStatus, lit, type Status as S } from '../../lib/copy';
+
+export async function getStaticPaths() {
+  const all = await getCollection('instances', (e) => e.data.status !== 'open');
+  return all.map((e) => ({ params: { id: e.id }, props: { entry: e } }));
+}
+const { entry } = Astro.props;
+const i = entry.data;
+const isPrivate = i.visibility === 'private';
+const status = effectiveStatus(i.status as S, i.asOf);
+const { Content } = await render(entry);
+const hasBody = !isPrivate && entry.body && entry.body.trim().length > 0;
+
+const page = (await getEntry('pages', 'databases'))!.data;
+const detail = page.sections.find((s) => s.key === 'detail')!;
+const privateNote = page.sections.find((s) => s.key === 'private')!.lead!;
+const L = detail.items.map((x) => x.title);
+const [lBusiness, lLeverage, lProduced, lGap, lRecord, lSources, lUse, lCoverage, lCredential] = L;
+const figures = isPrivate ? [] : i.figures;
+---
+<BaseLayout title={`${i.name} · SocioClimate`} description={`${i.code} ${i.name}. ${i.tagline ?? i.gap}`}>
+  <section class="sc-hero sc-abyss" data-caustic aria-labelledby="page-h">
+    <Abyss sparkle={true} />
+    <div class="sc-corners" aria-hidden="true">
+      <span class="tl">{i.code}</span>
+      {i.coordinates && !isPrivate && <span class="tr">{i.geography} · {i.coordinates}</span>}
+    </div>
+    <div class="wrap">
+      <div class="sc-hero__grid">
+        <div class="sc-hero__copy" data-reveal-stagger>
+          <Label text={`${i.code} · ${detail.label}`} />
+          <h1 class="sc-h1" id="page-h">{i.name}</h1>
+          {i.tagline && <p class="sc-lead">{i.tagline}</p>}
+          <div class="sc-row"><Status status={status} /><span class="sc-label">{i.sector}</span></div>
+          {i.url && status === 'live' && !isPrivate && (
+            <div class="sc-row"><a class="cta" href={i.url}>{new URL(i.url).hostname}<span class="cta__arrow" aria-hidden="true">↗</span></a></div>
+          )}
+        </div>
+        <div class="sc-hero__visual" data-reveal>
+          <div class="sc-observe">
+            <Motif name="lens" />
+            <div class="sc-hud" aria-hidden="true">
+              <div class="sc-hud-panel">Stage<b>{STATUS_LABEL[status]}</b></div>
+              <div class="sc-hud-panel">{detail.note}<b>{i.asOf}</b></div>
+              {figures[0] && <div class="sc-hud-panel">{figures[0].key}<b>{figures[0].value}</b></div>}
+              {!figures[0] && <div class="sc-hud-panel">{i.code}<b set:html={lit(i.geography)} /></div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap sc-weave-wrap" aria-hidden="true" data-reveal><Motif name="weave" /></div>
+
+  {!isPrivate && (
+    <section class="sc-section" aria-label={lBusiness}>
+      <div class="wrap">
+        <CaseBlock labels={[lBusiness, lLeverage, lProduced]} values={[i.business, i.leverage, i.produced]} />
+        <Figures figures={figures} />
+      </div>
+    </section>
+  )}
+
+  <Ridge />
+
+  <section class="sc-section" aria-label={lRecord}>
+    <div class="wrap sc-detail-grid">
+      <div>
+        {isPrivate && <p class="sc-lead" data-reveal set:html={lit(privateNote)} />}
+        {hasBody && <div class="prose" data-reveal><Content /></div>}
+        <dl class="sc-spec" data-reveal-stagger>
+          <dt>{lGap}</dt><dd set:html={lit(i.gap)} />
+          <dt>{lRecord}</dt><dd set:html={lit(i.record)} />
+          {!isPrivate && <><dt>{lSources}</dt><dd set:html={lit(i.sources)} /></>}
+          <dt>{lUse}</dt><dd set:html={lit(i.use)} />
+          {!isPrivate && i.coverage.length > 0 && (
+            <><dt>{lCoverage}</dt><dd>{i.coverage.map((c) => `${c.name}: ${c.status}`).join(' · ')}</dd></>
+          )}
+          {!isPrivate && i.credential && <><dt>{lCredential}</dt><dd set:html={lit(i.credential)} /></>}
+        </dl>
+      </div>
+      <p class="sc-disclosure" data-reveal>{page.aside} {detail.note} {i.asOf}.</p>
+    </div>
+  </section>
+</BaseLayout>

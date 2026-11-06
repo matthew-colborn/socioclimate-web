@@ -1,0 +1,13 @@
+---
+/** The live three-column case block: the business, the leverage, the result. */
+interface Props { labels: string[]; values: (string | undefined)[] }
+const { labels, values } = Astro.props;
+---
+<dl class="sc-case" data-reveal-stagger>
+  {labels.map((l, i) => values[i] && (
+    <div>
+      <dt class="sc-label">{l}</dt>
+      <dd>{values[i]}</dd>
+    </div>
+  ))}
+</dl>

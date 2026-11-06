@@ -1,0 +1,16 @@
+---
+/**
+ * The wave ridge between sections. Three layers swell on their own clocks
+ * (sc-tide) and drift at different speeds on scroll (data-parallax).
+ * Linework in teal and blue-lift only, which is what those tokens are for.
+ */
+interface Props { flip?: boolean }
+const { flip = false } = Astro.props;
+---
+<div class:list={['sc-ridge-wrap', flip && 'is-flip']} aria-hidden="true">
+  <svg class="sc-ridge" viewBox="0 0 1440 120" preserveAspectRatio="none" fill="none">
+    <path data-parallax="0.04" d="M0 78 C 160 52, 320 96, 480 74 S 800 40, 960 66 S 1280 98, 1440 70" stroke="var(--teal-deep)" stroke-opacity=".7" />
+    <path data-parallax="0.08" d="M0 92 C 200 70, 380 108, 600 88 S 980 60, 1180 84 S 1380 100, 1440 92" stroke="var(--blue-lift)" stroke-opacity=".55" />
+    <path data-parallax="0.12" d="M0 104 C 240 92, 420 116, 720 102 S 1100 88, 1440 106" stroke="var(--cyan)" stroke-opacity=".28" />
+  </svg>
+</div>

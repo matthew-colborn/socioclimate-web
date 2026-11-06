@@ -1,0 +1,35 @@
+[
+  {
+    "id": "RS-01",
+    "slug": "observability-precedes-automation",
+    "title": "Observability precedes automation",
+    "kind": "working-paper",
+    "status": "draft",
+    "publish": false,
+    "notes": [
+      "[VERIFY] title and whether to publish; draft lives in the Nergi project docs"
+    ]
+  },
+  {
+    "id": "RS-02",
+    "slug": "deed-restricted-observation-layer",
+    "title": "Deed-restricted housing as an observation layer",
+    "kind": "operating-paper",
+    "status": "draft",
+    "publish": false,
+    "notes": [
+      "[VERIFY]"
+    ]
+  },
+  {
+    "id": "RS-03",
+    "slug": "prediction-log",
+    "title": "REIT prediction log",
+    "kind": "log",
+    "status": "opening",
+    "publish": false,
+    "notes": [
+      "[VERIFY with Latoya] before opening"
+    ]
+  }
+]

@@ -6,40 +6,58 @@ export const SITE = {
   name: 'SocioClimate',
   domain: 'socioclimate.io',
   origin: 'https://socioclimate.io',
-  /** Customer-facing. What we do for the business reading the page. */
-  tagline: 'We find the valuable data inside your business and point it at revenue.',
-  /** Asset-side. What SocioClimate accumulates across every partnership. */
+  /** The company line (brand/socioclimate-rebrand/docs/01-positioning.md). */
+  tagline: 'SocioClimate builds the system of record for fragmented markets.',
+  /** Mission, carried over from the live footer. */
   mission: 'Building and compounding data moats.',
-  /** The compressed form, for places with one line of room. */
-  compressed: 'Dormant data in, decisions and revenue out.',
   email: 'matthew@socioclimate.io',
   legalName: 'SocioClimate',
+  place: 'San Diego, California',
 } as const;
 
 export const MAILTO = `mailto:${SITE.email}`;
 
 /**
- * Numbered because the site is a sequence rather than a set of destinations:
- * what we do, then how, then the proof, then the way in. The numbers are part
- * of the label and are rendered in mono beside it.
+ * Numbered because the site is a sequence: the claim, how it is funded, what
+ * clients get, the records, the thesis, the way in.
  */
 export const NAV = [
-  { n: '00', href: '#top', label: 'Home' },
-  { n: '01', href: '#01-what-we-do', label: 'What we do' },
-  { n: '02', href: '#02-portfolio', label: 'Portfolio' },
-  { n: '03', href: '#03-contact', label: 'Contact' },
+  { n: '00', href: '/', label: 'Home' },
+  { n: '01', href: '/services', label: 'Services' },
+  { n: '02', href: '/access', label: 'Access' },
+  { n: '03', href: '/databases', label: 'Databases' },
+  { n: '04', href: '/research', label: 'Research' },
+  { n: '05', href: '/contact', label: 'Contact' },
 ] as const;
 
 /**
- * The routes these sections used to live at. They are indexed and shared, so
- * they redirect to their anchor rather than 404 — the redirect itself is in
- * firebase.json; this is here so the mapping lives with the nav it mirrors.
+ * The live site was one page with anchors, and those anchors are shared. Hash
+ * fragments never reach the server, so this map runs client side on / (see
+ * src/lib/nav.ts). Route-level redirects are in firebase.json.
  */
-export const LEGACY_ROUTES = {
-  '/what-we-do': '/#01-what-we-do',
-  '/portfolio': '/#02-portfolio',
-  '/contact': '/#03-contact',
+export const LEGACY_ANCHORS: Record<string, string> = {
+  '01-what-we-do': '/services',
+  '02-portfolio': '/databases',
+  'deed-restricted-db': '/databases/deed-restricted',
+  'alfred-basil': '/services#alfred-basil',
+  'porchlight-website': '/services#porchlight-website',
+  branshe: '/services#branshe',
+  '03-contact': '/contact',
+};
+
+/**
+ * The roster. `spots` is the number of client seats open right now; null
+ * renders a visible [MATTHEW] placeholder rather than an invented number.
+ * `open: false` switches the call to action to the waitlist.
+ */
+export const ROSTER = {
+  open: true,
+  spots: null as number | null,
+  showPricing: false,
 } as const;
+
+/** A database whose asOf is older than this renders as Stale. */
+export const STALE_AFTER_DAYS = 120;
 
 /**
  * Clients whose name is not ours to publish yet.

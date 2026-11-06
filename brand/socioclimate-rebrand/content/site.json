@@ -1,0 +1,10 @@
+{
+  "contactEmail": "matthew@socioclimate.io",
+  "services": {
+    "showPricing": false,
+    "buildFrom": null,
+    "monthlyFrom": null,
+    "rosterOpen": true
+  },
+  "staleAfterDays": 120
+}

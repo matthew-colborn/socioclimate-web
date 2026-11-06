@@ -1,0 +1,123 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Field from '../components/Field.astro';
+import Hero from '../components/sc/Hero.astro';
+import SectionHead from '../components/sc/SectionHead.astro';
+import CaseBlock from '../components/sc/CaseBlock.astro';
+import Figures from '../components/sc/Figures.astro';
+import Status from '../components/sc/Status.astro';
+import Ridge from '../components/sc/Ridge.astro';
+import { ROSTER, clientName, type ClientKey } from '../config/site';
+import { lit } from '../lib/copy';
+
+const d = (await getEntry('pages', 'services'))!.data;
+const sec = (k: string) => {
+  const s = d.sections.find((x) => x.key === k);
+  if (!s) throw new Error(`services.mdx is missing the "${k}" section`);
+  return s;
+};
+const [includes, processS, workS, roster, waitlist] = ['includes', 'process', 'work', 'roster', 'waitlist'].map(sec);
+const caseLabels = (await getEntry('pages', 'databases'))!.data.sections.find((s) => s.key === 'detail')!.items.map((i) => i.title);
+
+const work = await Promise.all(
+  (await getCollection('work', (e) => e.data.public))
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (e) => ({
+      id: e.id,
+      d: e.data,
+      display: clientName(e.data.clientKey as ClientKey, { cap: true }) ?? e.data.name,
+      Body: (await render(e)).Content,
+    }))
+);
+const cta = ROSTER.open ? roster.link! : waitlist.link!;
+---
+<BaseLayout title={d.title} description={d.description}>
+  <Hero
+    eyebrow={d.eyebrow}
+    heading={d.heading}
+    lead={d.lead}
+    primary={{ label: cta, href: d.primary!.href }}
+    secondary={d.secondary}
+  >
+    <div class="sc-instrument sc-instrument--sweep" slot="visual">
+      <span class="sweep" aria-hidden="true"></span>
+      <Field scene="converge" variant="panel" priority={true} />
+    </div>
+  </Hero>
+
+  <Ridge />
+
+  <section class="sc-section" aria-labelledby="includes-h">
+    <div class="wrap">
+      <SectionHead label={includes.label} title={includes.title} lead={includes.lead} id="includes-h" />
+      <div class="sc-liquid-grid" data-reveal-stagger data-caustic>
+        {includes.items.map((it) => (
+          <div class="sc-liquid">
+            {it.chip && <span class="sc-chip">{it.chip}</span>}
+            <h3 class="sc-h4">{it.title}</h3>
+            {it.body && <p>{it.body}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="sc-section" aria-labelledby="process-h">
+    <div class="wrap">
+      <SectionHead label={processS.label} title={processS.title} lead={processS.lead} id="process-h" />
+      <div class="sc-process" data-process>
+        <div class="process__stage"><Field scene="process" variant="panel" /></div>
+        <div class="sc-process__steps">
+          {processS.items.map((it, i) => (
+            <article class="sc-process__step" id={it.n} data-reveal>
+              <span class="n">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="sc-h3">{it.title}</h3>
+              {it.body && <p>{it.body}</p>}
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Ridge flip />
+
+  <section class="sc-section" id="work" aria-labelledby="work-h">
+    <div class="wrap">
+      <SectionHead label={workS.label} title={workS.title} lead={workS.lead} id="work-h" />
+      <div class="sc-work">
+        {work.map((w) => (
+          <article class="sc-work__entry" id={w.id} data-reveal>
+            <div class="sc-work__top">
+              <div><Field scene={w.d.scene} variant="panel" /></div>
+              <div>
+                <Status status={w.d.stage} />
+                <h3 class="sc-h2">{w.display}</h3>
+                <p>{w.d.headline}</p>
+              </div>
+            </div>
+            <CaseBlock labels={caseLabels.slice(0, 3)} values={[w.d.business, w.d.leverage, w.d.produced]} />
+            <Figures figures={w.d.figures} />
+            <div class="sc-work__body prose"><w.Body /></div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="sc-section" id="roster" aria-labelledby="roster-h">
+    <div class="wrap">
+      <SectionHead label={roster.label} title={roster.title} lead={roster.lead} id="roster-h" />
+      <div class="sc-liquid sc-roster" data-reveal>
+        <div class="sc-roster__count">
+          <span class="sc-label">{roster.note}</span>
+          {ROSTER.spots === null
+            ? <b set:html={lit('[MATTHEW]')} />
+            : <b class="sc-num" data-count={String(ROSTER.spots)}>{ROSTER.spots}</b>}
+        </div>
+        <a class="sc-btn sc-btn--secondary" href={d.primary!.href}>{cta}<span class="arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

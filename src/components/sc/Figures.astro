@@ -1,0 +1,23 @@
+---
+/**
+ * Every figure renders with its label and a source line. A [VERIFY] source
+ * renders as a visible flag, never as a plausible-looking citation.
+ */
+import { countAttrs, isPlaceholder, lit } from '../../lib/copy';
+interface Props { figures: { key: string; value: string; label: string; source: string; asOf: string }[] }
+const { figures } = Astro.props;
+---
+{figures.length > 0 && (
+  <div class="sc-figures" data-reveal-stagger>
+    {figures.map((f) => (
+      <div class="sc-figure">
+        <span class="sc-figure__k">{f.key}</span>
+        <span class="sc-figure__v sc-num" {...(countAttrs(f.value) ?? {})}>{f.value}</span>
+        <span class="sc-figure__l">{f.label}</span>
+        <span class:list={['sc-figure__src', (isPlaceholder(f.source) || isPlaceholder(f.asOf)) && 'is-flagged']}>
+          Source: <Fragment set:html={lit(f.source)} /> · As of <Fragment set:html={lit(f.asOf)} />
+        </span>
+      </div>
+    ))}
+  </div>
+)}

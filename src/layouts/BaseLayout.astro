@@ -1,30 +1,28 @@
 ---
 import '../styles/tokens.css';
 import '../styles/base.css';
+import '../styles/deep-water.css';
+import '../styles/pages.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { ClientRouter } from 'astro:transitions';
 import { SITE } from '../config/site';
+import Motif from '../components/Motif.astro';
 
 interface Props {
+  /** The full <title>, exactly as written in the page's MDX. */
   title: string;
   description: string;
   organization?: boolean;
-  /** The hero sits under a transparent header; inner pages do not. */
-  bleed?: boolean;
-  /** Poster to preload — the LCP element on the hero. */
+  /** Poster to preload: the LCP element on a scene hero. */
   preloadImage?: string;
+  /** Maximum reading of the depth gauge on this page, in metres. */
+  depthMax?: number;
 }
-const {
-  title, description,
-  organization = false, bleed = false, preloadImage,
-} = Astro.props;
+const { title, description, organization = false, preloadImage, depthMax = 4200 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname.replace(/(.)\/$/, '$1'), SITE.origin).href;
 const ogImage = new URL('/og/socioclimate-og.png', SITE.origin).href;
-// The compressed line, not the tagline: the full customer-facing sentence runs
-// to 85 characters and a search result truncates it mid-clause.
-const fullTitle = title === SITE.name ? `${SITE.name} — ${SITE.compressed}` : `${title} — ${SITE.name}`;
 
 const orgLd = {
   '@context': 'https://schema.org',
@@ -34,11 +32,8 @@ const orgLd = {
   url: SITE.origin,
   logo: ogImage,
   email: SITE.email,
-  slogan: SITE.tagline,
-  description:
-    'SocioClimate is a data-leverage company. We partner with service businesses, ' +
-    'find the valuable data already inside them, build the system that captures and ' +
-    'makes sense of it, and point it at revenue.',
+  slogan: SITE.mission,
+  description: SITE.tagline,
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'San Diego',
@@ -52,7 +47,7 @@ const orgLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{fullTitle}</title>
+    <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
@@ -68,7 +63,7 @@ const orgLd = {
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
-    <meta property="og:title" content={fullTitle} />
+    <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
@@ -86,7 +81,7 @@ const orgLd = {
     {organization && <script is:inline type="application/ld+json" set:html={JSON.stringify(orgLd)} />}
   </head>
 
-  <body>
+  <body data-depth-max={depthMax}>
     {/* The wave surface from beneath the flame, behind the whole page. Fixed
         and aria-hidden: it is ground, not content, and it never affects
         layout, so it cannot move anything or contribute to CLS. */}
@@ -94,20 +89,38 @@ const orgLd = {
 
     <a class="skip" href="#main">Skip to content</a>
     <Header />
-    <main id="main" class={bleed ? '' : 'page'}>
+    <main id="main">
       <slot />
     </main>
+
+    {/* The crystal colonnade closes every page, standing on its own water. */}
+    <div class="wrap sc-colonnade-wrap" aria-hidden="true" data-reveal><Motif name="colonnade" /></div>
     <Footer />
+
+    {/* Scroll read as depth. Desktop only; decorative. */}
+    <div class="sc-depth" aria-hidden="true"><span data-depth>0000</span> M</div>
+
     <script>
-      import { initReveal } from '../lib/reveal';
       import { initBackdrop } from '../lib/field/backdrop';
-      initReveal();
+      import { mountFields } from '../lib/field/mount';
+      import { initProcess } from '../lib/process-controller';
+      import { initThesis } from '../lib/thesis';
+      import { initNav } from '../lib/nav';
+      import { initMotion } from '../lib/motion';
+      // With ClientRouter the document is never torn down, so everything that
+      // binds to page content re-runs on astro:page-load. The backdrop is
+      // document-level and starts once.
+      const boot = (): void => {
+        initNav();
+        mountFields();
+        const hero = document.querySelector<HTMLElement>('[data-thesis]');
+        if (hero) initThesis(hero);
+        initProcess();
+        initMotion();
+      };
       initBackdrop();
-      document.addEventListener('astro:page-load', initReveal);
+      document.addEventListener('astro:page-load', boot);
     </script>
   </body>
 </html>
 
-<style>
-  .page { padding-top: clamp(6rem, 12vh, 9rem); }
-</style>

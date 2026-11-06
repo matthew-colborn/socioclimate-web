@@ -1,0 +1,23 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/sc/Hero.astro';
+import Field from '../components/Field.astro';
+import Diagnostic from '../components/Diagnostic.astro';
+import '../styles/diagnostic.css';
+
+const d = (await getEntry('pages', 'contact'))!.data;
+const topics = d.sections.find((s) => s.key === 'topics')!;
+---
+<BaseLayout title={d.title} description={d.description}>
+  <Hero eyebrow={d.eyebrow} heading={d.heading} lead={d.lead} short={true}>
+    <div class="sc-instrument sc-instrument--sweep" slot="visual">
+      <span class="sweep" aria-hidden="true"></span>
+      <Field scene="threshold" variant="panel" priority={true} />
+    </div>
+  </Hero>
+
+  <section class="sc-section" aria-label="Diagnostic">
+    <Diagnostic topics={topics.items.map((t) => ({ value: t.n!, label: t.title }))} topicLabel={topics.label} />
+  </section>
+</BaseLayout>

@@ -1,132 +1,170 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Field from '../components/Field.astro';
-import WhatWeDo from '../components/sections/WhatWeDo.astro';
-import Portfolio from '../components/sections/Portfolio.astro';
-import Contact from '../components/sections/Contact.astro';
-import POSTERS from '../data/posters.json';
+import Motif from '../components/Motif.astro';
+import Hero from '../components/sc/Hero.astro';
+import SectionHead from '../components/sc/SectionHead.astro';
+import Register from '../components/sc/Register.astro';
+import Ridge from '../components/sc/Ridge.astro';
+import { SITE } from '../config/site';
+import { lit } from '../lib/copy';
 
 const page = await getEntry('pages', 'home');
 if (!page) throw new Error('Missing src/content/pages/home.mdx');
-const { Content } = await render(page);
 const d = page.data;
-
+const sec = (k: string) => {
+  const s = d.sections.find((x) => x.key === k);
+  if (!s) throw new Error(`home.mdx is missing the "${k}" section`);
+  return s;
+};
 const beats = d.beats ?? [];
+const [register, access, loop, method, close] = ['register', 'access', 'loop', 'method', 'close'].map(sec);
+const sc01 = await getEntry('instances', 'deed-restricted');
 ---
-<BaseLayout
-  title="SocioClimate"
-  description={d.description}
-  organization={true}
-  bleed={true}
-  preloadImage={POSTERS.flame}
->
+<BaseLayout title={d.title} description={d.description} organization={true}>
+  <Hero
+    eyebrow={d.eyebrow}
+    heading={d.heading}
+    lead={d.lead}
+    primary={d.primary}
+    secondary={d.secondary}
+    abyss={true}
+    corners={{ tl: 'MMXXVI', tr: `${SITE.place} · ${sc01?.data.coordinates ?? ''}` }}
+    ticks={['117°20′W', '117°15′W', '117°10′W', '117°05′W', '117°00′W']}
+  >
+    <div class="sc-portal" slot="visual">
+      <canvas class="sc-plankton" data-plankton="sparkle" aria-hidden="true"></canvas>
+      <Motif name="portal" />
+    </div>
+  </Hero>
+
+  <Ridge />
+
+  {/* The argument: the live rotator, three beats, its pause control intact. */}
   <section
-    id="top"
-    class="hero wrap"
+    class="sc-section"
     data-thesis
     aria-roledescription="carousel"
-    aria-label="The argument, in four beats"
+    aria-label="The argument, in three beats"
   >
-    <div class="hero__copy">
-      {/* One heading for the document, and it does not rotate. Giving each beat
-          its own h1 put four of them on the page, three aria-hidden at any
-          moment, and made the page's main heading depend on when you looked. */}
-      <h1 class="visually-hidden">{d.heading}</h1>
-
-      <div class="hero__stack" data-beat-stack>
-        {beats.map((b, i) => (
-          <article
-            class:list={['beat', i === 0 && 'is-on']}
-            data-beat={b.headline}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`Beat ${i + 1} of ${beats.length}`}
-            aria-hidden={i === 0 ? 'false' : 'true'}
-          >
-            <p class="hero__eyebrow">
-              <span class="hero__n">{b.n}</span>
-              <span>{i === 0 ? 'Data leverage' : 'The argument'}</span>
-            </p>
-            <p class="hero__h">{b.headline}</p>
-            <p class="hero__line">{b.line}</p>
-            {b.readouts.length > 0 && (
-              <ul class="beat__readouts">
-                {b.readouts.map((r) => (
-                  <li class="readout">
-                    <span class="readout__label">{r.label}</span>
-                    <span class="beat__value">{r.value}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </article>
-        ))}
-      </div>
-
-      {/* Outside the rotation on purpose. Nothing a visitor wants is behind a
-          beat coming round. */}
-      <div class="hero__act">
-        <a class="cta" href="#01-what-we-do">
-          How it works<span class="cta__arrow" aria-hidden="true">↗</span>
-        </a>
-        <div class="beat-ctl">
-          <button class="beat-ctl__pause" type="button" data-beat-pause aria-pressed="false">
-            <span class="beat-ctl__glyph" aria-hidden="true"></span>
-            <span data-beat-pause-label>Pause</span>
-            <span class="visually-hidden"> the rotation</span>
-          </button>
-          <ul class="beat-ctl__dots">
-            {beats.map((b, i) => (
-              <li>
-                <button
-                  type="button"
-                  data-beat-goto={i}
-                  aria-current={i === 0 ? 'true' : 'false'}
-                  aria-label={`Show beat ${i + 1} of ${beats.length}`}
-                >
-                  <span aria-hidden="true">{b.n}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+    <div class="wrap sc-argument">
+      <div class="hero__copy">
+        <div class="hero__stack" data-beat-stack>
+          {beats.map((b, i) => (
+            <article
+              class:list={['beat', i === 0 && 'is-on']}
+              data-beat={b.headline}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Beat ${i + 1} of ${beats.length}`}
+              aria-hidden={i === 0 ? 'false' : 'true'}
+            >
+              <p class="hero__eyebrow"><span class="hero__n">{b.n}</span><span>The argument</span></p>
+              <h2 class="hero__h">{b.headline}</h2>
+              <p class="hero__line">{b.line}</p>
+              {b.readouts.length > 0 && (
+                <ul class="beat__readouts">
+                  {b.readouts.map((r) => (
+                    <li class="readout">
+                      <span class="readout__label">{r.label}</span>
+                      <span class="beat__value">{r.value}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          ))}
+        </div>
+        <div class="hero__act">
+          <div class="beat-ctl">
+            <button class="beat-ctl__pause" type="button" data-beat-pause aria-pressed="false">
+              <span class="beat-ctl__glyph" aria-hidden="true"></span>
+              <span data-beat-pause-label>Pause</span>
+              <span class="visually-hidden"> the rotation</span>
+            </button>
+            <ul class="beat-ctl__dots">
+              {beats.map((b, i) => (
+                <li>
+                  <button type="button" data-beat-goto={i} aria-current={i === 0 ? 'true' : 'false'} aria-label={`Show beat ${i + 1} of ${beats.length}`}>
+                    <span aria-hidden="true">{b.n}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
+      <div class="hero__field"><Field scene="flame" priority={false} /></div>
+      <p class="visually-hidden" data-beat-live aria-live="off" aria-atomic="true"></p>
     </div>
-
-    <div class="hero__field"><Field scene="flame" priority={true} /></div>
-
-    <p class="visually-hidden" data-beat-live aria-live="off" aria-atomic="true"></p>
   </section>
 
-  <section class="band wrap" data-reveal aria-labelledby="thesis-h">
-    <p class="eyebrow" id="thesis-h">The thesis</p>
-    <div class="prose"><Content /></div>
+  <section class="sc-section" aria-labelledby="register-h">
+    <div class="wrap">
+      <SectionHead label={register.label} title={register.title} lead={register.lead} id="register-h" />
+      <Register />
+      <a class="sc-link" href="/databases">{register.link}<span aria-hidden="true">↗</span></a>
+    </div>
   </section>
 
-  <section class="band wrap" data-reveal aria-labelledby="lines-h">
-    <p class="eyebrow" id="lines-h">What delivery includes</p>
-    <h2 class="band__h">The mechanism is custom software.</h2>
-    <p class="band__p">
-      Usually all of it, because the parts only work together — an operating
-      system nobody points at revenue is just tidier software, and marketing
-      pointed at a business that cannot see its own record is guesswork with a
-      budget.
-    </p>
-    <ul class="lines">
-      {(d.lines ?? []).map((l) => (
-        <li class="line">
-          <span class="line__label">{l.label}</span>
-          <span class="line__note">{l.note}</span>
-        </li>
-      ))}
-    </ul>
+  <Ridge flip />
+
+  {/* Access: the larger pitch. A client of a data company sees what it sees. */}
+  <section class="sc-section" aria-labelledby="access-h" data-caustic>
+    <div class="wrap sc-access">
+      <div>
+        <SectionHead label={access.label} title={access.title} lead={access.lead} id="access-h" />
+        <a class="sc-btn sc-btn--secondary" href="/access">{access.link}<span class="arrow" aria-hidden="true">↗</span></a>
+      </div>
+      <ul class="sc-access__list" data-reveal-stagger>
+        {access.items.map((it) => (
+          <li class="sc-liquid">
+            {it.chip && <span class="sc-chip">{it.chip}</span>}
+            <h3 class="sc-h4" set:html={lit(it.title)} />
+          </li>
+        ))}
+      </ul>
+    </div>
   </section>
 
+  <section class="sc-section" aria-labelledby="loop-h">
+    <div class="wrap">
+      <SectionHead label={loop.label} title={loop.title} id="loop-h" />
+      <div class="sc-liquid-grid" data-reveal-stagger>
+        {loop.items.map((it) => (
+          <a class="sc-liquid" href={it.href}>
+            {it.chip && <span class="sc-chip">{it.chip}</span>}
+            <span class="n">{it.n}</span>
+            <h3 class="sc-h4">{it.title}</h3>
+            {it.body && <p>{it.body}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
 
-  <WhatWeDo />
-  <Portfolio />
-  <Contact />
+  <section class="sc-section" aria-labelledby="method-h">
+    <div class="wrap">
+      <SectionHead label={method.label} title={method.title} id="method-h" />
+      <div class="sc-weave-wrap" aria-hidden="true" data-reveal><Motif name="weave" /></div>
+      <ol class="sc-steps" data-reveal-stagger>
+        {method.items.map((it) => (
+          <li>
+            <h3 class="sc-h4">{it.title}</h3>
+            {it.body && <p>{it.body}</p>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="sc-section sc-close" aria-labelledby="close-h">
+    <div class="wrap">
+      <SectionHead title={close.title} id="close-h" />
+      <a class="sc-btn sc-btn--secondary" href="/contact">{close.link}<span class="arrow" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
@@ -134,16 +172,6 @@ const beats = d.beats ?? [];
      Two columns: the argument on the left, the mark on the right. The mark is
      one continuously running scene and never restarts between beats — what
      cycles is the text. */
-  .hero {
-    min-height: 100svh;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.72fr);
-    align-items: center;
-    gap: clamp(2rem, 5vw, 4rem);
-    padding-block: clamp(7rem, 14vh, 10rem) clamp(3rem, 8vh, 6rem);
-  }
-  .hero__copy { position: relative; z-index: 1; }
-  .hero__field { justify-self: center; width: 100%; max-width: 30rem; }
 
   /* Every beat occupies the same grid cell, so the stack is as tall as the
      tallest one and swapping between them shifts nothing. A fixed min-height
@@ -265,17 +293,7 @@ const beats = d.beats ?? [];
   }
 
   @media (max-width: 60rem) {
-    .hero {
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      padding-block: clamp(5.5rem, 16vh, 7rem) var(--s-6);
-      gap: var(--s-5);
-    }
-    /* The mark leads on a phone. `order` rather than column-reverse so the
-       reading order stays copy-first and only the paint order changes. */
-    .hero__field { order: -1; max-width: 16rem; align-self: center; }
-    .hero__h { font-size: clamp(1.75rem, 6.5vw, 2.4rem); max-width: 20ch; }
+    .hero__h { font-size: clamp(1.6rem, 6vw, 2.2rem); max-width: 20ch; }
     .beat__readouts { gap: var(--s-4); }
     .beat__value { font-size: 0.9rem; }
   }
@@ -287,84 +305,4 @@ const beats = d.beats ?? [];
     .beat.is-on { transition: none; }
   }
 
-  /* --- Bands --------------------------------------------------------------- */
-  .band { padding-block: clamp(3rem, 8vh, 5rem); }
-  .band__h {
-    font-size: clamp(1.5rem, 3.2vw, 2.2rem);
-    max-width: 24ch;
-    margin-bottom: var(--s-4);
-  }
-  .band__p { color: var(--paper-dim); max-width: 60ch; margin-bottom: var(--s-5); }
-
-  /* --- The four moves ------------------------------------------------------ */
-  .moves {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: var(--s-3);
-  }
-  .move {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5em;
-    height: 100%;
-    text-decoration: none;
-    color: inherit;
-  }
-  .move__n {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
-    color: var(--cyan);
-  }
-  .move__name {
-    font-size: 1.05rem;
-    font-weight: 400;
-    color: var(--paper);
-  }
-  .move__line { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.5; }
-
-  /* --- Delivery lines ------------------------------------------------------ */
-  .lines {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    gap: var(--s-4) var(--s-5);
-    border-top: 1px solid color-mix(in srgb, var(--teal-deep) 80%, transparent);
-    padding-top: var(--s-4);
-  }
-  .line { display: flex; flex-direction: column; gap: 0.35em; }
-  .line__label {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--paper);
-  }
-  .line__note { font-size: 0.85rem; color: var(--paper-dim); line-height: 1.5; }
-
-  /* --- Tail ---------------------------------------------------------------- */
 </style>
-
-<script>
-  import { mountFields } from '../lib/field/mount';
-  import { initThesis } from '../lib/thesis';
-  import { initProcess } from '../lib/process-controller';
-  import { initNav } from '../lib/nav';
-  // Re-run after every view transition: with ClientRouter the document is
-  // never torn down, so a plain top-level call would only ever fire once.
-  const boot = () => {
-    mountFields();
-    const hero = document.querySelector<HTMLElement>('[data-thesis]');
-    if (hero) initThesis(hero);
-    initProcess();
-    initNav();
-  };
-  boot();
-  document.addEventListener('astro:page-load', boot);
-</script>

@@ -1,17 +1,35 @@
 ---
+/**
+ * The live header, restyled as glass and made sticky. Below 48rem the six
+ * destinations do not fit beside the mark, so they move into a glass sheet
+ * behind a 44px menu button (focus trapped, Escape closes; src/lib/nav.ts).
+ * Without script the button is hidden and the nav wraps, so nothing is lost.
+ */
+import { getEntry } from 'astro:content';
 import CircuitFlame from './CircuitFlame.astro';
 import Wordmark from './Wordmark.astro';
 import { NAV } from '../config/site';
+
+const g = (await getEntry('pages', 'global'))!.data;
+const menu = g.sections.find((s) => s.key === 'menu')!.items;
+const path = Astro.url.pathname.replace(/(.)\/$/, '$1');
+const current = (href: string): boolean =>
+  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 ---
-<header class="site-head">
+<header class="site-head" data-head>
   <div class="wrap site-head__inner">
-    <a class="site-head__brand" href="/" aria-label="SocioClimate — home">
-      <CircuitFlame size={18} glow={false} title="" />
+    <a class="site-head__brand" href="/" aria-label="SocioClimate, home">
+      <CircuitFlame size={20} glow={true} animate={true} title="" />
       <Wordmark size="sm" />
     </a>
-    <nav class="site-head__nav" aria-label="Primary">
+    <button class="site-head__menu" type="button" data-menu-btn aria-expanded="false" aria-controls="site-nav" hidden>
+      <span class="site-head__menu-glyph" aria-hidden="true"></span>
+      <span data-menu-open>{menu[0].title}</span>
+      <span data-menu-close hidden>{menu[1].title}</span>
+    </button>
+    <nav class="site-head__nav" id="site-nav" aria-label="Primary" data-nav>
       {NAV.map((i) => (
-        <a href={i.href} aria-current={i.n === '00' ? 'true' : undefined}>
+        <a href={i.href} aria-current={current(i.href) ? 'page' : undefined}>
           <span class="n" aria-hidden="true">{i.n}</span>
           <span class="label">{i.label}</span>
         </a>

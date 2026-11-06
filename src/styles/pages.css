@@ -1,0 +1,277 @@
+/* ==========================================================================
+   Page layout for the rebrand: header, heroes, sections, footer, and the
+   placement of each motif. Components come from deep-water.css; this file
+   decides where they sit. Tokens only.
+   ========================================================================== */
+
+/* --- Header: the live header, now sticky glass ---------------------------- */
+.site-head {
+  position: sticky;
+  top: 0;
+  inset: auto;
+  z-index: 30;
+  padding-block: 0;
+  background: color-mix(in srgb, var(--ink) 72%, transparent);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-edge);
+}
+.site-head__inner { min-height: 64px; }
+.site-head__brand .mark { transition: filter var(--dur-2) var(--ease); }
+.site-head__menu {
+  display: none;
+  align-items: center;
+  gap: 0.6em;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 1.1em;
+  background: none;
+  border: var(--rule);
+  border-radius: 999px;
+  color: var(--paper);
+  font: 400 0.72rem/1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.site-head__menu-glyph {
+  width: 14px; height: 8px;
+  border-block: 1px solid currentColor;
+}
+.site-head.is-open .site-head__menu-glyph { height: 0; border-bottom: 0; transform: rotate(0); }
+
+@media (max-width: 47.99rem) {
+  .site-head.has-menu .site-head__menu { display: inline-flex; }
+  .site-head.has-menu .site-head__nav { display: none; }
+  .site-head.has-menu.is-open .site-head__nav {
+    display: grid;
+    position: fixed;
+    inset: 64px 0 auto 0;
+    gap: var(--s-1);
+    padding: var(--s-4) var(--gutter) var(--s-5);
+    background: var(--glass-strong);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--glass-edge);
+  }
+  .site-head.has-menu.is-open .site-head__nav a {
+    min-height: 44px;
+    align-items: center;
+    font-size: var(--step-1);
+    font-family: var(--font-display);
+    font-weight: 300;
+  }
+  .site-head.has-menu.is-open .site-head__nav .n { display: inline; font-size: 0.72rem; }
+  /* Without script the nav wraps under the mark instead. */
+  .site-head:not(.has-menu) .site-head__inner { flex-wrap: wrap; padding-block: var(--s-2); }
+  .site-head:not(.has-menu) .site-head__nav { flex-wrap: wrap; }
+  header.site-head .site-head__brand .wordmark { display: inline-block; }
+}
+.menu-open body { overflow: hidden; }
+
+/* --- Sections ------------------------------------------------------------- */
+.sc-section { padding-block: clamp(4rem, 10vh, var(--s-8)); }
+.sc-section + .sc-section { border-top: 0; }
+.sc-section-head { margin-bottom: var(--s-6); }
+.sc-section-head .sc-label { margin: 0; }
+.sc-h2 { max-width: 22ch; }
+.sc-h1 { max-width: 16ch; }
+.sc-row { margin-top: var(--s-5); gap: var(--s-3) var(--s-4); }
+
+/* The secondary pill. Paired with .cta, which stays the one primary per view. */
+.sc-btn--secondary {
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  padding: 0.82em 1.6em;
+  min-height: 44px;
+  text-decoration: none;
+}
+.sc-btn--secondary:hover { color: var(--paper); }
+
+/* A visible placeholder: [VERIFY] and [MATTHEW] never pass as finished copy. */
+.sc-flag {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  letter-spacing: 0.04em;
+  color: var(--paper-dim);
+  border: 1px dashed color-mix(in srgb, var(--paper-dim) 55%, transparent);
+  border-radius: var(--radius);
+  padding: 0 0.35em;
+  white-space: nowrap;
+}
+
+/* --- Heroes --------------------------------------------------------------- */
+.sc-hero {
+  position: relative;
+  padding-block: clamp(4.5rem, 12vh, 8rem) var(--s-6);
+  min-height: min(92svh, 60rem);
+  display: grid;
+  align-content: center;
+}
+.sc-hero--short { min-height: 0; padding-block: clamp(4rem, 10vh, 6.5rem) var(--s-6); }
+.sc-hero__grid {
+  display: grid;
+  grid-template-columns: var(--hero-split);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+}
+.sc-hero__copy { position: relative; z-index: 1; }
+.sc-hero__copy .sc-lead { margin-top: var(--s-4); }
+.sc-hero__copy .sc-label { margin-bottom: var(--s-3); }
+.sc-hero__aside { margin-top: var(--s-4); }
+.sc-hero__visual { position: relative; justify-self: center; width: 100%; }
+.sc-hero .sc-ticks { margin-top: var(--s-6); }
+.sc-hero .sc-corners { inset: var(--s-4) var(--gutter); }
+@media (max-width: 60rem) {
+  .sc-hero { min-height: 0; }
+  .sc-hero__grid { grid-template-columns: 1fr; }
+  .sc-hero__visual { max-width: 22rem; }
+  .sc-hero .sc-corners .tr { display: none; }
+}
+
+/* The portal stands on water; its reflection is drawn inside the SVG. */
+.sc-portal { max-width: 26rem; margin-inline: auto; }
+.sc-portal::after {
+  content: "";
+  position: absolute;
+  left: 4%; right: 4%; top: 71%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan-glow), transparent);
+  box-shadow: 0 0 24px var(--cyan);
+  opacity: 0.6;
+}
+.sc-portal .sc-plankton { inset: 30% -10% 0; height: 70%; width: 120%; z-index: 0; }
+
+/* Observer lens with its HUD panels. */
+.sc-observe { max-width: 34rem; margin-inline: auto; }
+.sc-observe .sc-lens { max-width: 22rem; }
+.sc-hud-panel b { word-break: break-word; }
+
+/* A scene in an instrument ring (Services, Contact). */
+.sc-instrument { max-width: 22rem; margin-inline: auto; }
+.sc-instrument .field { width: 72%; background: none; border: 0; }
+.sc-instrument--sweep > .sweep { pointer-events: none; }
+
+/* --- Argument rotator, inside the Deep Water layer ------------------------ */
+.sc-argument { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.6fr); gap: clamp(2rem, 5vw, 4rem); align-items: center; }
+.sc-argument .hero__field { max-width: 22rem; justify-self: center; width: 100%; }
+@media (max-width: 60rem) { .sc-argument { grid-template-columns: 1fr; } .sc-argument .hero__field { max-width: 14rem; order: -1; } }
+
+/* --- Glass grids ---------------------------------------------------------- */
+.sc-liquid-grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.sc-liquid { display: grid; gap: var(--s-3); align-content: start; text-decoration: none; }
+.sc-liquid h3 { margin: 0; }
+.sc-liquid p { margin: 0; color: var(--paper-dim); font-size: var(--step--1); line-height: 1.55; }
+.sc-liquid .n { font: 400 0.7rem var(--font-mono); letter-spacing: 0.14em; color: var(--cyan); }
+.sc-liquid .go { font: 400 0.7rem var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
+
+/* The Access band on Home: a portal-lit statement with three short claims. */
+.sc-access { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.sc-access__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+.sc-access__list li { display: grid; gap: var(--s-1); padding: var(--s-3) var(--s-4); }
+@media (max-width: 60rem) { .sc-access { grid-template-columns: 1fr; } }
+
+/* --- Register ------------------------------------------------------------- */
+.sc-tile { text-decoration: none; }
+.sc-tile .sector { font-size: var(--step--1); color: var(--paper-dim); }
+.sc-tile .sc-status { justify-self: start; margin-top: auto; }
+.sc-register { margin-top: var(--s-6); }
+.sc-register .name a { color: var(--paper); text-decoration: none; }
+.sc-register .name a:hover { color: var(--cyan-bright); }
+.sc-link { display: inline-flex; gap: 0.5em; margin-top: var(--s-5); font: 400 0.76rem var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; min-height: 44px; align-items: center; }
+
+/* --- Method: the weave above the steps ------------------------------------ */
+.sc-weave-wrap { margin-block: var(--s-4) var(--s-6); }
+.sc-steps h3 { margin: 0; }
+.sc-steps p { margin: 0; font-size: var(--step--1); color: var(--paper-dim); }
+
+/* Pinned process stage beside the four moves (the live component). */
+.sc-process { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.sc-process .process__stage { position: sticky; top: 7rem; }
+.sc-process .field { background: none; border: 0; }
+.sc-process__steps { display: grid; gap: var(--s-6); padding-block: var(--s-4) 20vh; }
+.sc-process__step { scroll-margin-top: 7rem; border-top: var(--rule); padding-top: var(--s-4); }
+.sc-process__step .n { font: 400 0.72rem var(--font-mono); letter-spacing: 0.14em; color: var(--cyan); }
+.sc-process__step h3 { margin: var(--s-2) 0; }
+.sc-process__step p { margin: 0; color: var(--paper-dim); max-width: 48ch; }
+@media (max-width: 60rem) {
+  .sc-process { grid-template-columns: 1fr; }
+  .sc-process .process__stage { position: static; max-width: 13rem; margin-inline: auto; }
+  .sc-process__steps { padding-bottom: 0; }
+}
+
+/* --- Case blocks (Services work, database detail) ------------------------- */
+.sc-case dt { margin: 0; }
+.sc-case dd { margin: var(--s-1) 0 0; color: var(--paper); font-size: var(--step--1); line-height: 1.6; }
+.sc-work { display: grid; gap: var(--s-8); }
+.sc-work__entry { scroll-margin-top: 6rem; }
+.sc-work__top { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: var(--s-5); align-items: center; margin-bottom: var(--s-4); }
+.sc-work__top .field { background: none; border: 0; }
+.sc-work__top h3 { margin: var(--s-2) 0; }
+.sc-work__top p { margin: 0; color: var(--paper-dim); font-size: var(--step-1); font-weight: 300; }
+.sc-work__body { max-width: 62ch; margin-top: var(--s-4); }
+@media (max-width: 52rem) {
+  .sc-work__top { grid-template-columns: 1fr; }
+  .sc-work__top > :first-child { max-width: 12rem; }
+}
+
+/* --- Figures -------------------------------------------------------------- */
+.sc-figure__l { font: 400 0.72rem/1.4 var(--font-mono); color: var(--paper-dim); }
+.sc-figure__src.is-flagged { color: var(--paper-dim); }
+
+/* --- Roster --------------------------------------------------------------- */
+.sc-roster { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-6); align-items: center; padding: var(--s-5); }
+.sc-roster__count { display: grid; gap: var(--s-1); }
+.sc-roster__count b { font: 400 var(--step-3)/1 var(--font-mono); color: var(--paper); }
+
+/* --- Prose and spec ------------------------------------------------------- */
+.sc-spec dd { font-size: var(--step--1); line-height: 1.6; }
+.sc-detail-grid { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+@media (max-width: 60rem) { .sc-detail-grid { grid-template-columns: 1fr; } }
+
+/* --- Close ---------------------------------------------------------------- */
+.sc-close { text-align: left; }
+.sc-close .sc-h2 { max-width: 20ch; }
+
+/* --- Ridges and the colonnade --------------------------------------------- */
+.sc-ridge-wrap { overflow: hidden; height: clamp(48px, 7vw, 110px); margin-block: calc(var(--s-5) * -1); pointer-events: none; }
+.sc-ridge-wrap.is-flip { transform: scaleX(-1); }
+.sc-ridge { width: 100%; height: 100%; }
+.sc-colonnade-wrap { padding-block: var(--s-6) 0; max-width: 64rem; }
+
+/* --- Footer --------------------------------------------------------------- */
+.site-foot { position: relative; isolation: isolate; overflow: hidden; }
+.site-foot__brand { display: grid; gap: var(--s-3); justify-items: start; }
+.site-foot__legal { display: grid; gap: var(--s-3); }
+.site-foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s-3); }
+.site-foot__motion {
+  display: inline-flex; align-items: center; gap: 0.6em;
+  min-height: 44px; padding: 0 1.1em;
+  background: none; border: var(--rule); border-radius: 999px;
+  color: var(--paper-dim); font: 400 0.7rem/1 var(--font-mono);
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+}
+.site-foot__motion:hover { color: var(--paper); }
+.site-foot__motion-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
+.site-foot__motion[aria-pressed="false"] .site-foot__motion-dot { background: transparent; border: 1px solid var(--paper-dim); }
+
+/* --- Contact -------------------------------------------------------------- */
+.sc-topic { display: grid; gap: var(--s-1); }
+.sc-topic span { font: 400 0.68rem/1.6 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper-dim); }
+.sc-topic select { min-height: 44px; padding: 0 var(--s-3); background: var(--ink-deep); color: var(--paper); border: var(--rule); border-radius: var(--radius); font: inherit; }
+
+/* --- Phones --------------------------------------------------------------- */
+@media (max-width: 52rem) {
+  .sc-section { padding-block: var(--s-7); }
+  .sc-hero { padding-block: var(--s-6) var(--s-5); }
+}
+/* The footer number sits with its label, in mono, and stays quieter than it.
+   Full --paper-dim rather than a mix: a color-mix is invisible to the contrast check. */
+.site-foot__n { font-family: var(--font-mono); font-size: 0.66rem; color: var(--paper-dim); margin-right: 0.6em; }
+
+/* The lens collapsed to its min-content width inside the hero's auto column.
+   Give it a real floor so it reads as the centerpiece. */
+.sc-observe { width: 100%; grid-template-columns: minmax(12rem, 1fr) auto; }
+.sc-observe .sc-lens { width: 100%; min-width: 12rem; height: auto; }
+@media (max-width: 899px) { .sc-observe { grid-template-columns: 1fr; justify-items: center; } }

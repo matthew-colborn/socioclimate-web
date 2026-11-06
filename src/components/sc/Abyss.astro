@@ -1,0 +1,12 @@
+---
+/**
+ * The water behind a hero: the bathymetric chart flowing as currents, plankton
+ * (or the denser sparkle), the overhead light and graticule from .sc-abyss.
+ * Only on the Home, Databases and database detail heroes.
+ */
+import Motif from '../Motif.astro';
+interface Props { sparkle?: boolean }
+const { sparkle = false } = Astro.props;
+---
+<Motif name="bathymetry" />
+<canvas class="sc-plankton" data-plankton={sparkle ? 'sparkle' : ''} aria-hidden="true"></canvas>

@@ -1,0 +1,52 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/sc/Hero.astro';
+import Motif from '../../components/Motif.astro';
+import SectionHead from '../../components/sc/SectionHead.astro';
+import { KIND_LABEL, RS_STATUS_LABEL, lit } from '../../lib/copy';
+
+const d = (await getEntry('pages', 'research'))!.data;
+const sec = (k: string) => {
+  const s = d.sections.find((x) => x.key === k);
+  if (!s) throw new Error(`research.mdx is missing the "${k}" section`);
+  return s;
+};
+const [register, log, disclosure] = ['register', 'log', 'disclosure'].map(sec);
+const H = register.items.map((i) => i.title);
+const rows = (await getCollection('research')).sort((a, b) => a.data.code.localeCompare(b.data.code));
+---
+<BaseLayout title={d.title} description={d.description}>
+  <Hero eyebrow={d.eyebrow} heading={d.heading} lead={d.lead} aside={d.aside}>
+    <div class="sc-observe" slot="visual"><Motif name="lens" /></div>
+  </Hero>
+
+  <section class="sc-section" aria-labelledby="register-h">
+    <div class="wrap">
+      <SectionHead label={register.label} title={register.title} id="register-h" />
+      <table class="sc-register" data-reveal>
+        <thead><tr>{H.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr>
+              <td class="id" data-label={H[0]}>{r.data.code}</td>
+              <td class="name" data-label={H[1]}>
+                {r.data.publish ? <a href={`/research/${r.id}`}>{r.data.title}</a> : r.data.title}
+              </td>
+              <td data-label={H[2]}>{KIND_LABEL[r.data.kind]}</td>
+              <td data-label={H[3]}><span class="sc-status sc-status--staging">{RS_STATUS_LABEL[r.data.status]}</span></td>
+              <td class="id" data-label={H[4]}>{r.data.date ?? ''}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sc-section" aria-labelledby="log-h">
+    <div class="wrap">
+      <SectionHead label={log.label} title={log.title} lead={log.lead} id="log-h" />
+      <p class="sc-disclosure" data-reveal set:html={lit(disclosure.lead!)} />
+    </div>
+  </section>
+</BaseLayout>

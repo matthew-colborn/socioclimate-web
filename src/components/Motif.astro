@@ -1,0 +1,35 @@
+---
+/**
+ * The Luminous Archive motifs (brand/socioclimate-rebrand/docs/09-art-direction.md),
+ * inlined so their linework can be animated by CSS and so their colours resolve
+ * from tokens.css rather than from hex values baked into a file.
+ *
+ * The flame inside the portal and the lens is the repo's own traced path
+ * (src/lib/flame.ts), substituted at build time. The kit shipped its own copy;
+ * the mark is never redrawn.
+ *
+ * Decorative: every motif is aria-hidden. What it says is said in text beside it.
+ */
+import { FLAME_PATH } from '../lib/flame';
+import portal from '../assets/motifs/portal.svg?raw';
+import lens from '../assets/motifs/lens.svg?raw';
+import colonnade from '../assets/motifs/colonnade.svg?raw';
+import weave from '../assets/motifs/weave.svg?raw';
+import bathymetry from '../assets/motifs/bathymetry.svg?raw';
+
+interface Props {
+  name: 'portal' | 'lens' | 'colonnade' | 'weave' | 'bathymetry';
+}
+const { name } = Astro.props;
+
+const RAW = { portal, lens, colonnade, weave, bathymetry };
+const CLASS = {
+  portal: 'sc-portal-svg',
+  lens: 'sc-lens',
+  colonnade: 'sc-colonnade',
+  weave: 'sc-weave',
+  bathymetry: 'sc-currents',
+};
+const svg = RAW[name].replaceAll('__FLAME__', FLAME_PATH).replace('__CLASS__', CLASS[name]);
+---
+<Fragment set:html={svg} />

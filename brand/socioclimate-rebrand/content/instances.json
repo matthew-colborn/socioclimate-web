@@ -1,0 +1,86 @@
+[
+  {
+    "id": "SC-01",
+    "slug": "deed-restricted",
+    "name": "Deed-Restricted DB",
+    "sector": "Deed-restricted for-sale housing",
+    "geography": "San Diego County",
+    "coordinates": "32°43′N 117°09′W",
+    "status": "building",
+    "visibility": "public",
+    "asOf": "2026-11-05",
+    "gap": "Deed-restricted homes in San Diego County are sold under city programs with different income limits, resale formulas and buyer rules. There was no single place to see them.",
+    "record": "Program rules by jurisdiction, income and price limits, current and past restricted listings, resale and qualification requirements.",
+    "sources": "City and County housing departments, program guidelines, MLS listings. Each record links to its source and date.",
+    "use": "Buyers search for homes they can qualify for. Agents and lenders check program rules. Cities get a consistent public view of their programs.",
+    "figures": [
+      {
+        "value": "23,440",
+        "label": "deed-restricted units, May 2020",
+        "key": "City of San Diego",
+        "source": "[VERIFY]",
+        "asOf": "2020-05"
+      },
+      {
+        "value": "~4,200",
+        "label": "covenants",
+        "key": "Expiring 2020 to 2040",
+        "source": "[VERIFY]",
+        "asOf": "[VERIFY]"
+      },
+      {
+        "value": "317 days",
+        "label": "zero price reductions",
+        "key": "Longest observed listing",
+        "source": "[VERIFY]",
+        "asOf": "[VERIFY]"
+      }
+    ],
+    "notes": [
+      "Figures are from the live site; confirm a source line for each",
+      "Switch status to live and add url when deedrestricted.org is public with outside traffic"
+    ],
+    "tagline": "The price nobody publishes.",
+    "scene": "bars",
+    "business": "[copy from live #deed-restricted-db]",
+    "leverage": "[copy from live #deed-restricted-db]",
+    "produced": "[copy from live #deed-restricted-db]"
+  },
+  {
+    "id": "SC-02",
+    "slug": "building-power",
+    "name": "Building power record",
+    "sector": "Power-ready commercial space",
+    "geography": "Southern California",
+    "status": "private",
+    "visibility": "private",
+    "asOf": "2026-11-05",
+    "gap": "Which commercial buildings can actually support power-intensive users is known building by building, by owners and utilities, and rarely written down in one place.",
+    "record": "Private. Building power and infrastructure characteristics gathered through our own deals and owner conversations.",
+    "sources": "Our own transactions and direct owner conversations.",
+    "use": "It powers our work for power-intensive and AI infrastructure users.",
+    "notes": [
+      "[VERIFY] region",
+      "[VERIFY with Latoya] any brokerage or tenant representation wording"
+    ],
+    "tagline": "Which buildings can actually carry the load.",
+    "scene": "lattice"
+  },
+  {
+    "id": "SC-03",
+    "slug": "next",
+    "name": "Next record",
+    "sector": "Selecting",
+    "geography": "",
+    "status": "open",
+    "visibility": "private",
+    "asOf": "2026-11-05",
+    "gap": "",
+    "record": "",
+    "sources": "",
+    "use": "",
+    "notes": [
+      "Register row only; no detail page while status is open"
+    ]
+  }
+]

@@ -29,6 +29,15 @@ export function initDiagnostic(root: HTMLElement): void {
   const payload = root.querySelector<HTMLInputElement>('[data-payload]');
   const status = root.querySelector<HTMLElement>('[data-status]');
 
+  // ?topic=services (from "Request a spot") preselects the topic and opens the
+  // form, so the visitor lands where the link said they would.
+  const topic = root.querySelector<HTMLSelectElement>('[data-topic]');
+  const wanted = new URLSearchParams(location.search).get('topic');
+  if (topic && wanted && Array.from(topic.options).some((o) => o.value === wanted)) {
+    topic.value = wanted;
+    root.querySelector<HTMLDetailsElement>('.reveal-form')?.setAttribute('open', '');
+  }
+
   const answers = new Map<string, Answer>();
 
   function verdict(score: number, answered: number): { title: string; body: string } {
@@ -45,7 +54,7 @@ export function initDiagnostic(root: HTMLElement): void {
           'You are generating a record nobody else holds, in a market where the rules ' +
           'are public but scattered and the price is not set by open bidding. The work ' +
           'to normalise it is tedious rather than hard, which is why no large vendor has ' +
-          'done it. The history is the part that cannot be bought later — that clock ' +
+          'done it. The history is the part that cannot be bought later, and that clock ' +
           'starts the day someone begins keeping it properly.',
       };
     }
@@ -64,7 +73,7 @@ export function initDiagnostic(root: HTMLElement): void {
       body:
         'On these answers the record you produce is either already public, already ' +
         'standardised, or set by a market that publishes its prices. That is not a bad ' +
-        'business — it is just not one where owning the observation layer is the ' +
+        'business. It is just not one where owning the observation layer is the ' +
         'advantage. We would rather tell you that than sell you a project.',
     };
   }
@@ -84,7 +93,7 @@ export function initDiagnostic(root: HTMLElement): void {
       const lines = groups.map((g) => {
         const key = g.dataset.question!;
         const label = g.querySelector('[data-qtext]')?.textContent?.trim() ?? key;
-        return `${label} — ${answers.get(key) ?? 'unanswered'}`;
+        return `${label}: ${answers.get(key) ?? 'unanswered'}`;
       });
       payload.value = `Score ${score} of ${groups.length}\nVerdict: ${v.title}\n\n${lines.join('\n')}`;
     }

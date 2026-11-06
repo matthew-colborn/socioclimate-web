@@ -1,0 +1,56 @@
+---
+/**
+ * Every page opens the same way: numbered label, a headline with one lit word,
+ * the lead, at most one primary pill. The right column is the page's one
+ * architectural centerpiece, passed in as the `visual` slot.
+ */
+import Label from './Label.astro';
+import Abyss from './Abyss.astro';
+import { lit } from '../../lib/copy';
+
+interface Props {
+  eyebrow: string;
+  heading: string;
+  lead: string;
+  aside?: string;
+  primary?: { label: string; href: string };
+  secondary?: { label: string; href: string };
+  /** Bathymetry, currents and plankton. Home, Databases, database pages only. */
+  abyss?: boolean;
+  sparkle?: boolean;
+  short?: boolean;
+  corners?: { tl?: string; tr?: string };
+  ticks?: string[];
+}
+const { eyebrow, heading, lead, aside, primary, secondary, abyss = false, sparkle = false, short = false, corners, ticks } = Astro.props;
+const hasVisual = Astro.slots.has('visual');
+---
+<section class:list={['sc-hero', abyss && 'sc-abyss', short && 'sc-hero--short']} data-caustic aria-labelledby="page-h">
+  {abyss && <Abyss sparkle={sparkle} />}
+  {corners && (
+    <div class="sc-corners" aria-hidden="true">
+      {corners.tl && <span class="tl">{corners.tl}</span>}
+      {corners.tr && <span class="tr">{corners.tr}</span>}
+    </div>
+  )}
+  <div class="wrap">
+    <div class:list={[hasVisual && 'sc-hero__grid']}>
+      <div class="sc-hero__copy" data-reveal-stagger>
+        <Label text={eyebrow} />
+        <h1 class="sc-h1" id="page-h" set:html={lit(heading)} />
+        <p class="sc-lead" set:html={lit(lead)} />
+        {aside && <p class="sc-disclosure sc-hero__aside" set:html={lit(aside)} />}
+        {(primary || secondary) && (
+          <div class="sc-row">
+            {primary && <a class="cta" href={primary.href}>{primary.label}<span class="cta__arrow" aria-hidden="true">↗</span></a>}
+            {secondary && <a class="sc-btn sc-btn--secondary" href={secondary.href}>{secondary.label}</a>}
+          </div>
+        )}
+      </div>
+      {hasVisual && <div class="sc-hero__visual" data-reveal><slot name="visual" /></div>}
+    </div>
+    {ticks && (
+      <div class="sc-ticks" aria-hidden="true">{ticks.map((t) => <span>{t}</span>)}</div>
+    )}
+  </div>
+</section>

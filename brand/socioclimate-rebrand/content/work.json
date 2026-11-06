@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "porchlight-website",
+    "name": "PorchLight website",
+    "stage": "live",
+    "business": "[live]",
+    "leverage": "[live]",
+    "produced": "[live]",
+    "public": true
+  },
+  {
+    "slug": "alfred-basil",
+    "name": "Alfred Basil",
+    "stage": "staging",
+    "business": "[live]",
+    "leverage": "[live]",
+    "produced": "[live]",
+    "public": true,
+    "notes": [
+      "[VERIFY with Mark] before expanding"
+    ]
+  },
+  {
+    "slug": "branshe",
+    "name": "Regional cleaning company",
+    "stage": "operating",
+    "business": "[live]",
+    "leverage": "[live]",
+    "produced": "[live]",
+    "public": true
+  }
+]

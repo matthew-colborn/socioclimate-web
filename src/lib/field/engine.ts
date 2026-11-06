@@ -303,6 +303,16 @@ export class Engine {
   };
 }
 
-export const prefersReducedMotion = (): boolean =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/**
+ * The OS setting, or the visitor's own choice from the footer motion toggle
+ * (src/lib/motion.ts). The toggle wins in both directions, so a visitor can turn
+ * motion off on a machine that allows it.
+ */
+export const prefersReducedMotion = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  let stored: string | null = null;
+  try { stored = localStorage.getItem('sc-motion'); } catch { /* storage blocked */ }
+  if (stored === 'off') return true;
+  if (stored === 'on') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};

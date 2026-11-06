@@ -14,7 +14,7 @@
         "headers": [
           {
             "key": "Content-Security-Policy",
-            "value": "default-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; connect-src 'self' https://api.web3forms.com; font-src 'self'; style-src 'self'; script-src 'self' 'sha256-4QsxsPQzormU/+6P3Y30arJyIpX6DkeWjn30qSBr1Hc='; upgrade-insecure-requests"
+            "value": "default-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self'; connect-src 'self' https://api.web3forms.com; font-src 'self'; style-src 'self'; script-src 'self' 'sha256-9nJQv0xCmiMf3YtKUZmchpsVboi+9kEhwHOcXatJFkY='; upgrade-insecure-requests"
           },
           {
             "key": "X-Content-Type-Options",
@@ -104,17 +104,12 @@
     "redirects": [
       {
         "source": "/what-we-do",
-        "destination": "/#01-what-we-do",
+        "destination": "/services",
         "type": 301
       },
       {
         "source": "/portfolio",
-        "destination": "/#02-portfolio",
-        "type": 301
-      },
-      {
-        "source": "/contact",
-        "destination": "/#03-contact",
+        "destination": "/databases",
         "type": 301
       }
     ]

@@ -1,16 +1,24 @@
 ---
+import { getEntry } from 'astro:content';
+import CircuitFlame from './CircuitFlame.astro';
 import Wordmark from './Wordmark.astro';
 import { SITE, MAILTO, NAV } from '../config/site';
+import { lit } from '../lib/copy';
+
+const g = (await getEntry('pages', 'global'))!.data;
+const f = g.sections.find((s) => s.key === 'footer')!.items;
 const year = 2026;
 ---
 <footer class="site-foot">
+  <canvas class="sc-plankton" data-plankton aria-hidden="true"></canvas>
   <div class="wrap site-foot__inner">
-    <div>
+    <div class="site-foot__brand">
+      <CircuitFlame size={72} glow={true} animate={true} title="" class="sc-flame-mark-xl" />
       <Wordmark size="md" />
-      <p class="site-foot__say">{SITE.mission}</p>
+      <p class="site-foot__say">{g.heading}</p>
     </div>
     <nav aria-label="Footer">
-      <h2 class="site-foot__h">Site</h2>
+      <h2 class="site-foot__h">{f[0].title}</h2>
       <ul>
         {NAV.map((i) => (
           <li><a href={i.href}><span class="site-foot__n" aria-hidden="true">{i.n}</span>{i.label}</a></li>
@@ -18,28 +26,21 @@ const year = 2026;
       </ul>
     </nav>
     <div>
-      <h2 class="site-foot__h">Start</h2>
+      <h2 class="site-foot__h">{f[1].title}</h2>
       <ul>
-        <li><a href="#03-contact">Run the diagnostic</a></li>
+        <li><a href={f[2].href}>{f[2].title}</a></li>
+        <li><a href={f[3].href}>{f[3].title}</a></li>
         <li><a href={MAILTO}>{SITE.email}</a></li>
       </ul>
     </div>
   </div>
   <div class="wrap site-foot__legal">
-    <p>© {year} {SITE.legalName}. San Diego, California.</p>
-    <p>{SITE.compressed}</p>
+    <p class="sc-disclosure" set:html={lit(g.lead)} />
+    <div class="site-foot__row">
+      <p>© {year} {SITE.legalName}. {SITE.place}.</p>
+      <button class="site-foot__motion" type="button" data-motion-toggle aria-pressed="true">
+        <span class="site-foot__motion-dot" aria-hidden="true"></span><span data-motion-label>Motion on</span>
+      </button>
+    </div>
   </div>
 </footer>
-
-<style>
-  /* The footer number sits with the label rather than in its own column: at
-     this size a second column would be alignment for its own sake. */
-  .site-foot__n {
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    /* Full --paper-dim: mixing it toward transparent drops it under AA, and the
-       token-pair contrast check cannot see a color-mix. */
-    color: var(--paper-dim);
-    margin-right: 0.6em;
-  }
-</style>

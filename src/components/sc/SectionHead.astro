@@ -1,0 +1,13 @@
+---
+import Label from './Label.astro';
+import { lit } from '../../lib/copy';
+interface Props { label?: string; title?: string; lead?: string; id?: string; as?: 'h1' | 'h2' }
+const { label, title, lead, id, as = 'h2' } = Astro.props;
+const H = as;
+---
+<div class="sc-section-head" data-reveal-stagger>
+  {label && <Label text={label} />}
+  {title && <H class={as === 'h1' ? 'sc-h1' : 'sc-h2'} id={id} set:html={lit(title)} />}
+  {lead && <p class="sc-lead" set:html={lit(lead)} />}
+  <slot />
+</div>
